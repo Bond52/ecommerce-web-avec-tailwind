@@ -1,10 +1,14 @@
+import Link from 'next/link';
+
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold mb-4">Bienvenue sur notre boutique artisanale !</h1>
-      <p className="text-lg text-gray-700">
-        Parcourez notre catalogue de produits fabriqués avec passion.
-      </p>
-    </main>
+    <div>
+      <h1>Bienvenue sur Sawaka</h1>
+      <p>Pour accéder à votre compte, veuillez vous connecter :</p>
+      
+      <Link href="/login">
+        <button>Se connecter</button>
+      </Link>
+    </div>
   );
 }
