@@ -1,10 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors"); // ✅ Ajout du module cors
 
 dotenv.config();
 const app = express();
+
 app.use(express.json());
+
+// ✅ Middleware CORS à ajouter ici
+app.use(cors({
+  origin: ['https://sawaka.vercel.app', 'http://localhost:3000'], // frontend prod + local
+  credentials: true
+}));
 
 // Connexion MongoDB
 mongoose.connect(process.env.MONGODB_URI)
@@ -16,7 +24,7 @@ app.get("/", (req, res) => {
   res.send("🎉 API e-commerce opérationnelle !");
 });
 
-// 👉 Ici tu ajoutes les routes :
+// 👉 Routes applicatives
 const productRoutes = require("./routes/products");
 const cartRoutes = require("./routes/cart");
 const checkoutRoutes = require("./routes/checkout");
