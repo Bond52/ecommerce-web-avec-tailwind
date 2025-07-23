@@ -1,4 +1,10 @@
-router.post('/api/login', async (req, res) => {
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user'); // ✅ adapte si le chemin est différent
+
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
 
@@ -9,8 +15,7 @@ router.post('/api/login', async (req, res) => {
 
   const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET);
 
-  res.json({
-    token,
-    role: user.role
-  });
+  res.json({ token, role: user.role });
 });
+
+module.exports = router;
