@@ -13,20 +13,23 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
-
 app.use(express.json());
+
+// ✅ Ajout de la route d'authentification
+const authRoutes = require('./routes/auth');
+app.use('/api', authRoutes); // 👈 ta route POST sera /api/login
 
 // Connexion MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connecté à MongoDB"))
   .catch(err => console.error("❌ Erreur MongoDB :", err));
 
-// Routes
+// Test simple
 app.get("/", (req, res) => {
   res.send("🎉 API e-commerce opérationnelle !");
 });
 
-// Serveur
+// Lancement du serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
