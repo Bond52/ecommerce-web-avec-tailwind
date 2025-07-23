@@ -8,6 +8,8 @@ const app = express();
 
 app.use(express.json());
 
+// Trigger redeploy to fix CORS
+
 // ✅ Middleware CORS à ajouter ici
 app.use(cors({
   origin: ['https://sawaka.vercel.app', 'http://localhost:3000'], // frontend prod + local
