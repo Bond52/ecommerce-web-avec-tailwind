@@ -7,7 +7,11 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: ['https://sawaka.vercel.app', 'http://localhost:3000'],
+  origin: [
+    'https://sawaka.vercel.app',
+    'http://localhost:3000',
+    'https://ecommerce-web-avec-tailwind.vercel.app' // 👈 ajoute cette origine
+  ],
   credentials: true,
 };
 
