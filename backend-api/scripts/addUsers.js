@@ -1,41 +1,31 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const cors = require("cors");
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const User = require('../models/user');
+require('dotenv').config();
 
-dotenv.config();
-const app = express();
+const users = [
+  { email: 'admin@test.com', password: 'admin123', role: 'admin' },
+  { email: 'vendeur@test.com', password: 'vendeur123', role: 'vendeur' },
+  { email: 'acheteur@test.com', password: 'acheteur123', role: 'acheteur' }
+];
 
-// ✅ CORS universel (test)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // 🔁 tu pourras restreindre plus tard
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+async function addUsers() {
+console.log("🔍 URI MongoDB :", process.env.MONGO_URI);
+  await mongoose.connect(process.env.MONGO_URI);
+  console.log('✅ Connecté à MongoDB');
+
+  for (const user of users) {
+    const existing = await User.findOne({ email: user.email });
+    if (!existing) {
+      const hashed = await bcrypt.hash(user.password, 10);
+      await User.create({ email: user.email, password: hashed, role: user.role });
+      console.log(`✅ Ajouté : ${user.email} (${user.role})`);
+    } else {
+      console.log(`ℹ️ Déjà existant : ${user.email}`);
+    }
   }
-  next();
-});
 
-app.use(express.json());
+  mongoose.disconnect();
+}
 
-// ✅ Route d'authentification
-const authRoutes = require('./routes/auth');
-app.use('/api', authRoutes);
-
-// ✅ Test simple
-app.get("/", (req, res) => {
-  res.send("🎉 API e-commerce opérationnelle !");
-});
-
-// ✅ Connexion MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Connecté à MongoDB"))
-  .catch(err => console.error("❌ Erreur MongoDB :", err));
-
-// ✅ Lancement du serveur
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
-});
+addUsers().catch(console.error);

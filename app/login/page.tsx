@@ -8,10 +8,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // 👇 Choix dynamique de l’URL selon le contexte
+  // ✅ URL corrigée vers ton backend Render
   const API_URL = typeof window !== 'undefined' && window.location.hostname === 'localhost'
     ? 'http://localhost:5000'
-    : 'https://sawaka-api.onrender.com';
+    : 'https://ecommerce-web-avec-tailwind.onrender.com';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

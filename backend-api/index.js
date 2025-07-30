@@ -5,22 +5,27 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-// ✅ CORS sécurisé : autorise seulement le frontend Vercel et localhost
-const allowedOrigin = 'https://ecommerce-web-avec-tailwind.vercel.app';
+// ✅ CORS sécurisé : autorise Vercel et localhost
+const allowedOrigins = [
+  'https://ecommerce-web-avec-tailwind.vercel.app',
+  'http://localhost:3000'
+];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin === allowedOrigin || origin === 'http://localhost:3000') {
-    res.header('Access-Control-Allow-Origin', origin);
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
 
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    return res.sendStatus(200); // ✅ réponse préflight
   }
+
   next();
 });
 
@@ -30,7 +35,7 @@ app.use(express.json());
 const authRoutes = require('./routes/auth');
 app.use('/api', authRoutes);
 
-// ✅ Test simple
+// ✅ Route test
 app.get("/", (req, res) => {
   res.send("🎉 API e-commerce opérationnelle !");
 });
