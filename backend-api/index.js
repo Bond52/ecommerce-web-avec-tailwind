@@ -6,32 +6,35 @@ const cors = require("cors");
 dotenv.config();
 const app = express();
 
-// ✅ Configuration CORS universelle pour test
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+// ✅ CORS universel (test)
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // 🔁 tu pourras restreindre plus tard
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
-app.options('*', cors());
 app.use(express.json());
 
-// ✅ Ajout de la route d'authentification
+// ✅ Route d'authentification
 const authRoutes = require('./routes/auth');
-app.use('/api', authRoutes); // 👈 ta route POST sera /api/login
+app.use('/api', authRoutes);
 
-// Connexion MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Connecté à MongoDB"))
-  .catch(err => console.error("❌ Erreur MongoDB :", err));
-
-// Test simple
+// ✅ Test simple
 app.get("/", (req, res) => {
   res.send("🎉 API e-commerce opérationnelle !");
 });
 
-// Lancement du serveur
+// ✅ Connexion MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connecté à MongoDB"))
+  .catch(err => console.error("❌ Erreur MongoDB :", err));
+
+// ✅ Lancement du serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`);
