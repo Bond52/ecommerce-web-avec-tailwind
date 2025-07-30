@@ -6,17 +6,25 @@ const cors = require("cors");
 dotenv.config();
 const app = express();
 
-const corsOptions = {
-  origin: [
-    'https://sawaka.vercel.app',
-    'http://localhost:3000',
-    'https://ecommerce-web-avec-tailwind.vercel.app' // 👈 ajoute cette origine
-  ],
-  credentials: true,
-};
+// ✅ Configuration CORS robuste
+const allowedOrigins = [
+  'https://ecommerce-web-avec-tailwind.vercel.app',
+  'https://sawaka.vercel.app',
+  'http://localhost:3000'
+];
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS: ' + origin));
+    }
+  },
+  credentials: true
+}));
+
+app.options('*', cors()); // ✅ autorise les requêtes préflight (OPTIONS)
 app.use(express.json());
 
 // ✅ Ajout de la route d'authentification
