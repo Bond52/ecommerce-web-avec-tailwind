@@ -7,22 +7,31 @@ dotenv.config();
 const app = express();
 
 /** CORS simple et sûr */
+const cors = require("cors"); // <-- ajoute cet import en haut
+
 const allowedOrigins = [
   "https://ecommerce-web-avec-tailwind.vercel.app",
+  process.env.FRONTEND_URL, // optionnel : pour un domaine de prévisualisation
   "http://localhost:3000",
-];
+].filter(Boolean);
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
+// CORS robuste (gère bien les préflights via proxy)
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);                  // autorise curl/healthchecks
+    return cb(null, allowedOrigins.includes(origin));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+// OPTIONS explicites (préflights)
+app.options("*", cors({
+  origin: allowedOrigins,
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.use(express.json());
 app.use(cookieParser()); // si tu poses un cookie "token" côté /login
