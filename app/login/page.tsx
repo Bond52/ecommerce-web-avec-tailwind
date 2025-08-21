@@ -8,11 +8,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_BASE ||
-    (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? 'http://localhost:5000'
-      : 'https://sawaka-api.onrender.com');
+const API_URL =
+  process.env.NEXT_PUBLIC_API_BASE ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:5000'
+    : 'https://ecommerce-web-avec-tailwind.onrender.com');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
