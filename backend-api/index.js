@@ -1,48 +1,55 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
 dotenv.config();
 const app = express();
 
-/** CORS simple et sûr */
-const cors = require("cors"); // <-- ajoute cet import en haut
+// utile derrière un proxy https pour cookies Secure
+app.set("trust proxy", 1);
 
 const allowedOrigins = [
   "https://ecommerce-web-avec-tailwind.vercel.app",
-  process.env.FRONTEND_URL, // optionnel : pour un domaine de prévisualisation
+  process.env.FRONTEND_URL, // (optionnel : préprod)
   "http://localhost:3000",
 ].filter(Boolean);
 
-// CORS robuste (gère bien les préflights via proxy)
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true);                  // autorise curl/healthchecks
-    return cb(null, allowedOrigins.includes(origin));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
+// CORS robuste (gère bien les préflights)
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true); // curl/healthchecks
+      const ok = allowedOrigins.includes(origin);
+      console.log("CORS origin:", origin, "->", ok ? "allowed" : "blocked");
+      cb(null, ok);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
-// OPTIONS explicites (préflights)
-app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
+// OPTIONS explicites
+app.options(
+  "*",
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(express.json());
-app.use(cookieParser()); // si tu poses un cookie "token" côté /login
+app.use(cookieParser());
 
-// Routes existantes
+// Routes
 const authRoutes = require("./routes/auth");
-app.use("/api", authRoutes);
+app.use("/api", authRoutes); // -> POST /api/login
 
-// ✅ Routes vendeur CRUD
 const sellerRoutes = require("./routes/seller.articles.routes");
-app.use("/api/seller", sellerRoutes);
+app.use("/api/seller", sellerRoutes); // -> /api/seller/articles
 
 // Ping
 app.get("/", (_, res) => res.send("🎉 API e-commerce opérationnelle !"));

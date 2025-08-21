@@ -15,26 +15,16 @@ export type Article = {
   updatedAt?: string;
 };
 
-// Lis le token stocké au login: localStorage.setItem("auth_token", token)
-function getToken() {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem("auth_token") ?? "";
-}
-
 async function http<T = any>(path: string, init?: RequestInit) {
-  const token = getToken();
   const res = await fetch(`${API}${path}`, {
     ...init,
+    credentials: "include", // IMPORTANT (Option A) : envoie le cookie
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers || {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `HTTP ${res.status}`);
-  }
+  if (!res.ok) throw new Error(await res.text());
   return res.json() as Promise<T>;
 }
 

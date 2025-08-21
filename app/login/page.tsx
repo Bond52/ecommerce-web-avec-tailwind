@@ -8,7 +8,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // ✅ Priorité à NEXT_PUBLIC_API_BASE, sinon dev/prod auto
   const API_URL =
     process.env.NEXT_PUBLIC_API_BASE ||
     (typeof window !== 'undefined' && window.location.hostname === 'localhost'
@@ -17,62 +16,33 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const res = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // ❗️Laisse 'include' seulement si tu poses un cookie HttpOnly côté backend.
-        // Sinon, tu peux supprimer cette ligne sans impact.
-        credentials: 'include',
+        credentials: 'include', // Option A (cookie)
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
+      if (!res.ok) return alert(data.error || 'Identifiants incorrects');
 
-      if (!res.ok) {
-        alert(data.error || 'Identifiants incorrects');
-        return;
-      }
+      // facultatif : garder aussi le token côté front
+      if (data.token) localStorage.setItem('auth_token', data.token);
+      if (data.role) localStorage.setItem('role', data.role);
 
-      // ✅ Stocke le JWT sous la clé attendue par les appels seller
-      if (data.token) {
-        localStorage.setItem('auth_token', data.token);
-      }
-      if (data.role) {
-        localStorage.setItem('role', data.role);
-      }
-
-      // ✅ Redirection selon le rôle
-      if (data.role === 'admin') {
-        router.push('/admin');
-      } else if (data.role === 'vendeur') {
-        // Nouvelle page CRUD vendeur
-        router.push('/vendor/articles');
-      } else {
-        router.push('/acheteur');
-      }
-    } catch (err) {
+      if (data.role === 'admin') router.push('/admin');
+      else if (data.role === 'vendeur') router.push('/vendor/articles');
+      else router.push('/acheteur');
+    } catch {
       alert('Erreur de connexion au serveur');
     }
   };
 
   return (
     <form onSubmit={handleLogin}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Mot de passe"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
+      <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+      <input type="password" placeholder="Mot de passe" value={password} onChange={e => setPassword(e.target.value)} required />
       <button type="submit">Se connecter</button>
     </form>
   );

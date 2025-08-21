@@ -2,7 +2,7 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const Article = require("../models/Article");
 
-// --- Auth inline (sans dossier middleware) ---
+// Auth inline : header Authorization OU cookie "token"
 function requireAuth(req, res, next) {
   const bearer = req.headers.authorization;
   const headerToken = bearer && bearer.startsWith("Bearer ") ? bearer.split(" ")[1] : null;
@@ -27,7 +27,6 @@ function requireRole(...roles) {
   };
 }
 
-// Protège toutes les routes vendeur
 router.use(requireAuth, requireRole("vendeur", "admin"));
 
 /** CREATE */
@@ -66,10 +65,7 @@ router.get("/articles", async (req, res) => {
     if (status) filter.status = status;
 
     const [items, total] = await Promise.all([
-      Article.find(filter)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit),
+      Article.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
       Article.countDocuments(filter),
     ]);
 
