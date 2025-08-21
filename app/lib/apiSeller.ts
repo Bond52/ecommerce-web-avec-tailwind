@@ -1,5 +1,6 @@
 // app/lib/apiSeller.ts
-const API = process.env.NEXT_PUBLIC_API_BASE ?? "https://sawaka-api.onrender.com";
+const API = process.env.NEXT_PUBLIC_API_BASE ?? "https://ecommerce-web-avec-tailwind.onrender.com";
+
 
 export type Article = {
   _id?: string;
