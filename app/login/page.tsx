@@ -32,7 +32,7 @@ const API_URL =
       if (data.role) localStorage.setItem('role', data.role);
 
       if (data.role === 'admin') router.push('/admin');
-      else if (data.role === 'vendeur') router.push('/vendor/articles');
+      else if (data.role === 'vendeur') router.push('/vendeur/articles')
       else router.push('/acheteur');
     } catch {
       alert('Erreur de connexion au serveur');
