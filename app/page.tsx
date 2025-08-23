@@ -10,7 +10,7 @@ export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Charger les articles et le panier au montage
+  // Charger articles + panier
   useEffect(() => {
     listPublicArticles().then(setArticles).catch(console.error);
 
@@ -18,7 +18,6 @@ export default function HomePage() {
     if (saved) setCart(JSON.parse(saved));
   }, []);
 
-  // Fonction ajout au panier
   const addToCart = (article: Article) => {
     setCart(prev => {
       const exists = prev.find(item => item._id === article._id);
@@ -62,6 +61,13 @@ export default function HomePage() {
           </li>
         ))}
       </ul>
+
+      {/* 👉 Nouveau bouton pour consulter le panier */}
+      {cart.length > 0 && (
+        <Link href="/panier">
+          <button>Consulter mon panier</button>
+        </Link>
+      )}
     </div>
   );
 }
