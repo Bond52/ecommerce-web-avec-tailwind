@@ -24,7 +24,14 @@ export default function PanierPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include", // envoie le cookie de login
-          body: JSON.stringify({ items: cart }),
+          body: JSON.stringify({
+            items: cart.map(item => ({
+              articleId: item._id,    // 👈 important pour Mongo
+              title: item.title,
+              price: item.price,
+              quantity: item.quantity,
+            }))
+          }),
         }
       );
 
