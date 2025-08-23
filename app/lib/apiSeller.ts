@@ -29,6 +29,10 @@ async function http<T = any>(path: string, init?: RequestInit) {
   return res.json() as Promise<T>;
 }
 
+export async function listPublicArticles() {
+  return http<Article[]>("/api/seller/public", { method: "GET" });
+}
+
 export async function listMyArticles(params?: { page?: number; q?: string; status?: string }) {
   const search = new URLSearchParams();
   if (params?.page) search.set("page", String(params.page));

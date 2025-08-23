@@ -2,6 +2,7 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const Article = require("../models/Article");
 
+
 // Auth inline : header Authorization OU cookie "token"
 function requireAuth(req, res, next) {
   const bearer = req.headers.authorization;
@@ -26,6 +27,16 @@ function requireRole(...roles) {
     next();
   };
 }
+
+// LISTE PUBLIQUE DES ARTICLES PUBLIES
+router.get("/public", async (req, res) => {
+  try {
+    const articles = await Article.find({ status: "published" }).sort({ createdAt: -1 });
+    res.json(articles);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 
 router.use(requireAuth, requireRole("vendeur", "admin"));
 
