@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
-require('dotenv').config();
+require("dotenv").config({ path: __dirname + "/../.env" });
 
 const users = [
   { email: 'admin@test.com', password: 'admin123', role: 'admin' },
   { email: 'vendeur@test.com', password: 'vendeur123', role: 'vendeur' },
   { email: 'acheteur@test.com', password: 'acheteur123', role: 'acheteur' },
-  { email: 'livreur@test.com', password: 'livreur123', role: 'livreur' }
+  { email: 'livreur@test.com', password: 'livreur123', role: 'livreur' } // 👈 ajouté
 ];
 
 async function addUsers() {
