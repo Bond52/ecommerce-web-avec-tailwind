@@ -6,7 +6,8 @@ require('dotenv').config();
 const users = [
   { email: 'admin@test.com', password: 'admin123', role: 'admin' },
   { email: 'vendeur@test.com', password: 'vendeur123', role: 'vendeur' },
-  { email: 'acheteur@test.com', password: 'acheteur123', role: 'acheteur' }
+  { email: 'acheteur@test.com', password: 'acheteur123', role: 'acheteur' },
+  { email: 'livreur@test.com', password: 'livreur123', role: 'livreur' }
 ];
 
 async function addUsers() {
