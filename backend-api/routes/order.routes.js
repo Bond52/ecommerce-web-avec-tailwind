@@ -25,7 +25,7 @@ function requireRole(...roles) {
   };
 }
 
-// ➕ Créer une commande (utilisateur classique)
+// ➕ Créer une commande (acheteur connecté)
 router.post("/", requireAuth, async (req, res) => {
   try {
     const { items } = req.body;
