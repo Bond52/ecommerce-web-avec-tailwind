@@ -23,7 +23,8 @@ export default function PanierPage() {
     // 🔒 Vérifie si connecté
     if (!token || role !== "acheteur") {
       alert("Veuillez vous connecter en tant qu'acheteur pour passer une commande.");
-      window.location.href = "/login"; // redirection vers login
+      // 👇 ajoute redirect pour revenir ici après login
+      window.location.href = "/login?redirect=/panier";
       return;
     }
 
