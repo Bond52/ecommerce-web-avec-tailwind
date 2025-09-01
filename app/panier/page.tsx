@@ -17,27 +17,39 @@ export default function PanierPage() {
   const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
 
   const passerCommande = async () => {
+    const token = localStorage.getItem("auth_token");
+    const role = localStorage.getItem("role");
+
+    // 🔒 Vérifie si connecté
+    if (!token || role !== "acheteur") {
+      alert("Veuillez vous connecter en tant qu'acheteur pour passer une commande.");
+      window.location.href = "/login"; // redirection vers login
+      return;
+    }
+
     try {
       const res = await fetch(
         (process.env.NEXT_PUBLIC_API_BASE ?? "https://ecommerce-web-avec-tailwind.onrender.com") + "/api/orders",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // envoie le cookie de login
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 🔑 envoi du JWT
+          },
           body: JSON.stringify({
             items: cart.map(item => ({
               articleId: item._id,    // 👈 important pour Mongo
               title: item.title,
               price: item.price,
               quantity: item.quantity,
-            }))
+            })),
           }),
         }
       );
 
       if (!res.ok) throw new Error(await res.text());
 
-      const data = await res.json();
+      await res.json();
       setMessage("✅ Commande créée avec succès !");
       localStorage.removeItem("cart");
       setCart([]);
