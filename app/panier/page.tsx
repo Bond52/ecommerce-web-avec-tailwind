@@ -23,7 +23,6 @@ export default function PanierPage() {
     // 🔒 Vérifie si connecté
     if (!token || role !== "acheteur") {
       alert("Veuillez vous connecter en tant qu'acheteur pour passer une commande.");
-      // 👇 ajoute redirect pour revenir ici après login
       window.location.href = "/login?redirect=/panier";
       return;
     }
@@ -50,10 +49,16 @@ export default function PanierPage() {
 
       if (!res.ok) throw new Error(await res.text());
 
-      await res.json();
-      setMessage("✅ Commande créée avec succès !");
-      localStorage.removeItem("cart");
-      setCart([]);
+      const data = await res.json();
+
+      // ✅ Vérifie que la commande a bien été créée
+      if (data && data._id) {
+        setMessage("✅ Commande créée avec succès !");
+        localStorage.removeItem("cart");
+        setCart([]);
+      } else {
+        throw new Error("Réponse invalide du serveur");
+      }
     } catch (err: any) {
       setMessage("❌ Erreur: " + err.message);
     }
