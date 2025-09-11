@@ -35,39 +35,68 @@ export default function HomePage() {
   };
 
   return (
-    <div>
-      <h1>Bienvenue sur Sawaka</h1>
-      <p>Pour accéder à votre compte, veuillez vous connecter :</p>
-      <Link href="/login">
-        <button>Se connecter</button>
-      </Link>
+    <div className="min-h-screen bg-gray-50">
+      {/* 🔹 Header */}
+      <header className="bg-blue-600 text-white shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+          <h1 className="text-2xl font-bold">Sawaka</h1>
 
-      <h2>🛍️ Articles disponibles</h2>
-      {articles.length === 0 && <p>Aucun article publié pour l’instant.</p>}
-      <ul>
-        {articles.map(article => (
-          <li key={article._id}>
-            <strong>{article.title}</strong> – {article.price}$
-            <button onClick={() => addToCart(article)}>Ajouter au panier</button>
-          </li>
-        ))}
-      </ul>
+          <nav className="flex items-center gap-6">
+            <Link href="/login" className="hover:underline">
+              Se connecter
+            </Link>
+            <Link
+              href="/panier"
+              className="relative flex items-center hover:underline"
+            >
+              <span>Mon Panier</span>
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-3 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {cart.reduce((s, i) => s + i.quantity, 0)}
+                </span>
+              )}
+            </Link>
+          </nav>
+        </div>
+      </header>
 
-      <h2>🛒 Mon Panier ({cart.reduce((s, i) => s + i.quantity, 0)})</h2>
-      <ul>
-        {cart.map(item => (
-          <li key={item._id}>
-            {item.title} x {item.quantity}
-          </li>
-        ))}
-      </ul>
+      {/* 🔹 Hero section */}
+      <section className="bg-gradient-to-r from-blue-600 to-blue-400 text-white py-20 text-center">
+        <h2 className="text-4xl font-extrabold mb-4">
+          Bienvenue sur Sawaka 🛍️
+        </h2>
+        <p className="text-lg">
+          Découvrez nos articles et profitez d’une expérience d’achat simple et rapide.
+        </p>
+      </section>
 
-      {/* 👉 Nouveau bouton pour consulter le panier */}
-      {cart.length > 0 && (
-        <Link href="/panier">
-          <button>Consulter mon panier</button>
-        </Link>
-      )}
+      {/* 🔹 Liste des articles */}
+      <main className="max-w-7xl mx-auto px-6 py-10">
+        <h3 className="text-2xl font-semibold mb-6">Articles disponibles</h3>
+        {articles.length === 0 ? (
+          <p className="text-gray-500">Aucun article publié pour l’instant.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {articles.map(article => (
+              <div
+                key={article._id}
+                className="bg-white shadow rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition"
+              >
+                <div>
+                  <h4 className="font-bold text-lg mb-2">{article.title}</h4>
+                  <p className="text-gray-600 mb-4">{article.price} $</p>
+                </div>
+                <button
+                  onClick={() => addToCart(article)}
+                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded mt-auto"
+                >
+                  Ajouter au panier
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
