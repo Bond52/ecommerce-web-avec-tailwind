@@ -65,6 +65,10 @@ export default function HomePage() {
         <h2 className="text-4xl font-extrabold mb-4">
           Bienvenue sur Sawaka 🛍️
         </h2>
+
+<div className="bg-red-500 text-white p-4 text-center">
+  🎉 Tailwind fonctionne !
+</div>
         <p className="text-lg">
           Découvrez nos articles et profitez d’une expérience d’achat simple et rapide.
         </p>
