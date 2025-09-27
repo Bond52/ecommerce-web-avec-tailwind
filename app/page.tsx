@@ -33,41 +33,8 @@ export default function HomePage() {
     });
   };
 
-  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
-
   return (
-    <div className="min-h-screen bg-white text-sawaka-900">
-
-      {/* ===== Header ===== */}
-      <header className="border-b border-cream-200">
-        <div className="wrap py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="font-display text-xl md:text-2xl tracking-tight text-sawaka-800">
-              Sawaka
-            </span>
-          </Link>
-
-          <nav className="nav">
-            <Link href="/" className="nav-link">Accueil</Link>
-            <Link href="/boutique" className="nav-link">Boutique</Link>
-            <Link href="/artisans" className="nav-link">Nos artisans</Link>
-            <Link href="/apropos" className="nav-link">À propos</Link>
-            <Link href="/contact" className="nav-link">Contact</Link>
-
-            <Link href="/login" className="btn-outline btn-small">Se connecter</Link>
-
-            <Link href="/panier" className="relative btn-outline btn-small">
-              Mon panier
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-sawaka-500 text-white">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-          </nav>
-        </div>
-      </header>
-
+    <>
       {/* ===== Hero ===== */}
       <section className="hero">
         <div className="wrap">
@@ -162,41 +129,6 @@ export default function HomePage() {
           )}
         </div>
       </main>
-
-      {/* ===== Footer ===== */}
-      <footer className="site-footer mt-16">
-        <div className="footer-wrap grid gap-8 md:grid-cols-4">
-          <div className="footer-col">
-            <div className="footer-title">À propos</div>
-            <Link href="/apropos" className="footer-link">Notre mission</Link>
-            <Link href="/conditions" className="footer-link">Conditions générales</Link>
-            <Link href="/livraison" className="footer-link">Livraison</Link>
-          </div>
-
-          <div className="footer-col">
-            <div className="footer-title">Catégories</div>
-            <Link href="/boutique?c=mode" className="footer-link">Mode</Link>
-            <Link href="/boutique?c=maison" className="footer-link">Maison</Link>
-            <Link href="/boutique?c=art" className="footer-link">Art</Link>
-            <Link href="/boutique?c=beaute" className="footer-link">Beauté</Link>
-          </div>
-
-          <div className="footer-col md:col-span-2">
-            <div className="footer-title">Recevez nos dernières créations</div>
-            <div className="newsletter mt-2 max-w-md">
-              <input type="email" placeholder="Votre email" className="px-3 py-2" />
-              <button className="ok">OK</button>
-            </div>
-            <p className="mt-6 text-xs text-cream-300">
-              Paiements acceptés : MTN • Orange • Visa
-            </p>
-          </div>
-        </div>
-
-        <div className="wrap py-6 border-t border-sawaka-800 text-xs text-cream-300">
-          © {new Date().getFullYear()} Sawaka. Tous droits réservés.
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }
