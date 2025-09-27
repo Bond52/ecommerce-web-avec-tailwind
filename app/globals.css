@@ -6,16 +6,70 @@
 @layer base {
   :root {
     --rings: 0 0 0 4px rgba(166,119,76,.18);
+    /* Palette Sawaka */
+    --sawaka-50:  #F9F3EC;
+    --sawaka-100: #F4E8D9;
+    --sawaka-200: #EEDCC3;
+    --sawaka-300: #E3CBA6;
+    --sawaka-400: #C9A57A;
+    --sawaka-500: #A6774C;
+    --sawaka-600: #8B5F38;
+    --sawaka-700: #734C2C;
+    --sawaka-800: #5A3B22;
+    --sawaka-900: #2d1606; /* texte foncé */
+    --cream-50:   #FFFCF8;
+    --cream-100:  #FEF7F0;
+    --cream-200:  #FBF0E3;
   }
-  html, body { @apply bg-white text-sawaka-900; }
-  body { @apply antialiased; }
 
-  h1 { @apply font-display text-4xl md:text-5xl leading-tight tracking-tight; }
-  h2 { @apply font-display text-3xl md:text-4xl leading-snug; }
-  h3 { @apply font-semibold text-xl; }
-  p  { @apply text-[15px] leading-7 text-sawaka-800; }
+  html, body {
+    background-color: #fff;
+    color: var(--sawaka-900);
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-  a { @apply text-sawaka-700 hover:text-sawaka-800 transition-colors; }
+  h1 {
+    font-family: var(--font-display, ui-serif, Georgia, serif);
+    font-size: 2.25rem;      /* text-4xl */
+    line-height: 2.5rem;     /* leading-tight */
+    letter-spacing: -0.015em;/* tracking-tight */
+  }
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 3rem;       /* md:text-5xl */
+      line-height: 1;
+    }
+  }
+
+  h2 {
+    font-family: var(--font-display, ui-serif, Georgia, serif);
+    font-size: 1.875rem;     /* text-3xl */
+    line-height: 2.25rem;    /* leading-snug */
+  }
+  @media (min-width: 768px) {
+    h2 { font-size: 2.25rem; } /* md:text-4xl */
+  }
+
+  h3 {
+    font-weight: 600;        /* font-semibold */
+    font-size: 1.25rem;      /* text-xl */
+    line-height: 1.75rem;
+  }
+
+  p  {
+    font-size: 15px;         /* text-[15px] */
+    line-height: 1.75rem;    /* leading-7 */
+    color: var(--sawaka-800);
+  }
+
+  a {
+    color: var(--sawaka-700);
+    transition: color .2s ease;
+  }
+  a:hover { color: var(--sawaka-800); }
 }
 
 /* ===== Utilitaires visuels ===== */
@@ -26,72 +80,227 @@
     background-clip: text;
     color: transparent;
   }
-  .section { @apply py-12 md:py-16; }
-  .section-muted { @apply bg-cream-200; }
+  .section {
+    padding-top: 3rem;       /* py-12 */
+    padding-bottom: 3rem;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-top: 4rem;     /* md:py-16 */
+      padding-bottom: 4rem;
+    }
+  }
+  .section-muted { background-color: var(--cream-200); }
 }
 
 /* ===== Composants ===== */
 @layer components {
   /* Conteneur + grilles */
-  .wrap { @apply container max-w-[1140px]; }
-  .grid-products { @apply grid gap-6 md:grid-cols-3; }
-  .grid-steps    { @apply grid gap-6 sm:grid-cols-2 md:grid-cols-4; }
+  .wrap {
+    width: 100%;
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .grid-products {
+    display: grid;
+    gap: 1.5rem; /* 24px */
+  }
+  @media (min-width: 768px) {
+    .grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  .grid-steps {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .grid-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .grid-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
 
   /* Navigation */
-  .nav-link { @apply text-sm font-medium text-sawaka-800 hover:text-sawaka-900; }
-  .nav { @apply flex items-center gap-6 text-sm; }
+  .nav-link {
+    font-size: 0.875rem;     /* text-sm */
+    font-weight: 500;        /* medium */
+    color: var(--sawaka-800);
+  }
+  .nav-link:hover { color: var(--sawaka-900); }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;             /* 24px */
+    font-size: 0.875rem;
+  }
 
   /* Boutons */
-  .btn { @apply inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold transition-all duration-200; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;     /* rounded-xl (custom) */
+    padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
+    font-weight: 600;
+    transition: all .2s ease;
+  }
   .btn-primary {
-    @apply btn bg-sawaka-700 text-white hover:bg-sawaka-800 active:bg-sawaka-800;
+    background-color: var(--sawaka-700);
+    color: #fff;
     box-shadow: var(--rings);
   }
-  .btn-outline {
-    @apply btn border border-sawaka-300 text-sawaka-800 hover:bg-cream-100;
+  .btn-primary:hover,
+  .btn-primary:active {
+    background-color: var(--sawaka-800);
   }
-  .btn-small { @apply px-3 py-2 text-sm rounded-lg; }
+
+  .btn-outline {
+    border: 1px solid var(--sawaka-300);
+    color: var(--sawaka-800);
+    background-color: transparent;
+  }
+  .btn-outline:hover { background-color: var(--cream-100); }
+
+  .btn-small {
+    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    font-size: 0.875rem;
+    border-radius: 0.5rem;   /* rounded-lg */
+  }
 
   /* Cartes produits */
-  .card { @apply rounded-2xl bg-cream-100 shadow-card overflow-hidden; }
-  .card-body { @apply p-4; }
-  .card-thumb { @apply bg-cream-200 h-56 flex items-center justify-center; } /* zone image */
-  .card-title { @apply font-semibold text-sawaka-900; }
-  .card-sub   { @apply text-xs text-sawaka-700; }
-  .card-desc  { @apply text-sm text-sawaka-800; }
-  .price      { @apply font-semibold text-sawaka-800; }
+  .card {
+    border-radius: 1.25rem;  /* rounded-2xl */
+    background-color: var(--cream-100);
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, .06),
+      0 1px 3px rgba(16, 24, 40, .10);
+    overflow: hidden;
+  }
+  .card-body { padding: 1rem; }
+  .card-thumb {
+    background-color: var(--cream-200);
+    height: 14rem;           /* h-56 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card-title {
+    font-weight: 600;
+    color: var(--sawaka-900);
+  }
+  .card-sub {
+    font-size: 0.75rem;      /* text-xs */
+    line-height: 1rem;
+    color: var(--sawaka-700);
+  }
+  .card-desc {
+    font-size: 0.875rem;     /* text-sm */
+    line-height: 1.25rem;
+    color: var(--sawaka-800);
+  }
+  .price {
+    font-weight: 600;
+    color: var(--sawaka-800);
+  }
 
   /* Pastille icône (section “Comment ça marche”) */
   .icon-circle {
-    @apply w-12 h-12 rounded-full bg-white shadow-soft flex items-center justify-center border border-sawaka-100;
+    width: 3rem; height: 3rem;         /* 12 */
+    border-radius: 9999px;
+    background-color: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sawaka-100);
   }
 
   /* Bandeau “How it works” */
   .howit-card {
-    @apply bg-cream-200 rounded-2xl p-6 text-center;
+    background-color: var(--cream-200);
+    border-radius: 1.25rem;
+    padding: 1.5rem; /* p-6 */
+    text-align: center;
   }
-  .howit-title { @apply mt-3 font-semibold text-sawaka-900; }
-  .howit-text  { @apply text-sm text-sawaka-800; }
+  .howit-title {
+    margin-top: 0.75rem;
+    font-weight: 600;
+    color: var(--sawaka-900);
+  }
+  .howit-text  {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--sawaka-800);
+  }
 
   /* Hero */
-  .hero { @apply text-center py-16 md:py-20; }
-  .hero-eyebrow { @apply uppercase tracking-[0.2em] text-[11px] text-sawaka-700; }
-  .hero-title   { @apply font-display text-5xl md:text-6xl leading-tight; }
-  .hero-sub     { @apply mt-3 text-sawaka-700; }
+  .hero {
+    text-align: center;
+    padding-top: 4rem;       /* py-16 */
+    padding-bottom: 4rem;
+  }
+  @media (min-width: 768px) {
+    .hero { padding-top: 5rem; padding-bottom: 5rem; } /* md:py-20 */
+  }
+  .hero-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 11px;
+    color: var(--sawaka-700);
+  }
+  .hero-title {
+    font-family: var(--font-display, ui-serif, Georgia, serif);
+    font-size: 3rem;         /* text-5xl */
+    line-height: 1.25;       /* leading-tight */
+  }
+  @media (min-width: 768px) {
+    .hero-title { font-size: 3.75rem; } /* md:text-6xl */
+  }
+  .hero-sub {
+    margin-top: 0.75rem;
+    color: var(--sawaka-700);
+  }
 
   /* Footer */
-  .site-footer { @apply bg-sawaka-900 text-cream-50; }
-  .footer-wrap { @apply wrap py-10; }
-  .footer-col  { @apply space-y-3 text-sm; }
-  .footer-title{ @apply text-sm font-semibold text-cream-50; }
-  .footer-link { @apply text-cream-200 hover:text-white; }
+  .site-footer {
+    background-color: var(--sawaka-900);
+    color: var(--cream-50);
+  }
+  .footer-wrap {
+    /* .wrap + py-10 */
+    width: 100%;
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 2.5rem;     /* py-10 */
+    padding-bottom: 2.5rem;
+  }
+  .footer-col  { display: grid; gap: 0.75rem; font-size: 0.875rem; }
+  .footer-title{ font-size: 0.875rem; font-weight: 600; color: var(--cream-50); }
+  .footer-link { color: #f1efe9; }        /* cream-200 approx */
+  .footer-link:hover { color: #fff; }
 
   /* Formulaire newsletter */
-  .newsletter {
-    @apply flex items-center gap-2;
-  }
+  .newsletter { display: flex; align-items: center; gap: 0.5rem; }
   .newsletter input {
-    @apply w-full rounded-lg border-sawaka-700 bg-sawaka-800 text-cream-50 placeholder:text-cream-200;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--sawaka-700);
+    background-color: var(--sawaka-800);
+    color: var(--cream-50);
   }
-  .newsletter .ok { @apply btn-small bg-sawaka-500 text-white hover:bg-sawaka-600; }
+  .newsletter input::placeholder { color: #f1efe9; }
+  .newsletter .ok {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    background-color: var(--sawaka-500);
+    color: #fff;
+  }
+  .newsletter .ok:hover { background-color: #955f3f; } /* sawaka-600-ish */
 }
