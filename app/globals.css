@@ -1,3 +1,97 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ===== Base ===== */
+@layer base {
+  :root {
+    --rings: 0 0 0 4px rgba(166,119,76,.18);
+  }
+  html, body { @apply bg-white text-sawaka-900; }
+  body { @apply antialiased; }
+
+  h1 { @apply font-display text-4xl md:text-5xl leading-tight tracking-tight; }
+  h2 { @apply font-display text-3xl md:text-4xl leading-snug; }
+  h3 { @apply font-semibold text-xl; }
+  p  { @apply text-[15px] leading-7 text-sawaka-800; }
+
+  a { @apply text-sawaka-700 hover:text-sawaka-800 transition-colors; }
+}
+
+/* ===== Utilitaires visuels ===== */
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(180deg, #A6774C 0%, #734C2C 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .section { @apply py-12 md:py-16; }
+  .section-muted { @apply bg-cream-200; }
+}
+
+/* ===== Composants ===== */
+@layer components {
+  /* Conteneur + grilles */
+  .wrap { @apply container max-w-[1140px]; }
+  .grid-products { @apply grid gap-6 md:grid-cols-3; }
+  .grid-steps    { @apply grid gap-6 sm:grid-cols-2 md:grid-cols-4; }
+
+  /* Navigation */
+  .nav-link { @apply text-sm font-medium text-sawaka-800 hover:text-sawaka-900; }
+  .nav { @apply flex items-center gap-6 text-sm; }
+
+  /* Boutons */
+  .btn { @apply inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold transition-all duration-200; }
+  .btn-primary {
+    @apply btn bg-sawaka-700 text-white hover:bg-sawaka-800 active:bg-sawaka-800;
+    box-shadow: var(--rings);
+  }
+  .btn-outline {
+    @apply btn border border-sawaka-300 text-sawaka-800 hover:bg-cream-100;
+  }
+  .btn-small { @apply px-3 py-2 text-sm rounded-lg; }
+
+  /* Cartes produits */
+  .card { @apply rounded-2xl bg-cream-100 shadow-card overflow-hidden; }
+  .card-body { @apply p-4; }
+  .card-thumb { @apply bg-cream-200 h-56 flex items-center justify-center; } /* zone image */
+  .card-title { @apply font-semibold text-sawaka-900; }
+  .card-sub   { @apply text-xs text-sawaka-700; }
+  .card-desc  { @apply text-sm text-sawaka-800; }
+  .price      { @apply font-semibold text-sawaka-800; }
+
+  /* Pastille icône (section “Comment ça marche”) */
+  .icon-circle {
+    @apply w-12 h-12 rounded-full bg-white shadow-soft flex items-center justify-center border border-sawaka-100;
+  }
+
+  /* Bandeau “How it works” */
+  .howit-card {
+    @apply bg-cream-200 rounded-2xl p-6 text-center;
+  }
+  .howit-title { @apply mt-3 font-semibold text-sawaka-900; }
+  .howit-text  { @apply text-sm text-sawaka-800; }
+
+  /* Hero */
+  .hero { @apply text-center py-16 md:py-20; }
+  .hero-eyebrow { @apply uppercase tracking-[0.2em] text-[11px] text-sawaka-700; }
+  .hero-title   { @apply font-display text-5xl md:text-6xl leading-tight; }
+  .hero-sub     { @apply mt-3 text-sawaka-700; }
+
+  /* Footer */
+  .site-footer { @apply bg-sawaka-900 text-cream-50; }
+  .footer-wrap { @apply wrap py-10; }
+  .footer-col  { @apply space-y-3 text-sm; }
+  .footer-title{ @apply text-sm font-semibold text-cream-50; }
+  .footer-link { @apply text-cream-200 hover:text-white; }
+
+  /* Formulaire newsletter */
+  .newsletter {
+    @apply flex items-center gap-2;
+  }
+  .newsletter input {
+    @apply w-full rounded-lg border-sawaka-700 bg-sawaka-800 text-cream-50 placeholder:text-cream-200;
+  }
+  .newsletter .ok { @apply btn-small bg-sawaka-500 text-white hover:bg-sawaka-600; }
+}

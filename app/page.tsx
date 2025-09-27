@@ -10,7 +10,7 @@ export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  // Charger articles + panier
+  // Charger articles + panier (inchangé)
   useEffect(() => {
     listPublicArticles().then(setArticles).catch(console.error);
 
@@ -34,25 +34,33 @@ export default function HomePage() {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 🔹 Header */}
-      <header className="bg-blue-600 text-white shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <h1 className="text-2xl font-bold">Sawaka</h1>
+  const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
-          <nav className="flex items-center gap-6">
-            <Link href="/login" className="hover:underline">
-              Se connecter
-            </Link>
-            <Link
-              href="/panier"
-              className="relative flex items-center hover:underline"
-            >
-              <span>Mon Panier</span>
-              {cart.length > 0 && (
-                <span className="absolute -top-2 -right-3 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {cart.reduce((s, i) => s + i.quantity, 0)}
+  return (
+    <div className="min-h-screen bg-white text-sawaka-900">
+      {/* ===== Header ===== */}
+      <header className="border-b border-cream-200">
+        <div className="wrap py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="font-display text-xl md:text-2xl tracking-tight text-sawaka-800">
+              Sawaka
+            </span>
+          </Link>
+
+          <nav className="nav">
+            <Link href="/" className="nav-link">Accueil</Link>
+            <Link href="/boutique" className="nav-link">Boutique</Link>
+            <Link href="/artisans" className="nav-link">Nos artisans</Link>
+            <Link href="/apropos" className="nav-link">À propos</Link>
+            <Link href="/contact" className="nav-link">Contact</Link>
+
+            <Link href="/login" className="btn-outline btn-small">Se connecter</Link>
+
+            <Link href="/panier" className="relative btn-outline btn-small">
+              Mon panier
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold rounded-full bg-sawaka-500 text-white">
+                  {cartCount}
                 </span>
               )}
             </Link>
@@ -60,47 +68,105 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* 🔹 Hero section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-400 text-white py-20 text-center">
-        <h2 className="text-4xl font-extrabold mb-4">
-          Bienvenue sur Sawaka 🛍️
-        </h2>
-
-<div className="bg-red-500 text-white p-4 text-center">
-  🎉 Tailwind fonctionne !
-</div>
-        <p className="text-lg">
-          Découvrez nos articles et profitez d’une expérience d’achat simple et rapide.
-        </p>
+      {/* ===== Hero ===== */}
+      <section className="hero">
+        <div className="wrap">
+          <div className="hero-eyebrow">ARTISANAT AUTHENTIQUE CAMEROUNAIS</div>
+          <h1 className="hero-title">
+            Découvrez l’art <span className="text-gradient font-bold">authentique</span>
+          </h1>
+          <p className="hero-sub max-w-2xl mx-auto">
+            Connectez-vous directement avec les artisans du Cameroun. Des créations uniques,
+            livrées avec soin.
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link href="/boutique" className="btn-primary">Découvrir la collection</Link>
+            <Link href="/artisans" className="btn-outline">Voir les artisans</Link>
+          </div>
+        </div>
       </section>
 
-      {/* 🔹 Liste des articles */}
-      <main className="max-w-7xl mx-auto px-6 py-10">
-        <h3 className="text-2xl font-semibold mb-6">Articles disponibles</h3>
-        {articles.length === 0 ? (
-          <p className="text-gray-500">Aucun article publié pour l’instant.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {articles.map(article => (
-              <div
-                key={article._id}
-                className="bg-white shadow rounded-lg p-4 flex flex-col justify-between hover:shadow-lg transition"
-              >
-                <div>
-                  <h4 className="font-bold text-lg mb-2">{article.title}</h4>
-                  <p className="text-gray-600 mb-4">{article.price} $</p>
-                </div>
-                <button
-                  onClick={() => addToCart(article)}
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-2 px-4 rounded mt-auto"
-                >
-                  Ajouter au panier
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+      {/* ===== Liste des articles ===== */}
+      <main className="section">
+        <div className="wrap">
+          <h2 className="text-center mb-1">Nos créations</h2>
+          <p className="text-center text-sm text-sawaka-700 mb-8">
+            Découvrez une sélection d’articles authentiques
+          </p>
+
+          {articles.length === 0 ? (
+            <p className="text-sawaka-700 text-center">Aucun article publié pour l’instant.</p>
+          ) : (
+            <div className="grid-products">
+              {articles.map(article => (
+                <article key={article._id} className="card flex flex-col">
+                  {/* Zone image – si tu as une image, remplace la div ci-dessous */}
+                  <div className="card-thumb">
+                    {/* <img src={article.imageUrl} alt={article.title} className="h-full w-full object-cover" /> */}
+                    {/* Placeholder icône/emoji */}
+                    <span className="text-2xl">📦</span>
+                  </div>
+
+                  <div className="card-body grow flex flex-col">
+                    <h3 className="card-title">{article.title}</h3>
+                    <div className="card-sub mt-0.5">Artisan • Cameroun</div>
+
+                    {/* Si tu as une description, ajoute-la ici */}
+                    {/* <p className="card-desc mt-2 line-clamp-3">{article.description}</p> */}
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="price">
+                        {article.price} $
+                      </span>
+                      <button
+                        onClick={() => addToCart(article)}
+                        className="btn-primary btn-small"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
+
+      {/* ===== Footer ===== */}
+      <footer className="site-footer mt-16">
+        <div className="footer-wrap grid gap-8 md:grid-cols-4">
+          <div className="footer-col">
+            <div className="footer-title">À propos</div>
+            <Link href="/apropos" className="footer-link">Notre mission</Link>
+            <Link href="/conditions" className="footer-link">Conditions générales</Link>
+            <Link href="/livraison" className="footer-link">Livraison</Link>
+          </div>
+
+          <div className="footer-col">
+            <div className="footer-title">Catégories</div>
+            <Link href="/boutique?c=mode" className="footer-link">Mode</Link>
+            <Link href="/boutique?c=maison" className="footer-link">Maison</Link>
+            <Link href="/boutique?c=art" className="footer-link">Art</Link>
+            <Link href="/boutique?c=beaute" className="footer-link">Beauté</Link>
+          </div>
+
+          <div className="footer-col md:col-span-2">
+            <div className="footer-title">Recevez nos dernières créations</div>
+            <div className="newsletter mt-2 max-w-md">
+              <input type="email" placeholder="Votre email" className="px-3 py-2" />
+              <button className="ok">OK</button>
+            </div>
+            <p className="mt-6 text-xs text-cream-300">
+              Paiements acceptés : MTN • Orange • Visa
+            </p>
+          </div>
+        </div>
+
+        <div className="wrap py-6 border-t border-sawaka-800 text-xs text-cream-300">
+          © {new Date().getFullYear()} Sawaka. Tous droits réservés.
+        </div>
+      </footer>
     </div>
   );
 }
