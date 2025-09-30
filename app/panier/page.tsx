@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import AppLayout from "../AppLayout"
 import { Article } from "../lib/apiSeller"
 
 type CartItem = Article & { quantity: number }
@@ -63,7 +62,7 @@ export default function PanierPage() {
   }
 
   return (
-    <AppLayout>
+    <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-brown-800 mb-6">🛒 Mon Panier</h1>
 
       {cart.length === 0 && (
@@ -77,7 +76,9 @@ export default function PanierPage() {
             className="flex justify-between border-b py-2 text-gray-700"
           >
             <span>{item.title}</span>
-            <span>{item.price}$ x {item.quantity}</span>
+            <span>
+              {item.price}$ x {item.quantity}
+            </span>
           </li>
         ))}
       </ul>
@@ -97,6 +98,6 @@ export default function PanierPage() {
       {message && (
         <p className="mt-4 font-medium text-gray-700">{message}</p>
       )}
-    </AppLayout>
+    </div>
   )
 }
