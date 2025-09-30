@@ -14,7 +14,7 @@ export default function PanierPage() {
     if (saved) setCart(JSON.parse(saved))
   }, [])
 
-  // 🔄 sauvegarder dans localStorage à chaque changement
+  // 🔄 Sauvegarder dans localStorage à chaque modification
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart))
   }, [cart])
@@ -29,7 +29,7 @@ export default function PanierPage() {
             ? { ...item, quantity: Math.max(1, item.quantity + delta) }
             : item
         )
-        .filter(item => item.quantity > 0) // supprime si 0
+        .filter(item => item.quantity > 0)
     )
   }
 
@@ -145,22 +145,25 @@ export default function PanierPage() {
           </ul>
         )}
 
-        {/* Total + bouton passer commande */}
+        {/* Total */}
         <div className="flex justify-between items-center mt-6 border-t pt-4">
           <h2 className="text-xl font-bold text-gray-800">Total</h2>
           <span className="text-2xl font-extrabold text-green-600">{total}$</span>
         </div>
 
-        <button
-          onClick={passerCommande}
-          disabled={cart.length === 0}
-          className={`mt-6 w-full px-6 py-3 rounded-lg font-semibold transition
-            ${cart.length === 0
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-brown-700 text-white hover:bg-brown-800"}`}
-        >
-          Passer commande
-        </button>
+        {/* Bouton passer commande */}
+        <div className="mt-6">
+          <button
+            onClick={passerCommande}
+            disabled={cart.length === 0}
+            className={`w-full px-6 py-3 rounded-lg font-semibold transition
+              ${cart.length === 0
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-brown-700 text-white hover:bg-brown-800"}`}
+          >
+            Passer commande
+          </button>
+        </div>
 
         {message && (
           <p className="mt-4 font-medium text-gray-700 text-center">{message}</p>
