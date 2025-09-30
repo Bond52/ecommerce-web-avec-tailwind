@@ -14,7 +14,28 @@ export default function PanierPage() {
     if (saved) setCart(JSON.parse(saved))
   }, [])
 
+  // 🔄 sauvegarder dans localStorage à chaque changement
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart))
+  }, [cart])
+
   const total = cart.reduce((s, i) => s + i.price * i.quantity, 0)
+
+  const updateQuantity = (id: string, delta: number) => {
+    setCart(prev =>
+      prev
+        .map(item =>
+          item._id === id
+            ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+            : item
+        )
+        .filter(item => item.quantity > 0) // supprime si 0
+    )
+  }
+
+  const removeItem = (id: string) => {
+    setCart(prev => prev.filter(item => item._id !== id))
+  }
 
   const passerCommande = async () => {
     const token = localStorage.getItem("auth_token")
@@ -94,10 +115,31 @@ export default function PanierPage() {
                   </div>
                 </div>
 
-                {/* Bloc droit : prix total */}
-                <p className="font-semibold text-gray-900">
-                  {item.price * item.quantity}$
-                </p>
+                {/* Bloc droit : quantité + total */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => updateQuantity(item._id, -1)}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    –
+                  </button>
+                  <span className="font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item._id, 1)}
+                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                  <p className="font-semibold text-gray-900 w-16 text-right">
+                    {item.price * item.quantity}$
+                  </p>
+                  <button
+                    onClick={() => removeItem(item._id)}
+                    className="text-red-500 hover:underline text-sm"
+                  >
+                    Supprimer
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -112,7 +154,10 @@ export default function PanierPage() {
         <button
           onClick={passerCommande}
           disabled={cart.length === 0}
-          className="mt-6 bg-brown-700 text-white px-6 py-2 rounded hover:bg-brown-800 disabled:opacity-50"
+          className={`mt-6 w-full px-6 py-3 rounded-lg font-semibold transition
+            ${cart.length === 0
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-brown-700 text-white hover:bg-brown-800"}`}
         >
           Passer commande
         </button>
