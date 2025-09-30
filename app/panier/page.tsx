@@ -89,6 +89,21 @@ export default function PanierPage() {
           🛒 Mon Panier
         </h1>
 
+        {/* Bouton passer commande en haut */}
+        <div className="mb-6">
+          <button
+            onClick={passerCommande}
+            disabled={cart.length === 0}
+            className={`w-full px-6 py-3 rounded-lg font-semibold transition
+              ${cart.length === 0
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-brown-700 text-white hover:bg-brown-800"}`}
+          >
+            Passer commande
+          </button>
+        </div>
+
+        {/* Liste du panier */}
         {cart.length === 0 ? (
           <p className="text-gray-600">Votre panier est vide.</p>
         ) : (
@@ -149,20 +164,6 @@ export default function PanierPage() {
         <div className="flex justify-between items-center mt-6 border-t pt-4">
           <h2 className="text-xl font-bold text-gray-800">Total</h2>
           <span className="text-2xl font-extrabold text-green-600">{total}$</span>
-        </div>
-
-        {/* Bouton passer commande */}
-        <div className="mt-6">
-          <button
-            onClick={passerCommande}
-            disabled={cart.length === 0}
-            className={`w-full px-6 py-3 rounded-lg font-semibold transition
-              ${cart.length === 0
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-brown-700 text-white hover:bg-brown-800"}`}
-          >
-            Passer commande
-          </button>
         </div>
 
         {message && (
