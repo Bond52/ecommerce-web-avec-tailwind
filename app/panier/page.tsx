@@ -63,41 +63,64 @@ export default function PanierPage() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-brown-800 mb-6">🛒 Mon Panier</h1>
+      <div className="bg-white shadow rounded-lg p-6">
+        <h1 className="text-3xl font-bold text-brown-800 mb-6 flex items-center gap-2">
+          🛒 Mon Panier
+        </h1>
 
-      {cart.length === 0 && (
-        <p className="text-gray-600">Votre panier est vide.</p>
-      )}
+        {cart.length === 0 ? (
+          <p className="text-gray-600">Votre panier est vide.</p>
+        ) : (
+          <ul className="divide-y divide-gray-200">
+            {cart.map(item => (
+              <li
+                key={item._id}
+                className="flex items-center justify-between py-3"
+              >
+                {/* Bloc gauche : image + infos */}
+                <div className="flex items-center gap-4">
+                  {item.images && item.images.length > 0 && (
+                    <img
+                      src={item.images[0]}
+                      alt={item.title}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium text-gray-800">{item.title}</p>
+                    <p className="text-sm text-gray-500">
+                      {item.price}$ × {item.quantity}
+                    </p>
+                  </div>
+                </div>
 
-      <ul className="space-y-2">
-        {cart.map(item => (
-          <li
-            key={item._id}
-            className="flex justify-between border-b py-2 text-gray-700"
-          >
-            <span>{item.title}</span>
-            <span>
-              {item.price}$ x {item.quantity}
-            </span>
-          </li>
-        ))}
-      </ul>
+                {/* Bloc droit : prix total */}
+                <p className="font-semibold text-gray-900">
+                  {item.price * item.quantity}$
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      <h2 className="text-xl font-semibold mt-6">
-        Total: <span className="text-green-600">{total}$</span>
-      </h2>
+        {/* Total + bouton passer commande */}
+        <div className="flex justify-between items-center mt-6 border-t pt-4">
+          <h2 className="text-xl font-bold text-gray-800">Total</h2>
+          <span className="text-2xl font-extrabold text-green-600">{total}$</span>
+        </div>
 
-      <button
-        onClick={passerCommande}
-        disabled={cart.length === 0}
-        className="mt-6 bg-brown-700 text-white px-6 py-2 rounded disabled:opacity-50 hover:bg-brown-800"
-      >
-        Passer commande
-      </button>
+        <button
+          onClick={passerCommande}
+          disabled={cart.length === 0}
+          className="mt-6 bg-brown-700 text-white px-6 py-2 rounded hover:bg-brown-800 disabled:opacity-50"
+        >
+          Passer commande
+        </button>
 
-      {message && (
-        <p className="mt-4 font-medium text-gray-700">{message}</p>
-      )}
+        {message && (
+          <p className="mt-4 font-medium text-gray-700 text-center">{message}</p>
+        )}
+      </div>
     </div>
   )
 }
