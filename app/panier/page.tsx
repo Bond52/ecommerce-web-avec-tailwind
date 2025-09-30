@@ -14,7 +14,7 @@ export default function PanierPage() {
     if (saved) setCart(JSON.parse(saved))
   }, [])
 
-  // 🔄 Sauvegarder dans localStorage à chaque modification
+  // 🔄 Sauvegarde du panier à chaque modification
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart))
   }, [cart])
@@ -84,26 +84,24 @@ export default function PanierPage() {
 
   return (
     <div className="container mx-auto p-6">
+      
+      {/* ✅ Bouton hors du cadre, en haut à droite */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={passerCommande}
+          disabled={cart.length === 0}
+          className="px-6 py-3 rounded-lg font-semibold bg-brown-700 text-white hover:bg-brown-800 disabled:opacity-50"
+        >
+          Passer commande
+        </button>
+      </div>
+
+      {/* Cadre du panier */}
       <div className="bg-white shadow rounded-lg p-6">
         <h1 className="text-3xl font-bold text-brown-800 mb-6 flex items-center gap-2">
           🛒 Mon Panier
         </h1>
 
-        {/* Bouton passer commande en haut */}
-        <div className="mb-6">
-          <button
-            onClick={passerCommande}
-            disabled={cart.length === 0}
-            className={`w-full px-6 py-3 rounded-lg font-semibold transition
-              ${cart.length === 0
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-brown-700 text-white hover:bg-brown-800"}`}
-          >
-            Passer commande
-          </button>
-        </div>
-
-        {/* Liste du panier */}
         {cart.length === 0 ? (
           <p className="text-gray-600">Votre panier est vide.</p>
         ) : (
