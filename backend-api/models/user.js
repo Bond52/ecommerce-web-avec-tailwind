@@ -1,24 +1,34 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  username: { type: String, required: true, unique: true },
-  phone: { type: String, required: true },
-  country: { type: String, required: true },
-  province: { type: String, required: true },
-  city: { type: String, required: true },
-  pickupPoint: { type: String }, // pour les acheteurs
+const userSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, default: "" },
+    lastName: { type: String, default: "" },
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    phone: { type: String, default: "" },
+    country: { type: String, default: "" },
+    province: { type: String, default: "" },
+    city: { type: String, default: "" },
+    pickupPoint: { type: String, default: "" }, // acheteur
 
-  // Partie vendeur
-  isSeller: { type: Boolean, default: false },
-  commerceName: { type: String },
-  neighborhood: { type: String },
-  idCardImage: { type: String }, // on stocke l’URL du fichier
+    // Partie vendeur
+    isSeller: { type: Boolean, default: false },
+    commerceName: { type: String, default: "" },
+    neighborhood: { type: String, default: "" },
+    idCardImage: { type: String, default: "" }, // lien
 
-  // Auth
-  passwordHash: { type: String, required: true },
-  roles: [{ type: String, enum: ["buyer", "seller"], default: "buyer" }],
-}, { timestamps: true });
+    // Auth
+    password: { type: String, required: true }, // hash bcrypt
+    roles: [
+      {
+        type: String,
+        enum: ["acheteur", "vendeur", "admin", "livreur"],
+        default: "acheteur"
+      }
+    ]
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model("User", userSchema);
