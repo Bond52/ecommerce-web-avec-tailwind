@@ -91,11 +91,11 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-sawaka-700 mt-6">
             Pas encore de compte ?{" "}
-            <a
-              href="/signup"
-              className="text-sawaka-600 hover:text-sawaka-800 font-semibold"
-            >
-              Créez-en un
+              <a
+                href="/register"
+                className="text-sawaka-600 hover:text-sawaka-800 font-semibold"
+              >
+                  Créez-en un
             </a>
           </p>
         </div>
