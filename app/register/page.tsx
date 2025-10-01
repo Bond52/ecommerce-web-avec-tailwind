@@ -3,6 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+const CAMEROON_REGIONS: Record<string, string[]> = {
+  "Adamaoua": ["Ngaoundéré", "Tibati", "Meiganga"],
+  "Centre": ["Yaoundé", "Mbalmayo", "Obala"],
+  "Est": ["Bertoua", "Batouri", "Yokadouma"],
+  "Extrême-Nord": ["Maroua", "Kousséri", "Mokolo"],
+  "Littoral": ["Douala", "Yabassi", "Nkongsamba"],
+  "Nord": ["Garoua", "Guider", "Pitoa"],
+  "Nord-Ouest": ["Bamenda", "Kumbo", "Ndop"],
+  "Ouest": ["Bafoussam", "Dschang", "Foumban"],
+  "Sud": ["Ebolowa", "Kribi", "Sangmélima"],
+  "Sud-Ouest": ["Buea", "Limbe", "Kumba"]
+};
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -13,7 +26,7 @@ export default function RegisterPage() {
     username: '',
     email: '',
     phone: '',
-    country: '',
+    country: 'Cameroun', // par défaut Cameroun
     province: '',
     city: '',
     pickupPoint: '',
@@ -32,6 +45,12 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    // reset la ville si la province change
+    setForm((prev) => ({ ...prev, province: value, city: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,17 +98,22 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-3 gap-2">
               <select name="country" value={form.country} onChange={handleChange} required className="input">
-                <option value="">Pays</option>
-                <option value="Canada">Canada</option>
                 <option value="Cameroun">Cameroun</option>
               </select>
 
-              <select name="province" value={form.province} onChange={handleChange} required className="input">
+              <select name="province" value={form.province} onChange={handleProvinceChange} required className="input">
                 <option value="">Province</option>
+                {Object.keys(CAMEROON_REGIONS).map((prov) => (
+                  <option key={prov} value={prov}>{prov}</option>
+                ))}
               </select>
 
               <select name="city" value={form.city} onChange={handleChange} required className="input">
                 <option value="">Ville</option>
+                {form.province &&
+                  CAMEROON_REGIONS[form.province].map((ville) => (
+                    <option key={ville} value={ville}>{ville}</option>
+                  ))}
               </select>
             </div>
 
