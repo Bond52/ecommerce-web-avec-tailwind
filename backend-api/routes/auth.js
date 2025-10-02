@@ -29,7 +29,7 @@ router.post("/login", async (req, res) => {
       .json({ token, roles: user.roles });
   } catch (err) {
     console.error("❌ Erreur dans /login :", err);
-    res.status(500).json({ error: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 });
 
@@ -68,7 +68,7 @@ router.post("/register", async (req, res) => {
       province,
       city,
       pickupPoint,
-      isSeller: !!isSeller,
+      isSeller: Boolean(isSeller),
       commerceName,
       neighborhood,
       idCardImage,
@@ -88,7 +88,7 @@ router.post("/register", async (req, res) => {
       .json({ message: "Utilisateur créé avec succès", token, roles: user.roles });
   } catch (err) {
     console.error("❌ Erreur dans /register :", err);
-    res.status(500).json({ error: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur", details: err.message });
   }
 });
 
