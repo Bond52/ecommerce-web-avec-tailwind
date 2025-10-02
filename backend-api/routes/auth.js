@@ -18,8 +18,9 @@ router.post("/login", async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ error: "Mot de passe invalide" });
 
+    // ⚠️ utiliser _id et pas id
     const token = jwt.sign(
-      { id: user.id, roles: user.roles },
+      { id: user._id.toString(), roles: user.roles },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -43,7 +44,6 @@ router.post("/register", async (req, res) => {
       password
     } = req.body;
 
-    // Validation basique
     if (!username || !email || !password) {
       return res.status(400).json({ error: "Nom d'utilisateur, email et mot de passe requis" });
     }
@@ -76,8 +76,9 @@ router.post("/register", async (req, res) => {
       roles
     });
 
+    // ⚠️ utiliser _id
     const token = jwt.sign(
-      { id: user.id, roles: user.roles },
+      { id: user._id.toString(), roles: user.roles },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
