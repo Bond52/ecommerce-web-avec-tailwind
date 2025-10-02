@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,25 +10,23 @@ const userSchema = new mongoose.Schema(
     country: { type: String, default: "" },
     province: { type: String, default: "" },
     city: { type: String, default: "" },
-    pickupPoint: { type: String, default: "" }, // acheteur
+    pickupPoint: { type: String, default: "" },
 
-    // Partie vendeur
     isSeller: { type: Boolean, default: false },
     commerceName: { type: String, default: "" },
     neighborhood: { type: String, default: "" },
-    idCardImage: { type: String, default: "" }, // lien
+    idCardImage: { type: String, default: "" },
 
-    // Auth
-    password: { type: String, required: true }, // hash bcrypt
+    password: { type: String, required: true },
     roles: [
       {
         type: String,
         enum: ["acheteur", "vendeur", "admin", "livreur"],
-        default: "acheteur"
-      }
-    ]
+        default: "acheteur",
+      },
+    ],
   },
   { timestamps: true }
 );
 
-export default mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema);
