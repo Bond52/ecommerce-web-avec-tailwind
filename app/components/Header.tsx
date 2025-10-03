@@ -128,9 +128,9 @@ export default function Header() {
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 z-50">
                   <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">👤 Profil</Link>
-                  <Link href="/achat" className="block px-4 py-2 hover:bg-cream-50">📦 Achats</Link>
-                  <Link href="/projet" className="block px-4 py-2 hover:bg-cream-50">📑 Projets</Link>
-                  <Link href="/vente" className="block px-4 py-2 hover:bg-cream-50">🛍️ Ventes</Link>
+                  <Link href="/acheteur/commandes" className="block px-4 py-2 hover:bg-cream-50">📦 Achats</Link>
+                  <Link href="/projets" className="block px-4 py-2 hover:bg-cream-50">📑 Projets</Link>
+                  <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">🛍️ Ventes</Link>
                   <hr className="my-2" />
                   <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">🚪 Déconnexion</button>
                 </div>
