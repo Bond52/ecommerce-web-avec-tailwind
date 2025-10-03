@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 type Order = {
   _id: string;
+  orderNumber?: string; // ✅ Nouveau champ optionnel
   total: number;
   status: string;
   createdAt: string;
@@ -114,7 +115,7 @@ export default function MesCommandesPage() {
               <div className="card-body">
                 <div className="flex justify-between items-center mb-3">
                   <h2 className="font-semibold text-sawaka-700">
-                    Commande #{order._id}
+                    Commande #{order.orderNumber || order._id}
                   </h2>
                   <span
                     className={`px-3 py-1 text-xs rounded-full ${
