@@ -27,7 +27,13 @@ router.post("/login", async (req, res) => {
 
     res
       .cookie("token", token, { httpOnly: true, sameSite: "none", secure: true })
-      .json({ token, roles: user.roles });
+      .json({
+        token,
+        roles: user.roles,
+        username: user.username,  // ✅ Ajouté
+        firstName: user.firstName,
+        lastName: user.lastName
+      });
   } catch (err) {
     console.error("❌ Erreur dans /login :", err);
     res.status(500).json({ error: "Erreur serveur", details: err.message });
@@ -86,7 +92,14 @@ router.post("/register", async (req, res) => {
     res
       .cookie("token", token, { httpOnly: true, sameSite: "none", secure: true })
       .status(201)
-      .json({ message: "Utilisateur créé avec succès", token, roles: user.roles });
+      .json({
+        message: "Utilisateur créé avec succès",
+        token,
+        roles: user.roles,
+        username: user.username, // ✅ Ajouté
+        firstName: user.firstName,
+        lastName: user.lastName
+      });
   } catch (err) {
     console.error("❌ Erreur dans /register :", err);
     res.status(500).json({ error: "Erreur serveur", details: err.message });

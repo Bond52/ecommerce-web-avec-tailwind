@@ -10,33 +10,34 @@ type CartItem = Article & { quantity: number };
 export default function Header() {
   const router = useRouter();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [user, setUser] = useState<{ token: string; role: string } | null>(
-    null
-  );
+  const [user, setUser] = useState<{ token: string; roles: string[]; username: string } | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Load cart
-    const saved = localStorage.getItem("cart");
-    if (saved) setCart(JSON.parse(saved));
+    // Panier
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) setCart(JSON.parse(savedCart));
 
-    // Check authentication status
-    const token = localStorage.getItem("auth_token");
-    const role = localStorage.getItem("role");
-    if (token && role) {
-      setUser({ token, role });
-    }
+    // Utilisateur
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) setUser(JSON.parse(savedUser));
 
-    // Listen for storage changes (login/logout from other tabs)
+    // Écoute des changements dans le localStorage
     const handleStorageChange = () => {
-      const token = localStorage.getItem("auth_token");
-      const role = localStorage.getItem("role");
-      if (token && role) {
-        setUser({ token, role });
+      const updatedUser = localStorage.getItem("user");
+      if (updatedUser) {
+        setUser(JSON.parse(updatedUser));
       } else {
         setUser(null);
+      }
+
+      const updatedCart = localStorage.getItem("cart");
+      if (updatedCart) {
+        setCart(JSON.parse(updatedCart));
+      } else {
+        setCart([]);
       }
     };
 
@@ -47,9 +48,10 @@ export default function Header() {
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
   const handleLogout = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    localStorage.removeItem("cart");
     setUser(null);
+    setCart([]);
     setShowUserMenu(false);
     router.push("/");
   };
@@ -58,32 +60,6 @@ export default function Header() {
     e.preventDefault();
     if (searchTerm.trim()) {
       router.push(`/produits?search=${encodeURIComponent(searchTerm.trim())}`);
-    }
-  };
-
-  const getUserDashboard = () => {
-    switch (user?.role) {
-      case "admin":
-        return "/admin";
-      case "vendeur":
-        return "/vendeur";
-      case "acheteur":
-        return "/acheteur";
-      default:
-        return "/";
-    }
-  };
-
-  const getRoleLabel = () => {
-    switch (user?.role) {
-      case "admin":
-        return "Admin";
-      case "vendeur":
-        return "Vendeur";
-      case "acheteur":
-        return "Acheteur";
-      default:
-        return "";
     }
   };
 
@@ -162,16 +138,9 @@ export default function Header() {
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-cream-100 transition-colors"
                 >
                   <div className="w-8 h-8 bg-sawaka-500 rounded-full flex items-center justify-center text-white text-sm">
-                    {getRoleLabel().charAt(0)}
+                    {user.username ? user.username.charAt(0).toUpperCase() : "U"}
                   </div>
-                  <div className="hidden md:block text-left">
-                    <div className="text-sm font-medium text-sawaka-800">
-                      Bonjour,
-                    </div>
-                    <div className="text-xs text-sawaka-600">
-                      {getRoleLabel()}
-                    </div>
-                  </div>
+                  <span className="text-sawaka-800 font-medium">{user.username}</span>
                   <svg
                     className="w-4 h-4 text-sawaka-600"
                     fill="none"
@@ -190,40 +159,39 @@ export default function Header() {
                 {showUserMenu && (
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-cream-200 rounded-lg shadow-lg py-2 z-50">
                     <Link
-                      href={getUserDashboard()}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-sawaka-700 hover:bg-cream-50"
+                      href="/profil"
+                      className="block px-4 py-2 text-sawaka-700 hover:bg-cream-50"
                       onClick={() => setShowUserMenu(false)}
                     >
-                      <span>🏠</span>
-                      Mon espace
+                      Profil
                     </Link>
-                    {user.role === "acheteur" && (
-                      <Link
-                        href="/acheteur/commandes"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-sawaka-700 hover:bg-cream-50"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <span>📦</span>
-                        Mes commandes
-                      </Link>
-                    )}
-                    {user.role === "vendeur" && (
-                      <Link
-                        href="/vendeur/articles"
-                        className="flex items-center gap-3 px-4 py-2 text-sm text-sawaka-700 hover:bg-cream-50"
-                        onClick={() => setShowUserMenu(false)}
-                      >
-                        <span>📝</span>
-                        Mes articles
-                      </Link>
-                    )}
+                    <Link
+                      href="/acheteur"
+                      className="block px-4 py-2 text-sawaka-700 hover:bg-cream-50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Achat
+                    </Link>
+                    <Link
+                      href="/projet"
+                      className="block px-4 py-2 text-sawaka-700 hover:bg-cream-50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Projet
+                    </Link>
+                    <Link
+                      href="/vendeur"
+                      className="block px-4 py-2 text-sawaka-700 hover:bg-cream-50"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Vente
+                    </Link>
                     <hr className="my-2 border-cream-200" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
                     >
-                      <span>🚪</span>
-                      Se déconnecter
+                      🚪 Se déconnecter
                     </button>
                   </div>
                 )}
@@ -276,20 +244,7 @@ export default function Header() {
                 onClick={() => setShowCategoryMenu(!showCategoryMenu)}
                 className="flex items-center gap-2 px-4 py-2 bg-sawaka-500 text-white rounded-lg hover:bg-sawaka-600 transition-colors"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                Catégories
+                ☰ Catégories
                 <svg
                   className="w-4 h-4"
                   fill="none"

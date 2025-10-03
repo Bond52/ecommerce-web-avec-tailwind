@@ -29,22 +29,27 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) return alert(data.error || 'Identifiants incorrects');
 
-      if (data.token) localStorage.setItem('auth_token', data.token);
-      if (data.role) localStorage.setItem('role', data.role);
+      // ✅ Stocker un objet complet
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          token: data.token,
+          roles: data.roles,
+          username: data.username,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        })
+      );
 
+      // ✅ Redirection
       const redirect = searchParams.get('redirect');
       if (redirect) {
         router.push(redirect);
-      } else if (data.role === 'admin') {
-        router.push('/admin');
-      } else if (data.role === 'vendeur') {
-        router.push('/vendeur/articles');
-      } else if (data.role === 'livreur') {
-        router.push('/livreur/commandes');
       } else {
-        router.push('/acheteur');
+        router.push('/'); // accueil par défaut
       }
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert('Erreur de connexion au serveur');
     }
   };
@@ -90,12 +95,12 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-sm text-sawaka-700 mt-6">
-            Pas encore de compte ?{" "}
-              <a
-                href="/register"
-                className="text-sawaka-600 hover:text-sawaka-800 font-semibold"
-              >
-                  Créez-en un
+            Pas encore de compte ?{' '}
+            <a
+              href="/register"
+              className="text-sawaka-600 hover:text-sawaka-800 font-semibold"
+            >
+              Créez-en un
             </a>
           </p>
         </div>
