@@ -29,27 +29,27 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) return alert(data.error || 'Identifiants incorrects');
 
-      // ✅ Stocker un objet complet
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          token: data.token,
-          roles: data.roles,
-          username: data.username,
-          firstName: data.firstName,
-          lastName: data.lastName,
-        })
-      );
+      // 🔑 On stocke tout dans user
+      if (data.token) {
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            token: data.token,
+            roles: data.roles,
+            username: data.username || email.split('@')[0],
+            firstName: data.firstName || '',
+            lastName: data.lastName || '',
+          })
+        );
+      }
 
-      // ✅ Redirection
       const redirect = searchParams.get('redirect');
       if (redirect) {
         router.push(redirect);
       } else {
-        router.push('/'); // accueil par défaut
+        router.push('/'); // 🔥 retour accueil
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert('Erreur de connexion au serveur');
     }
   };

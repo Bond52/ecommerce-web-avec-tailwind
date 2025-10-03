@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [isSeller, setIsSeller] = useState(false);
   const [form, setForm] = useState({
@@ -31,9 +30,7 @@ export default function RegisterPage() {
       : 'https://ecommerce-web-avec-tailwind.onrender.com');
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -53,27 +50,22 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) return alert(data.error || 'Erreur à l’inscription');
 
-      // ✅ Sauvegarder user complet
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          token: data.token,
-          roles: data.roles,
-          username: data.username,
-          firstName: data.firstName,
-          lastName: data.lastName,
-        })
-      );
+      // 🔑 Sauvegarde user complet
+      if (data.token) {
+        localStorage.setItem(
+          'user',
+          JSON.stringify({
+            token: data.token,
+            roles: data.roles,
+            username: data.username || form.username,
+            firstName: data.firstName || form.firstName,
+            lastName: data.lastName || form.lastName,
+          })
+        );
+      }
 
       alert('Compte créé avec succès !');
-
-      // ✅ Redirection
-      const redirect = searchParams.get('redirect');
-      if (redirect) {
-        router.push(redirect);
-      } else {
-        router.push('/'); // accueil par défaut
-      }
+      router.push('/'); // 🔥 retour accueil directement
     } catch (err) {
       console.error(err);
       alert('Erreur de connexion au serveur');
@@ -144,8 +136,8 @@ export default function RegisterPage() {
                 className="input"
               >
                 <option value="">Pays</option>
-                <option value="Cameroun">Cameroun</option>
                 <option value="Canada">Canada</option>
+                <option value="Cameroun">Cameroun</option>
               </select>
 
               <select
