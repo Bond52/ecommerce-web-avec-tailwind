@@ -4,6 +4,13 @@ import { useEffect, useState } from "react"
 import { Article } from "../lib/apiSeller"
 
 type CartItem = Article & { quantity: number }
+type UserData = {
+  token: string
+  roles: string[]
+  username: string
+  firstName?: string
+  lastName?: string
+}
 
 export default function PanierPage() {
   const [cart, setCart] = useState<CartItem[]>([])
@@ -14,7 +21,6 @@ export default function PanierPage() {
     if (saved) setCart(JSON.parse(saved))
   }, [])
 
-  // 🔄 Sauvegarde du panier à chaque modification
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart))
   }, [cart])
@@ -38,10 +44,10 @@ export default function PanierPage() {
   }
 
   const passerCommande = async () => {
-    const token = localStorage.getItem("auth_token")
-    const role = localStorage.getItem("role")
+    const savedUser = localStorage.getItem("user")
+    const user: UserData | null = savedUser ? JSON.parse(savedUser) : null
 
-    if (!token || role !== "acheteur") {
+    if (!user || !user.token || !user.roles.includes("acheteur")) {
       alert("Veuillez vous connecter en tant qu'acheteur pour passer une commande.")
       window.location.href = "/login?redirect=/panier"
       return
@@ -54,7 +60,7 @@ export default function PanierPage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${user.token}`,
           },
           body: JSON.stringify({
             items: cart.map(item => ({
@@ -84,8 +90,7 @@ export default function PanierPage() {
 
   return (
     <div className="container mx-auto p-6">
-      
-      {/* ✅ Bouton hors du cadre, en haut à droite */}
+      {/* Bouton en haut */}
       <div className="flex justify-end mb-4">
         <button
           onClick={passerCommande}
@@ -96,7 +101,7 @@ export default function PanierPage() {
         </button>
       </div>
 
-      {/* Cadre du panier */}
+      {/* Panier */}
       <div className="bg-white shadow rounded-lg p-6">
         <h1 className="text-3xl font-bold text-brown-800 mb-6 flex items-center gap-2">
           🛒 Mon Panier
@@ -107,18 +112,10 @@ export default function PanierPage() {
         ) : (
           <ul className="divide-y divide-gray-200">
             {cart.map(item => (
-              <li
-                key={item._id}
-                className="flex items-center justify-between py-3"
-              >
-                {/* Bloc gauche : image + infos */}
+              <li key={item._id} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-4">
                   {item.images && item.images.length > 0 && (
-                    <img
-                      src={item.images[0]}
-                      alt={item.title}
-                      className="w-16 h-16 object-cover rounded"
-                    />
+                    <img src={item.images[0]} alt={item.title} className="w-16 h-16 object-cover rounded" />
                   )}
                   <div>
                     <p className="font-medium text-gray-800">{item.title}</p>
@@ -128,37 +125,18 @@ export default function PanierPage() {
                   </div>
                 </div>
 
-                {/* Bloc droit : quantité + total */}
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => updateQuantity(item._id, -1)}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    –
-                  </button>
+                  <button onClick={() => updateQuantity(item._id, -1)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">–</button>
                   <span className="font-medium">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item._id, 1)}
-                    className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    +
-                  </button>
-                  <p className="font-semibold text-gray-900 w-16 text-right">
-                    {item.price * item.quantity}$
-                  </p>
-                  <button
-                    onClick={() => removeItem(item._id)}
-                    className="text-red-500 hover:underline text-sm"
-                  >
-                    Supprimer
-                  </button>
+                  <button onClick={() => updateQuantity(item._id, 1)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300">+</button>
+                  <p className="font-semibold text-gray-900 w-16 text-right">{item.price * item.quantity}$</p>
+                  <button onClick={() => removeItem(item._id)} className="text-red-500 hover:underline text-sm">Supprimer</button>
                 </div>
               </li>
             ))}
           </ul>
         )}
 
-        {/* Total */}
         <div className="flex justify-between items-center mt-6 border-t pt-4">
           <h2 className="text-xl font-bold text-gray-800">Total</h2>
           <span className="text-2xl font-extrabold text-green-600">{total}$</span>
