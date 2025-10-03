@@ -3,6 +3,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+// Mini base de données Cameroun
+const provincesCM = {
+  "Centre": ["Yaoundé", "Mbalmayo", "Obala"],
+  "Littoral": ["Douala", "Nkongsamba", "Yabassi"],
+  "Ouest": ["Bafoussam", "Dschang", "Foumban"],
+  "Nord": ["Garoua", "Guider", "Pitoa"],
+  "Extrême-Nord": ["Maroua", "Kousséri", "Mora"],
+  "Sud": ["Ebolowa", "Kribi", "Sangmélima"],
+  "Est": ["Bertoua", "Batouri", "Abong-Mbang"],
+  "Nord-Ouest": ["Bamenda", "Kumbo", "Ndop"],
+  "Sud-Ouest": ["Buea", "Limbe", "Kumba"],
+  "Adamaoua": ["Ngaoundéré", "Meiganga", "Tibati"]
+};
+
 export default function RegisterPage() {
   const router = useRouter();
 
@@ -13,7 +27,7 @@ export default function RegisterPage() {
     username: '',
     email: '',
     phone: '',
-    country: '',
+    country: 'Cameroun',
     province: '',
     city: '',
     pickupPoint: '',
@@ -33,7 +47,11 @@ export default function RegisterPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "province" ? { city: "" } : {}) // reset city si province change
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,8 +82,7 @@ export default function RegisterPage() {
         );
       }
 
-      alert('Compte créé avec succès !');
-      router.push('/'); // 🔥 retour accueil directement
+      router.push('/'); // retour accueil
     } catch (err) {
       console.error(err);
       alert('Erreur de connexion au serveur');
@@ -80,94 +97,41 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <input
-                name="firstName"
-                placeholder="Nom"
-                value={form.firstName}
-                onChange={handleChange}
-                required
-                className="input"
-              />
-              <input
-                name="lastName"
-                placeholder="Prénom"
-                value={form.lastName}
-                onChange={handleChange}
-                required
-                className="input"
-              />
+              <input name="firstName" placeholder="Nom" value={form.firstName} onChange={handleChange} required className="input" />
+              <input name="lastName" placeholder="Prénom" value={form.lastName} onChange={handleChange} required className="input" />
             </div>
 
-            <input
-              name="username"
-              placeholder="Nom d’utilisateur"
-              value={form.username}
-              onChange={handleChange}
-              required
-              className="input w-full"
-            />
+            <input name="username" placeholder="Nom d’utilisateur" value={form.username} onChange={handleChange} required className="input w-full" />
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="input w-full"
-            />
+            <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required className="input w-full" />
 
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Téléphone"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              className="input w-full"
-            />
+            <input type="tel" name="phone" placeholder="Téléphone" value={form.phone} onChange={handleChange} required className="input w-full" />
 
+            {/* Pays / Province / Ville */}
             <div className="grid grid-cols-3 gap-2">
-              <select
-                name="country"
-                value={form.country}
-                onChange={handleChange}
-                required
-                className="input"
-              >
-                <option value="">Pays</option>
-                <option value="Canada">Canada</option>
+              <select name="country" value={form.country} onChange={handleChange} required className="input">
                 <option value="Cameroun">Cameroun</option>
+                <option value="Canada">Canada</option>
               </select>
 
-              <select
-                name="province"
-                value={form.province}
-                onChange={handleChange}
-                required
-                className="input"
-              >
+              <select name="province" value={form.province} onChange={handleChange} required className="input">
                 <option value="">Province</option>
+                {Object.keys(provincesCM).map((prov) => (
+                  <option key={prov} value={prov}>{prov}</option>
+                ))}
               </select>
 
-              <select
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                required
-                className="input"
-              >
+              <select name="city" value={form.city} onChange={handleChange} required className="input" disabled={!form.province}>
                 <option value="">Ville</option>
+                {form.province &&
+                  provincesCM[form.province]?.map((city) => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
               </select>
             </div>
 
             {form.city && (
-              <select
-                name="pickupPoint"
-                value={form.pickupPoint}
-                onChange={handleChange}
-                className="input w-full"
-              >
+              <select name="pickupPoint" value={form.pickupPoint} onChange={handleChange} className="input w-full">
                 <option value="">Point de retrait</option>
                 <option value="centre-ville">Centre-ville</option>
                 <option value="gare">Gare</option>
@@ -175,55 +139,23 @@ export default function RegisterPage() {
               </select>
             )}
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Mot de passe"
-              value={form.password}
-              onChange={handleChange}
-              required
-              className="input w-full"
-            />
+            <input type="password" name="password" placeholder="Mot de passe" value={form.password} onChange={handleChange} required className="input w-full" />
 
             {/* Case vendeur */}
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={isSeller}
-                onChange={() => setIsSeller(!isSeller)}
-              />
+              <input type="checkbox" checked={isSeller} onChange={() => setIsSeller(!isSeller)} />
               Je suis vendeur
             </label>
 
             {isSeller && (
               <div className="space-y-3 border-t pt-4">
-                <input
-                  name="commerceName"
-                  placeholder="Nom du commerce"
-                  value={form.commerceName}
-                  onChange={handleChange}
-                  className="input w-full"
-                />
-                <textarea
-                  name="neighborhood"
-                  placeholder="Quartier / Description"
-                  value={form.neighborhood}
-                  onChange={handleChange}
-                  className="input w-full"
-                />
-                <input
-                  name="idCardImage"
-                  placeholder="Lien vers carte d’identité (URL)"
-                  value={form.idCardImage}
-                  onChange={handleChange}
-                  className="input w-full"
-                />
+                <input name="commerceName" placeholder="Nom du commerce" value={form.commerceName} onChange={handleChange} className="input w-full" />
+                <textarea name="neighborhood" placeholder="Quartier / Description" value={form.neighborhood} onChange={handleChange} className="input w-full" />
+                <input name="idCardImage" placeholder="Lien vers carte d’identité (URL)" value={form.idCardImage} onChange={handleChange} className="input w-full" />
               </div>
             )}
 
-            <button type="submit" className="btn-primary w-full mt-4">
-              S’inscrire
-            </button>
+            <button type="submit" className="btn-primary w-full mt-4">S’inscrire</button>
           </form>
         </div>
       </div>
