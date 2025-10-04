@@ -1,84 +1,82 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 
-export default function BudgetAssistantPage() {
+export default function BudgetPage() {
+  const [activeTab, setActiveTab] = useState<"budget"|"projet">("budget");
   const [montant, setMontant] = useState("");
+  const [description, setDescription] = useState("");
   const [result, setResult] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult(null);
+  const API = process.env.NEXT_PUBLIC_API_BASE ?? "https://ecommerce-web-avec-tailwind.onrender.com";
 
-    try {
-      const res = await fetch(
-        (process.env.NEXT_PUBLIC_API_BASE ??
-          "https://ecommerce-web-avec-tailwind.onrender.com") + "/api/budget/assistant",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ montant: parseInt(montant, 10) }),
-        }
-      );
-      const data = await res.json();
-      setResult(data);
-    } catch (err) {
-      setResult({ error: "Erreur de connexion au serveur" });
-    } finally {
-      setLoading(false);
-    }
+  const handleBudget = async () => {
+    const res = await fetch(`${API}/api/budget/assistant`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ montant: Number(montant) }),
+    });
+    setResult(await res.json());
+  };
+
+  const handleProjet = async () => {
+    const res = await fetch(`${API}/api/budget/assistant-projet`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ montant: Number(montant), description }),
+    });
+    setResult(await res.json());
   };
 
   return (
     <main className="wrap py-8">
-      <h1 className="text-2xl font-bold text-sawaka-700 mb-6">
-        💡 Assistant Budget
-      </h1>
+      <h1 className="text-2xl font-bold text-sawaka-700 mb-6">💡 Assistant Sawaka</h1>
 
-      <form onSubmit={handleSubmit} className="flex gap-4 mb-6">
-        <input
-          type="number"
-          value={montant}
-          onChange={(e) => setMontant(e.target.value)}
-          placeholder="Entrez votre budget (FCFA)"
-          className="border rounded-lg px-4 py-2 flex-1"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-2 rounded-lg bg-sawaka-600 text-white font-semibold"
-        >
-          {loading ? "Chargement..." : "Voir suggestions"}
+      {/* Onglets */}
+      <div className="flex gap-4 mb-6 border-b">
+        <button 
+          onClick={() => setActiveTab("budget")} 
+          className={`px-4 py-2 ${activeTab==="budget"?"border-b-2 border-sawaka-500 text-sawaka-600":"text-sawaka-400"}`}>
+          Assistant Budget
         </button>
-      </form>
+        <button 
+          onClick={() => setActiveTab("projet")} 
+          className={`px-4 py-2 ${activeTab==="projet"?"border-b-2 border-sawaka-500 text-sawaka-600":"text-sawaka-400"}`}>
+          Assistant Projet (IA)
+        </button>
+      </div>
 
+      {/* Formulaire */}
+      <div className="space-y-4">
+        <input 
+          type="number" 
+          value={montant} 
+          onChange={e => setMontant(e.target.value)} 
+          placeholder="Montant disponible (FCFA)" 
+          className="w-full border px-4 py-2 rounded-lg"
+        />
+
+        {activeTab==="projet" && (
+          <textarea 
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Décrivez votre projet (ex: fabriquer une chaise en bois)"
+            className="w-full border px-4 py-2 rounded-lg"
+          />
+        )}
+
+        <button 
+          onClick={activeTab==="budget"?handleBudget:handleProjet}
+          className="px-6 py-3 bg-sawaka-500 text-white rounded-lg"
+        >
+          Lancer l’assistant
+        </button>
+      </div>
+
+      {/* Résultats */}
       {result && (
-        <div className="bg-cream-50 p-4 rounded-lg shadow">
-          {result.error && (
-            <p className="text-red-600">{result.error}</p>
-          )}
-          {result.projet && (
-            <>
-              <p className="font-medium mb-2">{result.projet}</p>
-              <ul className="space-y-2">
-                {result.produits?.map((p: any) => (
-                  <li key={p._id} className="flex justify-between">
-                    <span>{p.title}</span>
-                    <span>{p.price} FCFA</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-3 text-sm text-sawaka-600">
-                Total utilisé : <strong>{result.totalUtilise} FCFA</strong> / {result.budget} FCFA
-              </p>
-              {result.restant > 0 && (
-                <p className="text-sm">Reste : {result.restant} FCFA</p>
-              )}
-            </>
-          )}
+        <div className="mt-6 bg-white p-4 rounded-lg shadow">
+          <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>
         </div>
       )}
     </main>
