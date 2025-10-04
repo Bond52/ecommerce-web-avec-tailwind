@@ -2,93 +2,89 @@
 const express = require("express");
 const router = express.Router();
 const Article = require("../models/Article");
-// fetch est dispo nativement dans Node.js 18+
 
-/**
- * POST /api/budget/assistant
- * -> Suggestion d'articles sans IA
- */
-router.post("/assistant", async (req, res) => {
+// ⚠️ Node 18+ possède fetch en natif → pas besoin de "node-fetch"
+
+ /**
+  * POST /api/budget/assistant-projet
+  * -> Génération d'idée de projet avec IA + vérification dans Sawaka
+  */
+router.post("/assistant-projet", async (req, res) => {
   try {
-    const { montant } = req.body;
+    const { montant, description } = req.body;
     if (!montant || montant <= 0) {
       return res.status(400).json({ error: "Montant invalide" });
     }
 
+    // ✅ Récupérer les articles Sawaka en dessous du budget
     const articles = await Article.find({ price: { $lte: montant } })
       .sort({ price: 1 })
       .limit(50);
 
     if (articles.length === 0) {
       return res.json({
+        projet: "Aucun projet possible",
         message: `Aucun article disponible pour ${montant} FCFA`,
         produits: [],
       });
     }
 
-    let total = 0;
-    let panier = [];
-    for (let a of articles) {
-      if (total + a.price <= montant) {
-        panier.push(a);
-        total += a.price;
-      }
+    // ✅ Préparer le prompt IA
+    let prompt;
+    if (description && description.trim().length > 0) {
+      prompt = `Je dispose de ${montant} FCFA. Projet: ${description}. 
+Liste les matériaux nécessaires.`;
+    } else {
+      const nomsArticles = articles.map(a => a.title).join(", ");
+      prompt = `Je dispose de ${montant} FCFA. Voici les articles disponibles: ${nomsArticles}. 
+Propose un projet concret réalisable uniquement avec ces articles.`;
     }
 
-    res.json({
-      projet: `Avec ${montant} FCFA, vous pouvez acheter :`,
-      budget: montant,
-      totalUtilise: total,
-      produits: panier,
-      restant: montant - total,
-    });
-  } catch (err) {
-    console.error("❌ Erreur assistant budget:", err);
-    res.status(500).json({ error: "Erreur serveur" });
-  }
-});
-
-/**
- * POST /api/budget/assistant-ia
- * -> Génération d’idées de projets avec IA + correspondance articles Sawaka
- */
-router.post("/assistant-ia", async (req, res) => {
-  try {
-    const { montant } = req.body;
-    if (!montant || montant <= 0) {
-      return res.status(400).json({ error: "Montant invalide" });
-    }
-
-    // Récupérer les articles disponibles sur Sawaka
-    const articles = await Article.find().limit(50);
-
-    // Construire un prompt IA basé sur les articles Sawaka
-    const listeArticles = articles.map(a => a.title).join(", ");
-    const prompt = `Avec un budget de ${montant} FCFA et les composants disponibles suivants : ${listeArticles}. 
-Propose un ou plusieurs projets faisables (par ex: tissu + teinture = habits). 
-Donne une explication courte et claire.`;
-
-    // Appel HuggingFace (Flan-T5 ou autre modèle gratuit)
+    // ✅ Appel HuggingFace
     const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-large", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.HF_API_KEY}`, // clé HuggingFace
+        "Authorization": `Bearer ${process.env.HF_API_KEY}`,
       },
       body: JSON.stringify({ inputs: prompt }),
     });
 
     const aiData = await response.json();
-    const projetIA = aiData[0]?.generated_text || "Aucune idée générée.";
+
+    // HuggingFace renvoie souvent un objet d’erreur si quota dépassé
+    if (aiData.error) {
+      return res.status(500).json({ error: "Erreur IA: " + aiData.error });
+    }
+
+    const texteAI = aiData[0]?.generated_text || "Aucune idée générée.";
+
+    // ✅ Extraction simple des mots-clés
+    const keywords = texteAI
+      .toLowerCase()
+      .split(/[\s,;.]+/)
+      .filter(w => w.length > 3);
+
+    let composants = [];
+    for (let kw of keywords) {
+      const dispo = await Article.findOne({ title: new RegExp(kw, "i") });
+      composants.push({
+        composant: kw,
+        disponible: !!dispo,
+        vendeur: dispo ? dispo.sellerId : null,
+      });
+    }
 
     res.json({
-      projetIA,
       budget: montant,
+      projet: description || "Projet suggéré automatiquement par l’IA",
+      recommandations: texteAI,
       produits: articles,
+      composants,
     });
 
   } catch (err) {
-    console.error("❌ Erreur assistant IA:", err);
+    console.error("❌ Erreur assistant projet:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
