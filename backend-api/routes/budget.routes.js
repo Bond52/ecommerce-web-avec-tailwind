@@ -5,10 +5,10 @@ const Article = require("../models/Article");
 
 // ⚠️ Node 18+ possède fetch en natif → pas besoin de "node-fetch"
 
- /**
-  * POST /api/budget/assistant-projet
-  * -> Génération d'idée de projet avec IA + vérification dans Sawaka
-  */
+/**
+ * POST /api/budget/assistant-projet
+ * -> Génération d'idée de projet avec IA + vérification dans Sawaka
+ */
 router.post("/assistant-projet", async (req, res) => {
   try {
     const { montant, description } = req.body;
@@ -29,19 +29,20 @@ router.post("/assistant-projet", async (req, res) => {
       });
     }
 
-    // ✅ Préparer le prompt IA
+    // ✅ Préparer le prompt IA (en français)
     let prompt;
     if (description && description.trim().length > 0) {
       prompt = `Je dispose de ${montant} FCFA. Projet: ${description}. 
-Liste les matériaux nécessaires.`;
+Liste les matériaux nécessaires et explique comment les utiliser pour réaliser ce projet.`;
     } else {
       const nomsArticles = articles.map(a => a.title).join(", ");
       prompt = `Je dispose de ${montant} FCFA. Voici les articles disponibles: ${nomsArticles}. 
-Propose un projet concret réalisable uniquement avec ces articles.`;
+Propose un projet concret et créatif réalisable uniquement avec ces articles.`;
     }
 
-    // ✅ Appel HuggingFace
-    const response = await fetch("https://api-inference.huggingface.co/models/google/flan-t5-large", {
+    // ✅ Appel HuggingFace (modèle francophone)
+    const HF_MODEL = "clementm85/t5-small-french-sum";
+    const response = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,14 +53,15 @@ Propose un projet concret réalisable uniquement avec ces articles.`;
 
     const aiData = await response.json();
 
-    // HuggingFace renvoie souvent un objet d’erreur si quota dépassé
+    // 🔍 Gestion d’erreur HuggingFace
     if (aiData.error) {
+      console.error("⚠️ Erreur HuggingFace:", aiData.error);
       return res.status(500).json({ error: "Erreur IA: " + aiData.error });
     }
 
     const texteAI = aiData[0]?.generated_text || "Aucune idée générée.";
 
-    // ✅ Extraction simple des mots-clés
+    // ✅ Extraction simple des mots-clés pour vérifier disponibilité sur Sawaka
     const keywords = texteAI
       .toLowerCase()
       .split(/[\s,;.]+/)
