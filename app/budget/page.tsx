@@ -77,8 +77,45 @@ export default function BudgetPage() {
 
       {/* Résultats */}
       {result && (
-        <div className="mt-6 bg-white p-4 rounded-lg shadow">
-          <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>
+        <div className="mt-6 bg-white p-6 rounded-lg shadow space-y-4">
+          {/* Titre / projet */}
+          <h2 className="text-xl font-semibold text-sawaka-700">
+            {result.projet}
+          </h2>
+
+          {/* Résumé budget */}
+          {result.budget && (
+            <div className="flex justify-between text-sm text-sawaka-600 border-b pb-2">
+              <span>Budget : <strong>{result.budget} FCFA</strong></span>
+              <span>Utilisé : <strong>{result.totalUtilise ?? 0} FCFA</strong></span>
+              <span>Restant : <strong>{result.restant ?? (result.budget - (result.totalUtilise ?? 0))} FCFA</strong></span>
+            </div>
+          )}
+
+          {/* Liste des produits */}
+          {result.produits && result.produits.length > 0 ? (
+            <ul className="divide-y divide-cream-200">
+              {result.produits.map((p: any, i: number) => (
+                <li key={i} className="py-3 flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-sawaka-800">{p.title}</p>
+                    <p className="text-sm text-gray-500">{p.description ?? ""}</p>
+                  </div>
+                  <span className="font-semibold text-sawaka-600">{p.price} FCFA</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500 text-sm">Aucun produit trouvé.</p>
+          )}
+
+          {/* Recommandations IA si présentes */}
+          {result.recommandations && (
+            <div className="mt-4 p-3 bg-cream-50 rounded border text-sm">
+              <p className="font-medium text-sawaka-700 mb-1">💡 Recommandations IA</p>
+              <p className="text-gray-700">{result.recommandations}</p>
+            </div>
+          )}
         </div>
       )}
     </main>
