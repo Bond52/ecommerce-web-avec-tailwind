@@ -2,7 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Article = require("../models/Article");
-const fetch = require("node-fetch"); // pour HuggingFace/OpenAI
+// fetch est dispo nativement dans Node.js 18+
 
 /**
  * POST /api/budget/assistant
