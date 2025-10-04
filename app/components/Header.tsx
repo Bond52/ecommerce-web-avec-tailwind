@@ -73,8 +73,12 @@ export default function Header() {
               <span>🛡️ Garantie artisan</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/aide" className="hover:text-sawaka-200">Aide</Link>
-              <Link href="/contact" className="hover:text-sawaka-200">Contact</Link>
+              <Link href="/aide" className="hover:text-sawaka-200">
+                Aide
+              </Link>
+              <Link href="/contact" className="hover:text-sawaka-200">
+                Contact
+              </Link>
             </div>
           </div>
         </div>
@@ -98,7 +102,10 @@ export default function Header() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-12 pl-4 pr-12 rounded-lg border-2 border-cream-200 focus:border-sawaka-500 focus:ring-0"
             />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-sawaka-500 text-white rounded-md">
+            <button
+              type="submit"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-sawaka-500 text-white rounded-md"
+            >
               🔍
             </button>
           </div>
@@ -127,17 +134,33 @@ export default function Header() {
 
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 z-50">
-                  <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">👤 Profil</Link>
-                  <Link href="/acheteur/commandes" className="block px-4 py-2 hover:bg-cream-50">📦 Achats</Link>
-                  <Link href="/projets" className="block px-4 py-2 hover:bg-cream-50">📑 Projets</Link>
-                  <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">🛍️ Ventes</Link>
+                  <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">
+                    👤 Profil
+                  </Link>
+                  <Link href="/acheteur/commandes" className="block px-4 py-2 hover:bg-cream-50">
+                    📦 Achats
+                  </Link>
+                  {/* 🔽 ici on remplace /projets par /budget */}
+                  <Link href="/budget" className="block px-4 py-2 hover:bg-cream-50">
+                    📑 Projets
+                  </Link>
+                  <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">
+                    🛍️ Ventes
+                  </Link>
                   <hr className="my-2" />
-                  <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">🚪 Déconnexion</button>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                  >
+                    🚪 Déconnexion
+                  </button>
                 </div>
               )}
             </div>
           ) : (
-            <Link href="/login" className="px-4 py-2 border rounded-lg hover:bg-cream-100">👤 Se connecter</Link>
+            <Link href="/login" className="px-4 py-2 border rounded-lg hover:bg-cream-100">
+              👤 Se connecter
+            </Link>
           )}
 
           <Link href="/panier" className="relative p-3">
@@ -163,7 +186,9 @@ export default function Header() {
           {showCategoryMenu && (
             <div className="absolute mt-1 w-64 bg-white border rounded-lg shadow-lg py-2 z-50">
               {categories.map((c, i) => (
-                <Link key={i} href={c.href} className="block px-4 py-2 hover:bg-cream-50">{c.name}</Link>
+                <Link key={i} href={c.href} className="block px-4 py-2 hover:bg-cream-50">
+                  {c.name}
+                </Link>
               ))}
             </div>
           )}

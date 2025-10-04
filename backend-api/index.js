@@ -55,6 +55,10 @@ app.use("/api/seller", sellerRoutes); // -> /api/seller/articles
 const orderRoutes = require("./routes/order.routes");
 app.use("/api/orders", orderRoutes);
 
+const budgetRoutes = require("./routes/budget.routes");
+app.use("/api/budget", budgetRoutes);
+
+
 // Test ping
 app.get("/", (_, res) => res.send("🎉 API e-commerce opérationnelle !"));
 
