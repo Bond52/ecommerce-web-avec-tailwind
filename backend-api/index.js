@@ -10,14 +10,14 @@ const app = express();
 // utile derrière un proxy https pour cookies Secure
 app.set("trust proxy", 1);
 
-// Origines autorisées
+// 🌍 Origines autorisées
 const allowedOrigins = [
   "https://ecommerce-web-avec-tailwind.vercel.app", // ton frontend en prod
   process.env.FRONTEND_URL, // optionnel : autre URL (préprod)
   "http://localhost:3000", // ton frontend en dev
 ].filter(Boolean);
 
-// Middleware CORS
+// 🧩 Middleware CORS
 app.use(
   cors({
     origin: (origin, cb) => {
@@ -32,7 +32,7 @@ app.use(
   })
 );
 
-// Réponse explicite aux requêtes OPTIONS (préflight)
+// ⚙️ Réponse explicite aux requêtes OPTIONS (préflight)
 app.options("*", (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
@@ -41,13 +41,13 @@ app.options("*", (req, res) => {
   res.sendStatus(200);
 });
 
-// Parsers
+// 📦 Parsers
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
+// 🧭 Routes principales
 const authRoutes = require("./routes/auth");
-app.use("/api", authRoutes); // -> POST /api/login
+app.use("/api", authRoutes); // -> POST /api/login, /api/register
 
 const sellerRoutes = require("./routes/seller.articles.routes");
 app.use("/api/seller", sellerRoutes); // -> /api/seller/articles
@@ -58,16 +58,21 @@ app.use("/api/orders", orderRoutes);
 const budgetRoutes = require("./routes/budget.routes");
 app.use("/api/budget", budgetRoutes);
 
+// ✅ Nouvelle route : profil utilisateur
+const userRoutes = require("./routes/user");
+app.use("/api/user", userRoutes); // -> GET /api/user/profile, PUT /api/user/profile
 
-// Test ping
+// 🔎 Test ping
 app.get("/", (_, res) => res.send("🎉 API e-commerce opérationnelle !"));
 
-// Connexion MongoDB
+// 🔗 Connexion MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connecté à MongoDB"))
   .catch((err) => console.error("❌ Erreur MongoDB :", err));
 
-// Boot
+// 🚀 Boot serveur
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`)
+);
