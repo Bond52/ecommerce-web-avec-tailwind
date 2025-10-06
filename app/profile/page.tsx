@@ -13,7 +13,7 @@ const provincesCM: Record<string, string[]> = {
   "Est": ["Bertoua", "Batouri", "Abong-Mbang"],
   "Nord-Ouest": ["Bamenda", "Kumbo", "Ndop"],
   "Sud-Ouest": ["Buea", "Limbe", "Kumba"],
-  "Adamaoua": ["Ngaoundéré", "Meiganga", "Tibati"]
+  "Adamaoua": ["Ngaoundéré", "Meiganga", "Tibati"],
 };
 
 export default function ProfilePage() {
@@ -22,13 +22,16 @@ export default function ProfilePage() {
   const [tempValue, setTempValue] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "https://ecommerce-web-avec-tailwind.onrender.com";
+  // ✅ Même logique que sur register et vendeur
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_BASE ||
+    (typeof window !== "undefined" && window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://ecommerce-web-avec-tailwind.onrender.com");
 
   // 🧭 Récupération du profil utilisateur
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/user/profile`, {
+    fetch(`${API_URL}/api/user/profile`, {
       credentials: "include",
     })
       .then(async (res) => {
@@ -43,7 +46,7 @@ export default function ProfilePage() {
         console.error(err);
         setError(err.message);
       });
-  }, [API_BASE_URL]);
+  }, [API_URL]);
 
   // 🧩 Sauvegarde d'un champ modifié
   const handleSave = async (field: string) => {
@@ -52,7 +55,7 @@ export default function ProfilePage() {
         ? { [field]: !user.isSeller }
         : { [field]: tempValue };
 
-    const res = await fetch(`${API_BASE_URL}/api/user/profile`, {
+    const res = await fetch(`${API_URL}/api/user/profile`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -68,10 +71,11 @@ export default function ProfilePage() {
     }
   };
 
-  if (error) return <p className="text-center text-red-600 mt-6">{error}</p>;
-  if (!user) return <p className="text-center text-gray-500 mt-6">Chargement...</p>;
+  if (error)
+    return <p className="text-center text-red-600 mt-6">{error}</p>;
+  if (!user)
+    return <p className="text-center text-gray-500 mt-6">Chargement...</p>;
 
-  // 🧱 UI principale
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
       <h1 className="text-2xl font-bold mb-6 text-center">Mon profil</h1>
@@ -179,7 +183,6 @@ export default function ProfilePage() {
                 )}
             </div>
 
-            {/* Boutons ✏️ ✅ */}
             {!isCheckbox && (
               <div className="flex items-center">
                 {isEditing ? (
