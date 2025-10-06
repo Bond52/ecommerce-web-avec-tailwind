@@ -47,16 +47,20 @@ app.use(cookieParser());
 
 // Routes
 const authRoutes = require("./routes/auth");
-app.use("/api", authRoutes); // -> POST /api/login
+app.use("/api", authRoutes);
 
 const sellerRoutes = require("./routes/seller.articles.routes");
-app.use("/api/seller", sellerRoutes); // -> /api/seller/articles
+app.use("/api/seller", sellerRoutes);
 
 const orderRoutes = require("./routes/order.routes");
 app.use("/api/orders", orderRoutes);
 
 const budgetRoutes = require("./routes/budget.routes");
 app.use("/api/budget", budgetRoutes);
+
+// ✅ AJOUTE CECI ↓↓↓↓↓
+const userRoutes = require("./routes/user");
+app.use("/api/user", userRoutes);
 
 // Test ping
 app.get("/", (_, res) => res.send("🎉 API e-commerce opérationnelle !"));
