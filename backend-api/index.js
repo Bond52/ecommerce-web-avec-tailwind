@@ -58,6 +58,9 @@ app.use("/api/orders", orderRoutes);
 const budgetRoutes = require("./routes/budget.routes");
 app.use("/api/budget", budgetRoutes);
 
+const adminRoutes = require("./routes/admin.routes");
+app.use("/api/admin", adminRoutes);
+
 // ✅ AJOUTE CECI ↓↓↓↓↓
 const userRoutes = require("./routes/user");
 app.use("/api/user", userRoutes);

@@ -62,6 +62,8 @@ export default function Header() {
     { name: "Textile", href: "/produits?category=textile" },
   ];
 
+  const isAdmin = user?.roles?.includes("admin");
+
   return (
     <header className="bg-white shadow-sm border-b border-cream-200 sticky top-0 z-40">
       {/* Top Bar */}
@@ -132,6 +134,7 @@ export default function Header() {
                 </div>
               </button>
 
+              {/* 🔽 Menu déroulant utilisateur */}
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 z-50">
                   <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">
@@ -140,13 +143,23 @@ export default function Header() {
                   <Link href="/acheteur/commandes" className="block px-4 py-2 hover:bg-cream-50">
                     📦 Achats
                   </Link>
-                  {/* 🔽 ici on remplace /projets par /budget */}
                   <Link href="/budget" className="block px-4 py-2 hover:bg-cream-50">
                     📑 Projets
                   </Link>
                   <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">
                     🛍️ Ventes
                   </Link>
+
+                  {/* 🧭 Sous-menu spécial pour admin */}
+                  {isAdmin && (
+                    <>
+                      <hr className="my-2" />
+                      <Link href="/admin" className="block px-4 py-2 hover:bg-cream-50 font-semibold text-sawaka-700">
+                        ⚙️ Gestion (Admin)
+                      </Link>
+                    </>
+                  )}
+
                   <hr className="my-2" />
                   <button
                     onClick={handleLogout}
