@@ -98,4 +98,17 @@ router.post("/categories", async (req, res) => {
   }
 });
 
+// 🗑 Supprimer une catégorie
+router.delete("/categories/:id", async (req, res) => {
+  try {
+    const deleted = await Category.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Catégorie introuvable" });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("❌ Erreur suppression catégorie :", err.message);
+    res.status(500).json({ message: "Erreur suppression catégorie" });
+  }
+});
+
+
 module.exports = router;
