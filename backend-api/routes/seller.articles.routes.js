@@ -2,7 +2,6 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const Article = require("../models/Article");
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("cloudinary").v2;
 
 /* ===========================================================
@@ -67,7 +66,6 @@ if (process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_CLOUD_NAME) {
   }
 }
 
-// Configuration Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -80,37 +78,48 @@ console.log("🌥️ Cloudinary config:", {
   secret: process.env.CLOUDINARY_API_SECRET ? "✅ OK" : "❌ MISSING",
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "sawaka-produits",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"],
-  },
-});
-
-const upload = multer({ storage });
-
 /* ===========================================================
-   ☁️ ROUTE UPLOAD CLOUDINARY (corrigée)
+   ☁️ UPLOAD CLOUDINARY (stable sur Render)
 =========================================================== */
+
+// On stocke les fichiers en mémoire (pas sur disque)
+const upload = multer({ storage: multer.memoryStorage() });
+
 router.post("/upload", upload.array("images", 5), async (req, res) => {
   try {
-    console.log("🧾 Upload reçu :", req.files?.length, "fichiers");
-
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "Aucun fichier reçu" });
     }
 
-    // ✅ Correction : .url ou .secure_url selon la version de multer-storage-cloudinary
-    const urls = req.files.map((f) => f.path || f.url || f.secure_url);
+    console.log("🧾 Upload reçu :", req.files.length, "fichier(s)");
+
+    const urls = [];
+
+    for (const file of req.files) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "sawaka-produits",
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(file.buffer);
+      });
+
+      urls.push(result.secure_url);
+    }
 
     console.log("✅ Upload Cloudinary réussi :", urls);
     res.json({ urls });
   } catch (err) {
-    console.error("❌ Erreur Cloudinary :", err);
+    console.error("❌ Erreur upload Cloudinary :", err);
     res.status(500).json({
       message: "Erreur upload Cloudinary",
-      error: err.message,
+      error: err.message || err.toString(),
     });
   }
 });
