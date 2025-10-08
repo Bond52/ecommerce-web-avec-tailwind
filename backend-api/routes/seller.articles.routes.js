@@ -48,23 +48,11 @@ function requireRole(...roles) {
 }
 
 /* ===========================================================
-   ☁️ CONFIGURATION CLOUDINARY
+   ☁️ CONFIGURATION CLOUDINARY (version stable Render)
 =========================================================== */
 
-if (process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_CLOUD_NAME) {
-  try {
-    const parts = process.env.CLOUDINARY_URL.match(
-      /cloudinary:\/\/(\d+):([^@]+)@([\w-]+)/
-    );
-    if (parts) {
-      process.env.CLOUDINARY_API_KEY = parts[1];
-      process.env.CLOUDINARY_API_SECRET = parts[2];
-      process.env.CLOUDINARY_CLOUD_NAME = parts[3];
-    }
-  } catch (err) {
-    console.error("❌ Erreur lors du parsing CLOUDINARY_URL :", err);
-  }
-}
+// ⚠️ On ne parse plus CLOUDINARY_URL : on attend 3 variables directes
+// CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -72,17 +60,17 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log("🌥️ Cloudinary config:", {
-  name: process.env.CLOUDINARY_CLOUD_NAME,
-  key: process.env.CLOUDINARY_API_KEY ? "✅ OK" : "❌ MISSING",
-  secret: process.env.CLOUDINARY_API_SECRET ? "✅ OK" : "❌ MISSING",
+console.log("🌥️ Cloudinary config vérifiée :", {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "❌ MISSING",
+  api_key: process.env.CLOUDINARY_API_KEY ? "✅ OK" : "❌ MISSING",
+  api_secret: process.env.CLOUDINARY_API_SECRET ? "✅ OK" : "❌ MISSING",
 });
 
 /* ===========================================================
-   ☁️ UPLOAD CLOUDINARY (stable sur Render)
+   ☁️ UPLOAD CLOUDINARY (stream + mémoire)
 =========================================================== */
 
-// On stocke les fichiers en mémoire (pas sur disque)
+// On stocke les fichiers en mémoire
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
@@ -103,8 +91,12 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
             resource_type: "image",
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              console.error("❌ Erreur Cloudinary (upload_stream) :", error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
           }
         );
         stream.end(file.buffer);
@@ -113,7 +105,7 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
       urls.push(result.secure_url);
     }
 
-    console.log("✅ Upload Cloudinary réussi :", urls);
+    console.log("✅ Upload Cloudinary terminé :", urls);
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur upload Cloudinary :", err);
