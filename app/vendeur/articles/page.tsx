@@ -4,20 +4,152 @@ import { useEffect, useMemo, useState } from "react";
 import type { Article } from "../../lib/apiSeller";
 import { listMyArticles, createArticle, updateArticle, deleteArticle } from "../../lib/apiSeller";
 
+// ✅ Composant d’upload Cloudinary avec suppression avant envoi
+function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[]) => void }) {
+  const [files, setFiles] = useState<File[]>([]);
+  const [preview, setPreview] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
+  const API_BASE =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "https://ecommerce-web-avec-tailwind.onrender.com";
+
+  // 📸 Sélection locale d’images
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files ? Array.from(e.target.files) : [];
+    if (selected.length > 0) {
+      const previews = selected.map((f) => URL.createObjectURL(f));
+      setFiles((prev) => [...prev, ...selected]);
+      setPreview((prev) => [...prev, ...previews]);
+    }
+  };
+
+  // 🗑 Suppression locale avant upload
+  const handleRemove = (index: number) => {
+    const newFiles = [...files];
+    const newPreview = [...preview];
+    newFiles.splice(index, 1);
+    newPreview.splice(index, 1);
+    setFiles(newFiles);
+    setPreview(newPreview);
+  };
+
+  // 📤 Envoi sur Cloudinary
+  const handleUpload = async () => {
+    if (files.length === 0) return alert("Choisissez au moins une image !");
+    setUploading(true);
+    setProgress(0);
+
+    const formData = new FormData();
+    files.forEach((f) => formData.append("images", f));
+
+    try {
+      const res = await fetch(`${API_BASE}/api/seller/upload`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Erreur lors de l’upload");
+      const data = await res.json();
+
+      onUploadComplete(data.urls);
+      alert("✅ Upload réussi !");
+      setFiles([]);
+      setPreview([]);
+      setProgress(100);
+    } catch (err) {
+      console.error(err);
+      alert("❌ Erreur upload Cloudinary");
+    } finally {
+      setUploading(false);
+      setProgress(0);
+    }
+  };
+
+  return (
+    <div className="border rounded-lg p-4 bg-white shadow-sm md:col-span-2">
+      <h3 className="text-lg font-semibold mb-3">📸 Ajouter des images</h3>
+
+      <input
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={handleFileChange}
+        className="block w-full border p-2 rounded mb-3"
+      />
+
+      {/* Indicateur de sélection */}
+      {files.length > 0 && (
+        <p className="text-sm text-gray-600 mb-2">
+          {files.length} image{files.length > 1 ? "s" : ""} sélectionnée
+          {files.length > 1 ? "s" : ""}
+        </p>
+      )}
+
+      {/* Prévisualisation + suppression */}
+      {preview.length > 0 && (
+        <div className="grid grid-cols-3 gap-3 mb-3">
+          {preview.map((src, i) => (
+            <div key={i} className="relative group">
+              <img
+                src={src}
+                alt={`Preview ${i}`}
+                className="w-full h-32 object-cover rounded-lg border"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemove(i)}
+                className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-80 hover:opacity-100 hidden group-hover:block"
+                title="Supprimer cette image"
+              >
+                🗑
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Barre de progression */}
+      {uploading && (
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+          <div
+            className="bg-sawaka-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+
+      {/* Bouton Upload */}
+      <button
+        onClick={handleUpload}
+        disabled={uploading}
+        className={`px-4 py-2 rounded text-white ${
+          uploading ? "bg-gray-400" : "bg-sawaka-600 hover:bg-sawaka-700"
+        }`}
+      >
+        {uploading ? "⏳ Upload en cours..." : "⬆️ Envoyer sur Cloudinary"}
+      </button>
+    </div>
+  );
+}
+
+// ===================================================================
+// ✅ PAGE VENDEUR
+// ===================================================================
 export default function VendorArticlesPage() {
-  // Liste + filtres + pagination
   const [data, setData] = useState<{ items: Article[]; total: number; page: number; pages: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
 
-  // Formulaire
   const emptyForm: Article = useMemo(
     () => ({ title: "", description: "", price: 0, stock: 0, status: "draft", images: [], categories: [], sku: "" }),
     []
   );
+
   const [form, setForm] = useState<Article>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
@@ -37,7 +169,6 @@ export default function VendorArticlesPage() {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, status]);
 
   function resetForm() {
@@ -94,8 +225,9 @@ export default function VendorArticlesPage() {
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       <h1 className="text-2xl font-semibold">Mes articles</h1>
 
-      {/* Barre d’alerte */}
-      {error && <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700">{error}</div>}
+      {error && (
+        <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700">{error}</div>
+      )}
 
       {/* Formulaire */}
       <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-2xl shadow-sm">
@@ -154,56 +286,27 @@ export default function VendorArticlesPage() {
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
         />
-        <input
-          className="border p-2 rounded md:col-span-2"
-          placeholder="URLs d'images (séparées par ,)"
-          value={(form.images ?? []).join(",")}
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              images: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-            }))
-          }
-        />
+
+        {/* ✅ Upload Cloudinary */}
+        <UploadImages onUploadComplete={(urls) => setForm((f) => ({ ...f, images: urls }))} />
+
         <div className="md:col-span-2 flex gap-3">
           <button className="px-4 py-2 rounded-2xl bg-black text-white">
             {editingId ? "Mettre à jour" : "Créer"}
           </button>
           {editingId && (
-            <button type="button" onClick={resetForm} className="px-4 py-2 rounded-2xl border">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="px-4 py-2 rounded-2xl border"
+            >
               Annuler
             </button>
           )}
         </div>
       </form>
 
-      {/* Filtres */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-        <input
-          className="border p-2 rounded w-full md:w-80"
-          placeholder="Rechercher par titre…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => (e.key === "Enter" ? (setPage(1), load()) : null)}
-        />
-        <select
-          className="border p-2 rounded"
-          value={status}
-          onChange={(e) => {
-            setPage(1);
-            setStatus(e.target.value);
-          }}
-        >
-          <option value="">Tous</option>
-          <option value="published">Publié</option>
-          <option value="draft">Brouillon</option>
-        </select>
-        <button onClick={() => (setPage(1), load())} className="px-3 py-2 rounded border">
-          Filtrer
-        </button>
-      </div>
-
-      {/* Tableau */}
+      {/* Tableau des articles */}
       <div className="overflow-x-auto border rounded-2xl">
         <table className="min-w-full text-sm">
           <thead>
@@ -217,61 +320,30 @@ export default function VendorArticlesPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td className="p-3" colSpan={5}>
-                  Chargement…
-                </td>
-              </tr>
+              <tr><td colSpan={5} className="p-3">Chargement…</td></tr>
             ) : (data?.items ?? []).length ? (
               data!.items.map((a) => (
                 <tr key={a._id} className="border-t">
                   <td className="p-3">{a.title}</td>
-                  <td className="p-3">{a.price?.toFixed(2)} $</td>
+                  <td className="p-3">{a.price?.toFixed(2)} FCFA</td>
                   <td className="p-3">{a.stock}</td>
                   <td className="p-3">{a.status}</td>
                   <td className="p-3 flex gap-2">
                     <button onClick={() => onEdit(a)} className="px-3 py-1 border rounded">
                       Éditer
                     </button>
-                    <button onClick={() => onDelete(a._id)} className="px-3 py-1 border rounded">
+                    <button onClick={() => onDelete(a._id)} className="px-3 py-1 border rounded text-red-500">
                       Supprimer
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr>
-                <td className="p-3" colSpan={5}>
-                  Aucun article.
-                </td>
-              </tr>
+              <tr><td colSpan={5} className="p-3">Aucun article.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-
-      {/* Pagination */}
-      {data && data.pages > 1 && (
-        <div className="flex gap-2 items-center">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Préc.
-          </button>
-          <span className="px-2 py-1">
-            Page {page} / {data.pages}
-          </span>
-          <button
-            disabled={page >= data.pages}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1 border rounded disabled:opacity-50"
-          >
-            Suiv.
-          </button>
-        </div>
-      )}
     </div>
   );
 }

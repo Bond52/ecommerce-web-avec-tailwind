@@ -179,4 +179,39 @@ router.delete("/articles/:id", async (req, res) => {
   }
 });
 
+/* ===========================================================
+   ☁️ UPLOAD CLOUDINARY
+=========================================================== */
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
+
+// Configuration Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_URL?.split("@")[1],
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "sawaka-produits",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+  },
+});
+
+const upload = multer({ storage });
+
+// Route d’upload
+router.post("/upload", upload.array("images", 5), async (req, res) => {
+  try {
+    const urls = req.files.map((f) => f.path);
+    res.json({ urls });
+  } catch (err) {
+    console.error("Erreur upload Cloudinary:", err);
+    res.status(500).json({ message: "Erreur upload", error: err.message });
+  }
+});
+
 module.exports = router;
