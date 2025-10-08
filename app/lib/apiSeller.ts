@@ -1,9 +1,9 @@
 // app/lib/apiSeller.ts
 
-// ✅ Utilise une variable plus explicite, mais garde compatibilité avec l’ancienne
+// ✅ Détermine l’URL de base au moment du build (compatible client & serveur)
 const API =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_BASE ||
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
   "https://ecommerce-web-avec-tailwind.onrender.com";
 
 export type Article = {
@@ -31,7 +31,6 @@ async function http<T = any>(path: string, init?: RequestInit) {
     },
   });
 
-  // En cas d’erreur (401, 404, 500...), on renvoie un message lisible
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || `Erreur HTTP ${res.status} sur ${path}`);
