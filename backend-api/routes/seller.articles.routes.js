@@ -12,11 +12,15 @@ const cloudinary = require("cloudinary").v2;
 // Authentification
 function requireAuth(req, res, next) {
   const bearer = req.headers.authorization;
-  const headerToken = bearer && bearer.startsWith("Bearer ") ? bearer.split(" ")[1] : null;
+  const headerToken =
+    bearer && bearer.startsWith("Bearer ") ? bearer.split(" ")[1] : null;
   const cookieToken = req.cookies?.token;
   const token = headerToken || cookieToken;
 
-  if (!token) return res.status(401).json({ message: "Non autorisé. Aucun token fourni." });
+  if (!token)
+    return res
+      .status(401)
+      .json({ message: "Non autorisé. Aucun token fourni." });
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
@@ -37,7 +41,9 @@ function requireRole(...roles) {
       : [];
     const hasRole = roles.some((r) => userRoles.includes(r));
     if (!hasRole)
-      return res.status(403).json({ message: "Accès refusé. Rôle insuffisant." });
+      return res
+        .status(403)
+        .json({ message: "Accès refusé. Rôle insuffisant." });
     next();
   };
 }
@@ -46,7 +52,6 @@ function requireRole(...roles) {
    ☁️ CONFIGURATION CLOUDINARY
 =========================================================== */
 
-// ⚙️ Lecture intelligente des variables (Render ou .env)
 if (process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_CLOUD_NAME) {
   try {
     const parts = process.env.CLOUDINARY_URL.match(
@@ -69,7 +74,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Log de vérification (visible sur Render)
 console.log("🌥️ Cloudinary config:", {
   name: process.env.CLOUDINARY_CLOUD_NAME,
   key: process.env.CLOUDINARY_API_KEY ? "✅ OK" : "❌ MISSING",
@@ -87,16 +91,20 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 /* ===========================================================
-   ☁️ ROUTE UPLOAD CLOUDINARY
+   ☁️ ROUTE UPLOAD CLOUDINARY (corrigée)
 =========================================================== */
 router.post("/upload", upload.array("images", 5), async (req, res) => {
   try {
     console.log("🧾 Upload reçu :", req.files?.length, "fichiers");
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "Aucun fichier reçu" });
     }
-    const urls = req.files.map((f) => f.path);
-    console.log("✅ Upload terminé :", urls);
+
+    // ✅ Correction : .url ou .secure_url selon la version de multer-storage-cloudinary
+    const urls = req.files.map((f) => f.path || f.url || f.secure_url);
+
+    console.log("✅ Upload Cloudinary réussi :", urls);
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur Cloudinary :", err);
@@ -114,7 +122,9 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
 // Liste publique des articles publiés
 router.get("/public", async (req, res) => {
   try {
-    const articles = await Article.find({ status: "published" }).sort({ createdAt: -1 });
+    const articles = await Article.find({ status: "published" }).sort({
+      createdAt: -1,
+    });
     res.json(articles);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -180,7 +190,8 @@ router.patch("/articles/:id", async (req, res) => {
       req.body,
       { new: true }
     );
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
     res.json(article);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -194,7 +205,8 @@ router.delete("/articles/:id", async (req, res) => {
       _id: req.params.id,
       owner: req.user.id,
     });
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ message: e.message });
