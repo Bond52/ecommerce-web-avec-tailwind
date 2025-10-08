@@ -1,6 +1,10 @@
 // app/lib/apiSeller.ts
-const API = process.env.NEXT_PUBLIC_API_BASE ?? "https://ecommerce-web-avec-tailwind.onrender.com";
 
+// ✅ Utilise une variable plus explicite, mais garde compatibilité avec l’ancienne
+const API =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_BASE ||
+  "https://ecommerce-web-avec-tailwind.onrender.com";
 
 export type Article = {
   _id?: string;
@@ -16,19 +20,27 @@ export type Article = {
   updatedAt?: string;
 };
 
+// --- Requête générique ---
 async function http<T = any>(path: string, init?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
     ...init,
-    credentials: "include", // IMPORTANT (Option A) : envoie le cookie
+    credentials: "include", // garde les cookies JWT
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers || {}),
     },
   });
-  if (!res.ok) throw new Error(await res.text());
+
+  // En cas d’erreur (401, 404, 500...), on renvoie un message lisible
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Erreur HTTP ${res.status} sur ${path}`);
+  }
+
   return res.json() as Promise<T>;
 }
 
+// --- Fonctions d’accès ---
 export async function listPublicArticles() {
   return http<Article[]>("/api/seller/public", { method: "GET" });
 }
