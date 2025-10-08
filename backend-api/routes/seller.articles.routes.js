@@ -51,9 +51,7 @@ function requireRole(...roles) {
    ☁️ CONFIGURATION CLOUDINARY (version stable Render)
 =========================================================== */
 
-// ⚠️ On ne parse plus CLOUDINARY_URL : on attend 3 variables directes
-// CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET
-
+// ⚠️ On attend les 3 variables directes dans l’environnement
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -70,7 +68,6 @@ console.log("🌥️ Cloudinary config vérifiée :", {
    ☁️ UPLOAD CLOUDINARY (stream + mémoire)
 =========================================================== */
 
-// On stocke les fichiers en mémoire
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
@@ -144,7 +141,7 @@ router.post("/articles", async (req, res) => {
   try {
     const article = new Article({
       ...req.body,
-      owner: req.user.id,
+      vendorId: req.user.id, // ✅ correction ici
     });
     await article.save();
     res.status(201).json(article);
@@ -157,7 +154,7 @@ router.post("/articles", async (req, res) => {
 // 📜 Lister les articles du vendeur connecté
 router.get("/articles", async (req, res) => {
   try {
-    const query = { owner: req.user.id };
+    const query = { vendorId: req.user.id }; // ✅ correction ici
     if (req.query.status) query.status = req.query.status;
     if (req.query.q)
       query.title = { $regex: req.query.q, $options: "i" };
@@ -187,7 +184,7 @@ router.get("/articles", async (req, res) => {
 router.patch("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user.id },
+      { _id: req.params.id, vendorId: req.user.id }, // ✅ correction ici
       req.body,
       { new: true }
     );
@@ -204,7 +201,7 @@ router.delete("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findOneAndDelete({
       _id: req.params.id,
-      owner: req.user.id,
+      vendorId: req.user.id, // ✅ correction ici
     });
     if (!article)
       return res.status(404).json({ message: "Article non trouvé." });
