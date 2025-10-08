@@ -111,6 +111,7 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
    📰 ROUTES PUBLIQUES / PROTÉGÉES
 =========================================================== */
 
+// Liste publique des articles publiés
 router.get("/public", async (req, res) => {
   try {
     const articles = await Article.find({ status: "published" }).sort({ createdAt: -1 });
@@ -120,9 +121,84 @@ router.get("/public", async (req, res) => {
   }
 });
 
+// Protection : uniquement vendeur/admin
 router.use(requireAuth, requireRole("vendeur", "admin"));
 
-// CREATE / READ / UPDATE / DELETE articles (identiques à ton code précédent)
-// ...
-// (Tu peux garder ton bloc CRUD complet tel qu’il est)
+/* ===========================================================
+   🛠️ CRUD ARTICLES (Protégés)
+=========================================================== */
+
+// ➕ Créer un article
+router.post("/articles", async (req, res) => {
+  try {
+    const article = new Article({
+      ...req.body,
+      owner: req.user.id,
+    });
+    await article.save();
+    res.status(201).json(article);
+  } catch (e) {
+    console.error("Erreur création article:", e);
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// 📜 Lister les articles du vendeur connecté
+router.get("/articles", async (req, res) => {
+  try {
+    const query = { owner: req.user.id };
+    if (req.query.status) query.status = req.query.status;
+    if (req.query.q)
+      query.title = { $regex: req.query.q, $options: "i" };
+
+    const page = Number(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Article.countDocuments(query);
+    const items = await Article.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      items,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// ✏️ Modifier un article
+router.patch("/articles/:id", async (req, res) => {
+  try {
+    const article = await Article.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user.id },
+      req.body,
+      { new: true }
+    );
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    res.json(article);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// 🗑 Supprimer un article
+router.delete("/articles/:id", async (req, res) => {
+  try {
+    const article = await Article.findOneAndDelete({
+      _id: req.params.id,
+      owner: req.user.id,
+    });
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
 module.exports = router;
