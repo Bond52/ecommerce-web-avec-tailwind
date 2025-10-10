@@ -4,26 +4,24 @@ import { useParams } from "next/navigation";
 
 export default function ProduitDetail() {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
+  const [article, setArticle] = useState(null);
   const [liked, setLiked] = useState(false);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
 
   useEffect(() => {
     if (!id) return;
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}`, {
       credentials: "include",
     })
       .then((res) => res.json())
-      .then((data) => {
-        setProduct(data);
-        // Vérifie si l'utilisateur a liké (si backend le renvoie plus tard)
-      });
+      .then((data) => setArticle(data))
+      .catch((err) => console.error("Erreur chargement article :", err));
   }, [id]);
 
   const handleLike = async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}/like`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/like`,
       { method: "POST", credentials: "include" }
     );
     const data = await res.json();
@@ -32,7 +30,7 @@ export default function ProduitDetail() {
 
   const handleComment = async () => {
     if (!comment) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}/comment`, {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/comment`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -40,42 +38,44 @@ export default function ProduitDetail() {
     });
     setComment("");
     setRating(5);
-    // recharge les commentaires
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${id}`);
-    setProduct(await res.json());
+    // Recharge l’article avec les commentaires à jour
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}`);
+    setArticle(await res.json());
   };
 
-  if (!product) return <p className="p-10">Chargement...</p>;
+  if (!article) return <p className="p-10 text-center">Chargement...</p>;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
       <img
-        src={product.image}
-        alt={product.title}
+        src={article.images?.[0] || "/placeholder.png"}
+        alt={article.title}
         className="w-full h-96 object-cover rounded-lg mb-6"
       />
-      <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
-      <p className="text-gray-600 mb-4">{product.description}</p>
-      <p className="text-lg font-semibold mb-6">${product.price}</p>
+      <h1 className="text-3xl font-bold mb-2 text-sawaka-800">{article.title}</h1>
+      <p className="text-gray-600 mb-4">{article.description}</p>
+      <p className="text-lg font-semibold mb-6 text-sawaka-700">
+        {article.price?.toLocaleString()} FCFA
+      </p>
 
-      {/* ❤️ Bouton Like */}
+      {/* ❤️ Like */}
       <button
         onClick={handleLike}
         className={`px-4 py-2 rounded-lg ${
           liked ? "bg-red-500 text-white" : "border border-red-500 text-red-500"
         }`}
       >
-        {liked ? "❤️ Aimé" : "🤍 J'aime"} ({product.likes?.length || 0})
+        {liked ? "❤️ Aimé" : "🤍 J'aime"} ({article.likes?.length || 0})
       </button>
 
       {/* 💬 Commentaires */}
       <div className="mt-8">
-        <h3 className="text-xl font-bold mb-3">Commentaires</h3>
+        <h3 className="text-xl font-bold mb-3 text-sawaka-800">Commentaires</h3>
 
-        {product.comments?.length > 0 ? (
-          product.comments.map((c) => (
+        {article.comments?.length > 0 ? (
+          article.comments.map((c) => (
             <div key={c._id} className="border-b py-2">
-              <strong>{c.user?.name || "Utilisateur"}</strong>
+              <strong>{c.user?.username || "Utilisateur"}</strong>
               <p>{c.text}</p>
               <span>⭐ {c.rating}</span>
             </div>
@@ -84,7 +84,7 @@ export default function ProduitDetail() {
           <p>Aucun commentaire pour le moment.</p>
         )}
 
-        {/* ✏️ Formulaire d'ajout */}
+        {/* ✏️ Ajouter un commentaire */}
         <div className="mt-4">
           <textarea
             value={comment}
@@ -116,9 +116,9 @@ export default function ProduitDetail() {
       </div>
 
       {/* 📞 Contacter l’artisan */}
-      {product.vendorId && (
+      {article.vendorId && (
         <a
-          href={`/messages/nouveau?to=${product.vendorId._id}`}
+          href={`/messages/nouveau?to=${article.vendorId}`}
           className="inline-block mt-6 bg-green-600 text-white px-6 py-3 rounded-lg"
         >
           Contacter l’artisan

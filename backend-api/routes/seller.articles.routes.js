@@ -48,100 +48,77 @@ function requireRole(...roles) {
 }
 
 /* ===========================================================
-   ☁️ CONFIGURATION CLOUDINARY (version stable Render)
+   ☁️ CONFIGURATION CLOUDINARY
 =========================================================== */
-
-// ⚠️ On attend les 3 variables directes dans l’environnement
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log("🌥️ Cloudinary config vérifiée :", {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "❌ MISSING",
-  api_key: process.env.CLOUDINARY_API_KEY ? "✅ OK" : "❌ MISSING",
-  api_secret: process.env.CLOUDINARY_API_SECRET ? "✅ OK" : "❌ MISSING",
-});
-
-/* ===========================================================
-   ☁️ UPLOAD CLOUDINARY (stream + mémoire)
-=========================================================== */
-
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
   try {
-    if (!req.files || req.files.length === 0) {
+    if (!req.files || req.files.length === 0)
       return res.status(400).json({ message: "Aucun fichier reçu" });
-    }
-
-    console.log("🧾 Upload reçu :", req.files.length, "fichier(s)");
 
     const urls = [];
-
     for (const file of req.files) {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "sawaka-produits",
-            resource_type: "image",
-          },
-          (error, result) => {
-            if (error) {
-              console.error("❌ Erreur Cloudinary (upload_stream) :", error);
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          }
+          { folder: "sawaka-produits", resource_type: "image" },
+          (error, result) => (error ? reject(error) : resolve(result))
         );
         stream.end(file.buffer);
       });
-
       urls.push(result.secure_url);
     }
-
-    console.log("✅ Upload Cloudinary terminé :", urls);
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur upload Cloudinary :", err);
-    res.status(500).json({
-      message: "Erreur upload Cloudinary",
-      error: err.message || err.toString(),
-    });
+    res.status(500).json({ message: "Erreur upload Cloudinary", error: err.message });
   }
 });
 
 /* ===========================================================
-   📰 ROUTES PUBLIQUES / PROTÉGÉES
+   📰 ROUTES PUBLIQUES
 =========================================================== */
 
-// Liste publique des articles publiés
+// ✅ Liste publique des articles publiés
 router.get("/public", async (req, res) => {
   try {
-    const articles = await Article.find({ status: "published" }).sort({
-      createdAt: -1,
-    });
+    const articles = await Article.find({ status: "published" }).sort({ createdAt: -1 });
     res.json(articles);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });
 
-// Protection : uniquement vendeur/admin
-router.use(requireAuth, requireRole("vendeur", "admin"));
+// 🆕 Détail public d’un article
+router.get("/articles/:id", async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id)
+      .populate("vendorId", "username email")
+      .populate("comments.user", "username");
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    res.json(article);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 
 /* ===========================================================
-   🛠️ CRUD ARTICLES (Protégés)
+   🔐 ROUTES PROTÉGÉES : VENDEUR / ADMIN
 =========================================================== */
+router.use(requireAuth, requireRole("vendeur", "admin"));
 
 // ➕ Créer un article
 router.post("/articles", async (req, res) => {
   try {
     const article = new Article({
       ...req.body,
-      vendorId: req.user.id, // ✅ correction ici
+      vendorId: req.user.id,
     });
     await article.save();
     res.status(201).json(article);
@@ -154,7 +131,7 @@ router.post("/articles", async (req, res) => {
 // 📜 Lister les articles du vendeur connecté
 router.get("/articles", async (req, res) => {
   try {
-    const query = { vendorId: req.user.id }; // ✅ correction ici
+    const query = { vendorId: req.user.id };
     if (req.query.status) query.status = req.query.status;
     if (req.query.q)
       query.title = { $regex: req.query.q, $options: "i" };
@@ -184,7 +161,7 @@ router.get("/articles", async (req, res) => {
 router.patch("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findOneAndUpdate(
-      { _id: req.params.id, vendorId: req.user.id }, // ✅ correction ici
+      { _id: req.params.id, vendorId: req.user.id },
       req.body,
       { new: true }
     );
@@ -201,11 +178,58 @@ router.delete("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findOneAndDelete({
       _id: req.params.id,
-      vendorId: req.user.id, // ✅ correction ici
+      vendorId: req.user.id,
     });
     if (!article)
       return res.status(404).json({ message: "Article non trouvé." });
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+/* ===========================================================
+   🆕 LIKE & COMMENTAIRES (Protégés)
+=========================================================== */
+
+// ❤️ Like / Unlike un article
+router.post("/articles/:id/like", requireAuth, async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id);
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+
+    const userId = req.user.id;
+    const alreadyLiked = article.likes.includes(userId);
+
+    if (alreadyLiked) {
+      article.likes.pull(userId);
+    } else {
+      article.likes.push(userId);
+    }
+
+    await article.save();
+    res.json({ liked: !alreadyLiked, totalLikes: article.likes.length });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+// 💬 Ajouter un commentaire
+router.post("/articles/:id/comment", requireAuth, async (req, res) => {
+  try {
+    const { text, rating } = req.body;
+    const article = await Article.findById(req.params.id);
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+
+    article.comments.push({
+      user: req.user.id,
+      text,
+      rating: rating || 5,
+      createdAt: new Date(),
+    });
+
+    await article.save();
+    res.status(201).json({ message: "Commentaire ajouté." });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
