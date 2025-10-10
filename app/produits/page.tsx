@@ -16,21 +16,32 @@ export default function ProduitsPage() {
   const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/public?page=${page}&limit=12`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const items = Array.isArray(data) ? data : data.items || [];
+    const fetchArticles = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/seller/public?page=${page}&limit=12`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json();
+
+        // ✅ Ici on récupère les "items" depuis ton objet JSON
+        const items = Array.isArray(data.items) ? data.items : [];
         setArticles(items);
         setTotalPages(data.pages || 1);
-      })
-      .catch((err) => console.error("Erreur chargement articles :", err));
+      } catch (err) {
+        console.error("Erreur chargement articles :", err);
+      }
+    };
+
+    fetchArticles();
   }, [page]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-8 text-sawaka-800">Tous les produits</h1>
+      <h1 className="text-3xl font-bold mb-8 text-sawaka-800">
+        Tous les produits
+      </h1>
 
       {articles.length === 0 ? (
         <p className="text-center text-sawaka-600">Aucun article trouvé.</p>
@@ -45,7 +56,9 @@ export default function ProduitsPage() {
                   className="w-full h-56 object-cover rounded-lg"
                 />
                 <h2 className="font-semibold mt-3 text-sawaka-800">{a.title}</h2>
-                <p className="text-gray-500">{a.price?.toLocaleString()} FCFA</p>
+                <p className="text-gray-500">
+                  {a.price?.toLocaleString()} FCFA
+                </p>
               </div>
             </Link>
           ))}
