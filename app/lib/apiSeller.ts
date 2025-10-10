@@ -39,22 +39,43 @@ async function http<T = any>(path: string, init?: RequestInit) {
   return res.json() as Promise<T>;
 }
 
-// --- Fonctions d’accès ---
+/* ===========================================================
+   📰 ARTICLES PUBLICS (visibles sur la page d’accueil / produits)
+=========================================================== */
 export async function listPublicArticles() {
-  return http<Article[]>("/api/seller/public", { method: "GET" });
+  const data = await http<{ items?: Article[]; total?: number; page?: number; pages?: number }>(
+    "/api/seller/public",
+    { method: "GET" }
+  );
+
+  // ✅ Retourne toujours un tableau d’articles
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.items)) return data.items;
+  return [];
 }
 
-export async function listMyArticles(params?: { page?: number; q?: string; status?: string }) {
+/* ===========================================================
+   👤 ARTICLES DU VENDEUR CONNECTÉ
+=========================================================== */
+export async function listMyArticles(params?: {
+  page?: number;
+  q?: string;
+  status?: string;
+}) {
   const search = new URLSearchParams();
   if (params?.page) search.set("page", String(params.page));
   if (params?.q) search.set("q", params.q);
   if (params?.status) search.set("status", params.status);
   const qs = search.toString();
+
   return http<{ items: Article[]; total: number; page: number; pages: number }>(
     `/api/seller/articles${qs ? `?${qs}` : ""}`
   );
 }
 
+/* ===========================================================
+   ✏️ CRUD ARTICLES
+=========================================================== */
 export async function createArticle(payload: Partial<Article>) {
   return http<Article>("/api/seller/articles", {
     method: "POST",
