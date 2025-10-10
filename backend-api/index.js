@@ -58,6 +58,11 @@ app.use("/api/admin", adminRoutes);
 const userRoutes = require("./routes/user");
 app.use("/api/user", userRoutes);
 
+// Routes produits
+const productRoutes = require("./routes/products");
+app.use("/api/products", productRoutes);
+
+
 // 🔎 Route de test rapide
 app.get("/", (_, res) => res.send("🎉 API e-commerce Sawaka opérationnelle !"));
 
