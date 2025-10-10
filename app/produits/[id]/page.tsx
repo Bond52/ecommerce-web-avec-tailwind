@@ -27,6 +27,7 @@ export default function ProduitDetail() {
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
 
+  // 🔹 Charger l’article
   useEffect(() => {
     if (!id) return;
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}`, {
@@ -37,31 +38,52 @@ export default function ProduitDetail() {
       .catch((err) => console.error("Erreur chargement article :", err));
   }, [id]);
 
+  // ❤️ Like / Unlike
   const handleLike = async () => {
     if (!id) return;
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/like`, {
-      method: "POST",
-      credentials: "include",
-    });
-    const data = await res.json();
-    setLiked(data.liked);
-    setArticle((prev) =>
-      prev ? { ...prev, likes: new Array(data.totalLikes).fill("x") } : prev
-    );
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/like`,
+        { method: "POST", credentials: "include" }
+      );
+      const data = await res.json();
+
+      // ✅ Sécurité : vérifier que totalLikes est bien un nombre
+      const totalLikes =
+        typeof data.totalLikes === "number" && data.totalLikes >= 0
+          ? data.totalLikes
+          : article?.likes?.length || 0;
+
+      setLiked(!!data.liked);
+      setArticle((prev) =>
+        prev ? { ...prev, likes: Array.from({ length: totalLikes }, () => "x") } : prev
+      );
+    } catch (err) {
+      console.error("Erreur Like :", err);
+    }
   };
 
+  // 💬 Commentaire
   const handleComment = async () => {
-    if (!id || !comment) return;
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/comment`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: comment, rating }),
-    });
-    setComment("");
-    setRating(5);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}`);
-    setArticle(await res.json());
+    if (!id || !comment.trim()) return;
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/comment`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: comment.trim(), rating }),
+      });
+      setComment("");
+      setRating(5);
+
+      // Recharge les commentaires
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}`
+      );
+      setArticle(await res.json());
+    } catch (err) {
+      console.error("Erreur ajout commentaire :", err);
+    }
   };
 
   if (!article) return <p className="p-10 text-center">Chargement...</p>;
@@ -73,9 +95,12 @@ export default function ProduitDetail() {
         alt={article.title}
         className="w-full h-96 object-cover rounded-lg mb-6"
       />
+
       <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
       <p className="text-gray-600 mb-4">{article.description}</p>
-      <p className="text-lg font-semibold mb-6">{article.price?.toLocaleString()} FCFA</p>
+      <p className="text-lg font-semibold mb-6">
+        {article.price?.toLocaleString()} FCFA
+      </p>
 
       <button
         onClick={handleLike}
@@ -86,6 +111,7 @@ export default function ProduitDetail() {
         {liked ? "❤️ Aimé" : "🤍 J'aime"} ({article.likes?.length || 0})
       </button>
 
+      {/* 💬 Commentaires */}
       <div className="mt-8">
         <h3 className="text-xl font-bold mb-3">Commentaires</h3>
 
@@ -131,6 +157,7 @@ export default function ProduitDetail() {
         </div>
       </div>
 
+      {/* 📞 Contacter l’artisan */}
       {article.vendorId && (
         <a
           href={`/messages/nouveau?to=${article.vendorId._id}`}
