@@ -2,9 +2,27 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
+interface Comment {
+  _id?: string;
+  user?: { name?: string };
+  text: string;
+  rating: number;
+}
+
+interface Article {
+  _id: string;
+  title: string;
+  description?: string;
+  price: number;
+  images?: string[];
+  likes?: string[];
+  comments?: Comment[];
+  vendorId?: { _id: string; username?: string; email?: string };
+}
+
 export default function ProduitDetail() {
   const { id } = useParams();
-  const [article, setArticle] = useState(null);
+  const [article, setArticle] = useState<Article | null>(null);
   const [liked, setLiked] = useState(false);
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
@@ -20,16 +38,20 @@ export default function ProduitDetail() {
   }, [id]);
 
   const handleLike = async () => {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/like`,
-      { method: "POST", credentials: "include" }
-    );
+    if (!id) return;
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/like`, {
+      method: "POST",
+      credentials: "include",
+    });
     const data = await res.json();
     setLiked(data.liked);
+    setArticle((prev) =>
+      prev ? { ...prev, likes: new Array(data.totalLikes).fill("x") } : prev
+    );
   };
 
   const handleComment = async () => {
-    if (!comment) return;
+    if (!id || !comment) return;
     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}/comment`, {
       method: "POST",
       credentials: "include",
@@ -38,7 +60,6 @@ export default function ProduitDetail() {
     });
     setComment("");
     setRating(5);
-    // Recharge l’article avec les commentaires à jour
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/articles/${id}`);
     setArticle(await res.json());
   };
@@ -52,13 +73,10 @@ export default function ProduitDetail() {
         alt={article.title}
         className="w-full h-96 object-cover rounded-lg mb-6"
       />
-      <h1 className="text-3xl font-bold mb-2 text-sawaka-800">{article.title}</h1>
+      <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
       <p className="text-gray-600 mb-4">{article.description}</p>
-      <p className="text-lg font-semibold mb-6 text-sawaka-700">
-        {article.price?.toLocaleString()} FCFA
-      </p>
+      <p className="text-lg font-semibold mb-6">{article.price?.toLocaleString()} FCFA</p>
 
-      {/* ❤️ Like */}
       <button
         onClick={handleLike}
         className={`px-4 py-2 rounded-lg ${
@@ -68,14 +86,13 @@ export default function ProduitDetail() {
         {liked ? "❤️ Aimé" : "🤍 J'aime"} ({article.likes?.length || 0})
       </button>
 
-      {/* 💬 Commentaires */}
       <div className="mt-8">
-        <h3 className="text-xl font-bold mb-3 text-sawaka-800">Commentaires</h3>
+        <h3 className="text-xl font-bold mb-3">Commentaires</h3>
 
-        {article.comments?.length > 0 ? (
+        {article.comments?.length ? (
           article.comments.map((c) => (
             <div key={c._id} className="border-b py-2">
-              <strong>{c.user?.username || "Utilisateur"}</strong>
+              <strong>{c.user?.name || "Utilisateur"}</strong>
               <p>{c.text}</p>
               <span>⭐ {c.rating}</span>
             </div>
@@ -84,7 +101,6 @@ export default function ProduitDetail() {
           <p>Aucun commentaire pour le moment.</p>
         )}
 
-        {/* ✏️ Ajouter un commentaire */}
         <div className="mt-4">
           <textarea
             value={comment}
@@ -115,10 +131,9 @@ export default function ProduitDetail() {
         </div>
       </div>
 
-      {/* 📞 Contacter l’artisan */}
       {article.vendorId && (
         <a
-          href={`/messages/nouveau?to=${article.vendorId}`}
+          href={`/messages/nouveau?to=${article.vendorId._id}`}
           className="inline-block mt-6 bg-green-600 text-white px-6 py-3 rounded-lg"
         >
           Contacter l’artisan

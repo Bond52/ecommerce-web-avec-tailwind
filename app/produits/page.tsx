@@ -2,10 +2,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+interface Article {
+  _id: string;
+  title: string;
+  description?: string;
+  price: number;
+  images?: string[];
+}
+
 export default function ProduitsPage() {
-  const [articles, setArticles] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/public?page=${page}&limit=12`, {
@@ -13,7 +21,8 @@ export default function ProduitsPage() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setArticles(data.items || data || []); // ton backend renvoie parfois un tableau simple
+        const items = Array.isArray(data) ? data : data.items || [];
+        setArticles(items);
         setTotalPages(data.pages || 1);
       })
       .catch((err) => console.error("Erreur chargement articles :", err));
@@ -23,7 +32,6 @@ export default function ProduitsPage() {
     <div className="max-w-6xl mx-auto px-4 py-10">
       <h1 className="text-3xl font-bold mb-8 text-sawaka-800">Tous les produits</h1>
 
-      {/* 🔹 Liste des articles */}
       {articles.length === 0 ? (
         <p className="text-center text-sawaka-600">Aucun article trouvé.</p>
       ) : (
@@ -44,7 +52,6 @@ export default function ProduitsPage() {
         </div>
       )}
 
-      {/* 🔹 Pagination */}
       <div className="flex justify-center gap-2 mt-8">
         <button
           disabled={page <= 1}
