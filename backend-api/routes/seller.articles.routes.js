@@ -17,9 +17,7 @@ function requireAuth(req, res, next) {
   const token = headerToken || cookieToken;
 
   if (!token)
-    return res
-      .status(401)
-      .json({ message: "Non autorisé. Aucun token fourni." });
+    return res.status(401).json({ message: "Non autorisé. Aucun token fourni." });
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
@@ -77,7 +75,10 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur upload Cloudinary :", err);
-    res.status(500).json({ message: "Erreur upload Cloudinary", error: err.message });
+    res.status(500).json({
+      message: "Erreur upload Cloudinary",
+      error: err.message,
+    });
   }
 });
 
@@ -85,12 +86,30 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
    📰 ROUTES PUBLIQUES
 =========================================================== */
 
-// ✅ Liste publique des articles publiés
+// ✅ Liste publique des articles publiés + recherche + pagination
 router.get("/public", async (req, res) => {
   try {
-    const articles = await Article.find({ status: "published" }).sort({ createdAt: -1 });
-    res.json(articles);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+    const search = req.query.q ? { title: { $regex: req.query.q, $options: "i" } } : {};
+
+    const filter = { status: "published", ...search };
+
+    const total = await Article.countDocuments(filter);
+    const items = await Article.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      items,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    });
   } catch (e) {
+    console.error("Erreur route /public :", e);
     res.status(500).json({ message: e.message });
   }
 });
@@ -199,7 +218,7 @@ router.post("/articles/:id/like", requireAuth, async (req, res) => {
     if (!article) return res.status(404).json({ message: "Article non trouvé." });
 
     const userId = req.user.id;
-    const alreadyLiked = article.likes.includes(userId);
+    const alreadyLiked = article.likes?.includes(userId);
 
     if (alreadyLiked) {
       article.likes.pull(userId);
