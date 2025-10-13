@@ -86,42 +86,36 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
    📰 ROUTES PUBLIQUES
 =========================================================== */
 
-// ✅ Liste publique des articles publiés avec pagination et images locales
+// ✅ Liste publique des articles publiés + recherche + pagination
 router.get("/public", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
+    const search = req.query.q
+      ? { title: { $regex: req.query.q, $options: "i" } }
+      : {};
 
-    const filter = { status: "published" };
+    const filter = { status: "published", ...search };
 
     const total = await Article.countDocuments(filter);
     const items = await Article.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit)
-      .lean();
-
-    // 🖼️ Préserve les images existantes et ajoute un placeholder local si vide
-    const safeItems = items.map((a) => ({
-      ...a,
-      images:
-        Array.isArray(a.images) && a.images.length > 0
-          ? a.images
-          : ["/placeholder.png"], // ✅ placeholder local dans /public du frontend
-    }));
+      .limit(limit);
 
     res.json({
-      items: safeItems,
+      items,
       total,
       page,
       pages: Math.ceil(total / limit),
     });
   } catch (e) {
-    console.error("❌ Erreur route /public :", e);
+    console.error("Erreur route /public :", e);
     res.status(500).json({ message: e.message });
   }
 });
+
 
 
 // 🆕 Détail public d’un article
