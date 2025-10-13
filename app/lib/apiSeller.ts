@@ -43,12 +43,14 @@ async function http<T = any>(path: string, init?: RequestInit) {
    📰 ARTICLES PUBLICS (visibles sur la page d’accueil / produits)
 =========================================================== */
 export async function listPublicArticles() {
-  const data = await http<{ items?: Article[]; total?: number; page?: number; pages?: number }>(
-    "/api/seller/public",
-    { method: "GET" }
-  );
+  const data = await http<{
+    items?: Article[];
+    total?: number;
+    page?: number;
+    pages?: number;
+  }>("/api/seller/public", { method: "GET" });
 
-  // ✅ Retourne toujours un tableau d’articles
+  // ✅ Retourne toujours un tableau d’articles, peu importe le format backend
   if (Array.isArray(data)) return data;
   if (Array.isArray(data.items)) return data.items;
   return [];
