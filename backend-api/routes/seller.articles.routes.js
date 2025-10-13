@@ -92,9 +92,7 @@ router.get("/public", async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
-    const search = req.query.q
-      ? { title: { $regex: req.query.q, $options: "i" } }
-      : {};
+    const search = req.query.q ? { title: { $regex: req.query.q, $options: "i" } } : {};
 
     const filter = { status: "published", ...search };
 
@@ -115,8 +113,6 @@ router.get("/public", async (req, res) => {
     res.status(500).json({ message: e.message });
   }
 });
-
-
 
 // 🆕 Détail public d’un article
 router.get("/articles/:id", async (req, res) => {
