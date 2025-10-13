@@ -86,14 +86,13 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
    📰 ROUTES PUBLIQUES
 =========================================================== */
 
-// ✅ Liste publique des articles publiés avec pagination
+// ✅ Liste publique des articles publiés avec pagination et images locales
 router.get("/public", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
 
-    // ✅ Filtre simple : seulement les articles publiés
     const filter = { status: "published" };
 
     const total = await Article.countDocuments(filter);
@@ -101,15 +100,15 @@ router.get("/public", async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .lean(); // + rapide, pas de méthodes Mongoose
+      .lean();
 
-    // 🖼️ Sécurisation images : ajoute un placeholder si vide
+    // 🖼️ Préserve les images existantes et ajoute un placeholder local si vide
     const safeItems = items.map((a) => ({
       ...a,
       images:
         Array.isArray(a.images) && a.images.length > 0
           ? a.images
-          : ["https://placehold.co/600x400?text=Image+indisponible"],
+          : ["/placeholder.png"], // ✅ placeholder local dans /public du frontend
     }));
 
     res.json({
