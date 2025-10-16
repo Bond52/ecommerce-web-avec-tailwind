@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+// 🔗 On importe la constante API de ton lib pour garder la même base URL
+const API =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
+  "https://ecommerce-web-avec-tailwind.onrender.com";
+
 interface Artisan {
   _id: string;
   firstName?: string;
@@ -21,12 +27,11 @@ export default function ArtisansPage() {
   useEffect(() => {
     const fetchArtisans = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/artisans`, {
-          cache: "no-store", // pour éviter le cache côté serveur
-        });
+        const res = await fetch(`${API}/api/artisans`, { cache: "no-store" });
         const data = await res.json();
 
-        // 🧠 Filtrage de sécurité côté frontend aussi
+        console.log("🧾 Réponse API artisans :", data); // 🧩 debug important
+
         const filtered = data.filter(
           (a: Artisan) => a.isSeller === true || a.roles?.includes("vendeur")
         );
