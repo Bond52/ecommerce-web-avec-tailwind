@@ -58,6 +58,7 @@ export default function HomePage() {
                 <Link href="/artisans" className="btn-outline inline-flex items-center gap-2 rounded-lg px-4 py-2 hover:bg-sawaka-100 transition-colors">
                   👥 Rencontrer les artisans
                 </Link>
+
               </div>
               
               {/* Stats */}

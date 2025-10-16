@@ -62,6 +62,10 @@ app.use("/api/user", userRoutes);
 const productRoutes = require("./routes/products");
 app.use("/api/products", productRoutes);
 
+const artisansRoute = require("./routes/artisans");
+app.use("/api/artisans", artisansRoute);
+
+
 
 // 🔎 Route de test rapide
 app.get("/", (_, res) => res.send("🎉 API e-commerce Sawaka opérationnelle !"));
