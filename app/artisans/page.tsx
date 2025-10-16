@@ -4,11 +4,14 @@ import { useEffect, useState } from "react";
 
 interface Artisan {
   _id: string;
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   username?: string;
   email?: string;
-  profilePicture?: string;
+  idCardImage?: string;
   createdAt?: string;
+  isSeller?: boolean;
+  roles?: string[];
 }
 
 export default function ArtisansPage() {
@@ -18,9 +21,16 @@ export default function ArtisansPage() {
   useEffect(() => {
     const fetchArtisans = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/artisans`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/artisans`, {
+          cache: "no-store", // pour éviter le cache côté serveur
+        });
         const data = await res.json();
-        setArtisans(data);
+
+        // 🧠 Filtrage de sécurité côté frontend aussi
+        const filtered = data.filter(
+          (a: Artisan) => a.isSeller === true || a.roles?.includes("vendeur")
+        );
+        setArtisans(filtered);
       } catch (error) {
         console.error("Erreur lors du chargement des artisans :", error);
       } finally {
@@ -55,14 +65,16 @@ export default function ArtisansPage() {
             >
               <img
                 src={
-                  artisan.profilePicture ||
+                  artisan.idCardImage ||
                   "https://via.placeholder.com/150?text=Artisan"
                 }
-                alt={artisan.name || artisan.username || "Artisan"}
+                alt={`${artisan.firstName || ""} ${artisan.lastName || ""}`}
                 className="w-full h-40 object-cover rounded-xl mb-4"
               />
               <h2 className="text-xl font-semibold text-[#5C3A1E]">
-                {artisan.name || artisan.username}
+                {artisan.firstName || artisan.lastName
+                  ? `${artisan.firstName || ""} ${artisan.lastName || ""}`
+                  : artisan.username}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 {artisan.email || "Aucun contact"}
