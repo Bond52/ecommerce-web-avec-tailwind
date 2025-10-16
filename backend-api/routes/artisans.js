@@ -1,18 +1,29 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user");
+const User = require("../models/user"); // 👈 même casse que dans admin.js
 
-// GET /api/artisans → liste des vendeurs
+/**
+ * 🧵 Route publique pour lister les artisans
+ * Renvoie uniquement les utilisateurs avec le rôle vendeur/vendor
+ */
 router.get("/", async (req, res) => {
   try {
-    const artisans = await User.find({ role: { $in: ["vendor", "vendeur"] } })
-      .select("-password") // on cache le mot de passe
-      .sort({ createdAt: -1 }); // tri du plus récent au plus ancien
+    const artisans = await User.find({
+      $or: [
+        { role: "vendeur" },
+        { role: "vendor" },
+        { roles: { $in: ["vendeur", "vendor"] } } // si certains users ont un tableau de rôles
+      ]
+    }).select("-password");
+
+    if (!artisans.length) {
+      return res.status(404).json({ message: "Aucun artisan trouvé" });
+    }
 
     res.json(artisans);
-  } catch (error) {
-    console.error("Erreur récupération artisans:", error);
-    res.status(500).json({ message: "Erreur serveur" });
+  } catch (err) {
+    console.error("Erreur /api/artisans :", err.message);
+    res.status(500).json({ message: "Erreur lors du chargement des artisans" });
   }
 });
 
