@@ -19,7 +19,7 @@ export default function ProduitsPage() {
     const fetchArticles = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/seller/public?page=${page}&limit=12`,
+           `${process.env.NEXT_PUBLIC_API_BASE}/api/seller/public?page=${page}&limit=12`,
           { credentials: "include" }
         );
 

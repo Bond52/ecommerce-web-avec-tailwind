@@ -138,6 +138,7 @@ router.post("/articles", async (req, res) => {
     const article = new Article({
       ...req.body,
       vendorId: req.user.id,
+      status: req.body.status || "published", // ✅ Publie automatiquement si rien n'est précisé
     });
     await article.save();
     res.status(201).json(article);
@@ -146,6 +147,7 @@ router.post("/articles", async (req, res) => {
     res.status(500).json({ message: e.message });
   }
 });
+
 
 // 📜 Lister les articles du vendeur connecté
 router.get("/articles", async (req, res) => {
