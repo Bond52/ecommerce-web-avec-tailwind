@@ -9,7 +9,9 @@ export default function UploadImages({ onUploadComplete }: { onUploadComplete: (
   const [progress, setProgress] = useState<number>(0);
 
   const API_BASE =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "https://ecommerce-web-avec-tailwind.onrender.com";
+    process.env.NEXT_PUBLIC_API_BASE ||
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    "http://localhost:5000";
 
   // 🖼️ Prévisualisation locale avant upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

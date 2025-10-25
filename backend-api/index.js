@@ -70,14 +70,17 @@ app.use("/api/artisans", artisansRoute);
 // 🔎 Route de test rapide
 app.get("/", (_, res) => res.send("🎉 API e-commerce Sawaka opérationnelle !"));
 
-// 🔗 Connexion MongoDB
+// 🔗 Connexion MongoDB (sans options deprecated)
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connecté à MongoDB"))
-  .catch((err) => console.error("❌ Erreur MongoDB :", err));
+  .catch((err) => {
+    console.error("❌ Erreur MongoDB :", err.message);
+    console.error("\n⚠️  SOLUTIONS POSSIBLES:");
+    console.error("1. MongoDB local: Installez et démarrez MongoDB avec 'mongod'");
+    console.error("2. MongoDB Atlas (gratuit): Créez un compte sur https://cloud.mongodb.com");
+    console.error("3. Vérifiez votre MONGO_URI dans le fichier .env\n");
+  });
 
 // 🚀 Lancement du serveur
 const PORT = process.env.PORT || 5000;
