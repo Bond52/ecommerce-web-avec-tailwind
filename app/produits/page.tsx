@@ -63,23 +63,7 @@ export default function ProduitsPage() {
         Tous les produits
       </h1>
 
-      {/* Affichage des erreurs */}
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-          <p className="font-bold">Erreur de connexion</p>
-          <p className="text-sm">{error}</p>
-          <p className="text-xs mt-2">
-            Assurez-vous que:
-            <br />
-            1. Le fichier .env.local existe à la racine du projet
-            <br />
-            2. Le serveur Next.js a été redémarré (Ctrl+C puis npm run dev)
-            <br />
-            3. Le backend est démarré sur le port 5000
-          </p>
-        </div>
-      )}
-
+    
       {/* Affichage du chargement */}
       {loading ? (
         <div className="text-center py-20">
