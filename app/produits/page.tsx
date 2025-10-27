@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { listPublicArticles } from "../lib/apiSeller"; // ✅ même source que la page d’accueil
 
 interface Article {
   _id: string;
@@ -12,8 +13,6 @@ interface Article {
 
 export default function ProduitsPage() {
   const [articles, setArticles] = useState<Article[]>([]);
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
@@ -23,29 +22,11 @@ export default function ProduitsPage() {
         setLoading(true);
         setError("");
 
-        // Vérifier que la variable d'environnement est définie
-        const apiBase = process.env.NEXT_PUBLIC_API_BASE;
-        if (!apiBase) {
-          throw new Error("NEXT_PUBLIC_API_BASE non définie. Veuillez redémarrer le serveur Next.js après avoir créé le fichier .env.local");
-        }
+        // ✅ On réutilise la même logique que la page d’accueil
+        const data = await listPublicArticles();
 
-        console.log("🔗 Tentative de connexion à:", `${apiBase}/api/seller/public?page=${page}&limit=12`);
-
-        const res = await fetch(
-          `${apiBase}/api/seller/public?page=${page}&limit=12`,
-          { credentials: "include" }
-        );
-
-        if (!res.ok) {
-          throw new Error(`Erreur HTTP ${res.status}: ${res.statusText}`);
-        }
-
-        const data = await res.json();
-
-        // ✅ Ici on récupère les "items" depuis ton objet JSON
-        const items = Array.isArray(data.items) ? data.items : [];
-        setArticles(items);
-        setTotalPages(data.pages || 1);
+        // On limite à 12 produits "populaires" comme sur l'accueil
+        setArticles(data.slice(0, 12));
         setLoading(false);
       } catch (err) {
         console.error("❌ Erreur chargement articles :", err);
@@ -55,21 +36,25 @@ export default function ProduitsPage() {
     };
 
     fetchArticles();
-  }, [page]);
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-bold mb-8 text-sawaka-800">
-        Tous les produits
+      <h1 className="text-3xl font-bold mb-4 text-sawaka-800 text-center">
+        Nos créations populaires
       </h1>
+      <p className="text-center text-sawaka-600 mb-10">
+        Retrouvez ici les créations artisanales les plus appréciées
+      </p>
 
-    
-      {/* Affichage du chargement */}
+      {/* 🌀 Chargement */}
       {loading ? (
         <div className="text-center py-20">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-sawaka-800"></div>
           <p className="mt-4 text-sawaka-600">Chargement des produits...</p>
         </div>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
       ) : articles.length === 0 ? (
         <p className="text-center text-sawaka-600">Aucun article trouvé.</p>
       ) : (
@@ -82,36 +67,13 @@ export default function ProduitsPage() {
                   alt={a.title}
                   className="w-full h-56 object-cover rounded-lg"
                 />
-                <h2 className="font-semibold mt-3 text-sawaka-800">{a.title}</h2>
-                <p className="text-gray-500">
-                  {a.price?.toLocaleString()} FCFA
-                </p>
+                <h2 className="font-semibold mt-3 text-sawaka-800">
+                  {a.title}
+                </h2>
+                <p className="text-gray-500">{a.price?.toLocaleString()} FCFA</p>
               </div>
             </Link>
           ))}
-        </div>
-      )}
-
-      {/* Pagination - seulement si pas d'erreur et pas de chargement */}
-      {!loading && !error && articles.length > 0 && (
-        <div className="flex justify-center gap-2 mt-8">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-sawaka-50 transition"
-          >
-            ◀ Précédent
-          </button>
-          <span className="px-4 py-2">
-            Page {page} / {totalPages}
-          </span>
-          <button
-            disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="px-4 py-2 border rounded disabled:opacity-50 hover:bg-sawaka-50 transition"
-          >
-            Suivant ▶
-          </button>
         </div>
       )}
     </div>
