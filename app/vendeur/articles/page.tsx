@@ -2,10 +2,21 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Article } from "../../lib/apiSeller";
-import { listMyArticles, createArticle, updateArticle, deleteArticle } from "../../lib/apiSeller";
+import {
+  listMyArticles,
+  createArticle,
+  updateArticle,
+  deleteArticle,
+} from "../../lib/apiSeller";
 
-// ✅ Composant d’upload Cloudinary avec suppression avant envoi
-function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[]) => void }) {
+/* ============================================================
+   🔼 Composant Upload Cloudinary
+============================================================ */
+function UploadImages({
+  onUploadComplete,
+}: {
+  onUploadComplete: (urls: string[]) => void;
+}) {
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -15,7 +26,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     "https://ecommerce-web-avec-tailwind.onrender.com";
 
-  // 📸 Sélection locale d’images
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files ? Array.from(e.target.files) : [];
     if (selected.length > 0) {
@@ -25,7 +35,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
     }
   };
 
-  // 🗑 Suppression locale avant upload
   const handleRemove = (index: number) => {
     const newFiles = [...files];
     const newPreview = [...preview];
@@ -35,7 +44,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
     setPreview(newPreview);
   };
 
-  // 📤 Envoi sur Cloudinary
   const handleUpload = async () => {
     if (files.length === 0) return alert("Choisissez au moins une image !");
     setUploading(true);
@@ -80,7 +88,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
         className="block w-full border p-2 rounded mb-3"
       />
 
-      {/* Indicateur de sélection */}
       {files.length > 0 && (
         <p className="text-sm text-gray-600 mb-2">
           {files.length} image{files.length > 1 ? "s" : ""} sélectionnée
@@ -88,7 +95,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
         </p>
       )}
 
-      {/* Prévisualisation + suppression */}
       {preview.length > 0 && (
         <div className="grid grid-cols-3 gap-3 mb-3">
           {preview.map((src, i) => (
@@ -102,7 +108,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
                 type="button"
                 onClick={() => handleRemove(i)}
                 className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-80 hover:opacity-100 hidden group-hover:block"
-                title="Supprimer cette image"
               >
                 🗑
               </button>
@@ -111,7 +116,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
         </div>
       )}
 
-      {/* Barre de progression */}
       {uploading && (
         <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
           <div
@@ -121,7 +125,6 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
         </div>
       )}
 
-      {/* Bouton Upload */}
       <button
         onClick={handleUpload}
         disabled={uploading}
@@ -135,24 +138,48 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
   );
 }
 
-// ===================================================================
-// ✅ PAGE VENDEUR
-// ===================================================================
+/* ============================================================
+   🧺 PAGE VENDEUR : GESTION DES ARTICLES
+============================================================ */
 export default function VendorArticlesPage() {
-  const [data, setData] = useState<{ items: Article[]; total: number; page: number; pages: number } | null>(null);
+  const [data, setData] = useState<{
+    items: Article[];
+    total: number;
+    page: number;
+    pages: number;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
 
   const emptyForm: Article = useMemo(
-    () => ({ title: "", description: "", price: 0, stock: 0, status: "draft", images: [], categories: [], sku: "" }),
+    () => ({
+      title: "",
+      description: "",
+      price: 0,
+      stock: 0,
+      status: "draft",
+      images: [],
+      categories: [],
+      sku: "",
+    }),
     []
   );
 
   const [form, setForm] = useState<Article>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
+
+  // 📚 Liste des catégories affichées sur la page d’accueil
+  const categoriesList = [
+    "Mode & Accessoires",
+    "Maison & Décoration",
+    "Art & Artisanat",
+    "Beauté & Bien-être",
+    "Bijoux",
+    "Textile",
+  ];
 
   async function load() {
     setLoading(true);
@@ -226,11 +253,16 @@ export default function VendorArticlesPage() {
       <h1 className="text-2xl font-semibold">Mes articles</h1>
 
       {error && (
-        <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700">{error}</div>
+        <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700">
+          {error}
+        </div>
       )}
 
-      {/* Formulaire */}
-      <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-2xl shadow-sm">
+      {/* 🧾 Formulaire de création/modification */}
+      <form
+        onSubmit={onSubmit}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-2xl shadow-sm"
+      >
         <input
           className="border p-2 rounded"
           placeholder="Titre"
@@ -238,48 +270,70 @@ export default function VendorArticlesPage() {
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
         />
+
+        {/* 🔢 Champ prix sans flèches */}
         <input
           className="border p-2 rounded"
-          placeholder="Prix"
-          type="number"
-          min={0}
-          step="0.01"
+          placeholder="Prix (FCFA)"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={form.price}
-          onChange={(e) => setForm((f) => ({ ...f, price: Number(e.target.value) }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, price: parseInt(e.target.value || "0") }))
+          }
         />
+
+        {/* 🔢 Champ stock sans flèches */}
         <input
           className="border p-2 rounded"
           placeholder="Stock"
-          type="number"
-          min={0}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={form.stock}
-          onChange={(e) => setForm((f) => ({ ...f, stock: Number(e.target.value) }))}
+          onChange={(e) =>
+            setForm((f) => ({ ...f, stock: parseInt(e.target.value || "0") }))
+          }
         />
+
         <input
           className="border p-2 rounded"
           placeholder="SKU (optionnel)"
           value={form.sku ?? ""}
           onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
         />
+
         <select
           className="border p-2 rounded"
           value={form.status}
-          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as "draft" | "published" }))}
+          onChange={(e) =>
+            setForm((f) => ({
+              ...f,
+              status: e.target.value as "draft" | "published",
+            }))
+          }
         >
           <option value="draft">Brouillon</option>
           <option value="published">Publié</option>
         </select>
-        <input
+
+        {/* 🧩 Liste déroulante des catégories */}
+        <select
           className="border p-2 rounded"
-          placeholder="Catégories (séparées par ,)"
-          value={(form.categories ?? []).join(",")}
+          value={form.categories?.[0] || ""}
           onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              categories: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
-            }))
+            setForm((f) => ({ ...f, categories: [e.target.value] }))
           }
-        />
+        >
+          <option value="">-- Sélectionner une catégorie --</option>
+          {categoriesList.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+
         <textarea
           className="border p-2 rounded md:col-span-2"
           placeholder="Description"
@@ -287,8 +341,10 @@ export default function VendorArticlesPage() {
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
         />
 
-        {/* ✅ Upload Cloudinary */}
-        <UploadImages onUploadComplete={(urls) => setForm((f) => ({ ...f, images: urls }))} />
+        {/* 📸 Upload images */}
+        <UploadImages
+          onUploadComplete={(urls) => setForm((f) => ({ ...f, images: urls }))}
+        />
 
         <div className="md:col-span-2 flex gap-3">
           <button className="px-4 py-2 rounded-2xl bg-black text-white">
@@ -306,7 +362,7 @@ export default function VendorArticlesPage() {
         </div>
       </form>
 
-      {/* Tableau des articles */}
+      {/* 🗂 Tableau des articles */}
       <div className="overflow-x-auto border rounded-2xl">
         <table className="min-w-full text-sm">
           <thead>
@@ -320,26 +376,40 @@ export default function VendorArticlesPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="p-3">Chargement…</td></tr>
+              <tr>
+                <td colSpan={5} className="p-3">
+                  Chargement…
+                </td>
+              </tr>
             ) : (data?.items ?? []).length ? (
               data!.items.map((a) => (
                 <tr key={a._id} className="border-t">
                   <td className="p-3">{a.title}</td>
-                  <td className="p-3">{a.price?.toFixed(2)} FCFA</td>
+                  <td className="p-3">{a.price?.toFixed(0)} FCFA</td>
                   <td className="p-3">{a.stock}</td>
                   <td className="p-3">{a.status}</td>
                   <td className="p-3 flex gap-2">
-                    <button onClick={() => onEdit(a)} className="px-3 py-1 border rounded">
+                    <button
+                      onClick={() => onEdit(a)}
+                      className="px-3 py-1 border rounded"
+                    >
                       Éditer
                     </button>
-                    <button onClick={() => onDelete(a._id)} className="px-3 py-1 border rounded text-red-500">
+                    <button
+                      onClick={() => onDelete(a._id)}
+                      className="px-3 py-1 border rounded text-red-500"
+                    >
                       Supprimer
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={5} className="p-3">Aucun article.</td></tr>
+              <tr>
+                <td colSpan={5} className="p-3">
+                  Aucun article.
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
