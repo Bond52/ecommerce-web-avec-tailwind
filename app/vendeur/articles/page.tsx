@@ -263,87 +263,117 @@ export default function VendorArticlesPage() {
         onSubmit={onSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-2xl shadow-sm"
       >
-        <input
-          className="border p-2 rounded"
-          placeholder="Titre"
-          required
-          value={form.title}
-          onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Titre</label>
+          <input
+            className="border p-2 rounded w-full"
+            placeholder="Titre de l’article"
+            required
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+          />
+        </div>
 
-        {/* 🔢 Champ prix sans flèches */}
-        <input
-          className="border p-2 rounded"
-          placeholder="Prix (FCFA)"
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={form.price}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, price: parseInt(e.target.value || "0") }))
-          }
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Prix (FCFA)</label>
+          <input
+            className="border p-2 rounded w-full"
+            placeholder="Ex: 10000"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={form.price}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                price: parseInt(e.target.value || "0"),
+              }))
+            }
+          />
+        </div>
 
-        {/* 🔢 Champ stock sans flèches */}
-        <input
-          className="border p-2 rounded"
-          placeholder="Stock"
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={form.stock}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, stock: parseInt(e.target.value || "0") }))
-          }
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Nombre d’articles</label>
+          <input
+            className="border p-2 rounded w-full"
+            placeholder="Ex: 5"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={form.stock}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                stock: parseInt(e.target.value || "0"),
+              }))
+            }
+          />
+        </div>
 
-        <input
-          className="border p-2 rounded"
-          placeholder="SKU (optionnel)"
-          value={form.sku ?? ""}
-          onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">SKU (optionnel)</label>
+          <input
+            className="border p-2 rounded w-full"
+            placeholder="Ex: CHAP-001"
+            value={form.sku ?? ""}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, sku: e.target.value }))
+            }
+          />
+        </div>
 
-        <select
-          className="border p-2 rounded"
-          value={form.status}
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              status: e.target.value as "draft" | "published",
-            }))
-          }
-        >
-          <option value="draft">Brouillon</option>
-          <option value="published">Publié</option>
-        </select>
+        <div>
+          <label className="block text-sm font-medium mb-1">Statut</label>
+          <select
+            className="border p-2 rounded w-full"
+            value={form.status}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                status: e.target.value as "draft" | "published",
+              }))
+            }
+          >
+            <option value="draft">Brouillon</option>
+            <option value="published">Publié</option>
+          </select>
+        </div>
 
-        {/* 🧩 Liste déroulante des catégories */}
-        <select
-          className="border p-2 rounded"
-          value={form.categories?.[0] || ""}
-          onChange={(e) =>
-            setForm((f) => ({ ...f, categories: [e.target.value] }))
-          }
-        >
-          <option value="">-- Sélectionner une catégorie --</option>
-          {categoriesList.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="block text-sm font-medium mb-1">Catégorie</label>
+          <select
+            className="border p-2 rounded w-full"
+            value={form.categories?.[0] || ""}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, categories: [e.target.value] }))
+            }
+          >
+            <option value="">-- Sélectionner une catégorie --</option>
+            {categoriesList.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <textarea
-          className="border p-2 rounded md:col-span-2"
-          placeholder="Description"
-          value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-        />
+        <div className="md:col-span-2">
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <textarea
+            className="border p-2 rounded w-full"
+            placeholder="Décrivez votre article"
+            value={form.description}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, description: e.target.value }))
+            }
+          />
+        </div>
 
         {/* 📸 Upload images */}
         <UploadImages
-          onUploadComplete={(urls) => setForm((f) => ({ ...f, images: urls }))}
+          onUploadComplete={(urls) =>
+            setForm((f) => ({ ...f, images: urls }))
+          }
         />
 
         <div className="md:col-span-2 flex gap-3">
@@ -370,6 +400,7 @@ export default function VendorArticlesPage() {
               <th className="text-left p-3">Titre</th>
               <th className="text-left p-3">Prix</th>
               <th className="text-left p-3">Stock</th>
+              <th className="text-left p-3">Catégorie</th>
               <th className="text-left p-3">Statut</th>
               <th className="text-left p-3">Actions</th>
             </tr>
@@ -377,7 +408,7 @@ export default function VendorArticlesPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="p-3">
+                <td colSpan={6} className="p-3">
                   Chargement…
                 </td>
               </tr>
@@ -387,6 +418,9 @@ export default function VendorArticlesPage() {
                   <td className="p-3">{a.title}</td>
                   <td className="p-3">{a.price?.toFixed(0)} FCFA</td>
                   <td className="p-3">{a.stock}</td>
+                  <td className="p-3">
+                    {a.categories?.length ? a.categories.join(", ") : "-"}
+                  </td>
                   <td className="p-3">{a.status}</td>
                   <td className="p-3 flex gap-2">
                     <button
@@ -406,7 +440,7 @@ export default function VendorArticlesPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="p-3">
+                <td colSpan={6} className="p-3">
                   Aucun article.
                 </td>
               </tr>
