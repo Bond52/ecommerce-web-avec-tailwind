@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { listPublicArticles } from "../lib/apiSeller";
 
 interface Article {
@@ -9,12 +10,17 @@ interface Article {
   description?: string;
   price: number;
   images?: string[];
+  categories?: string[];
 }
 
 export default function ProduitsPage() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+
+  // 🔍 Récupération du paramètre de catégorie depuis l’URL
+  const categoryParam = searchParams.get("category");
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -22,7 +28,19 @@ export default function ProduitsPage() {
         setLoading(true);
         setError("");
         const data = await listPublicArticles();
-        setArticles(data.slice(0, 12));
+
+        // 🔽 Filtrage des articles par catégorie (si paramètre présent)
+        let filtered = data;
+        if (categoryParam) {
+          const normalized = categoryParam.toLowerCase();
+          filtered = data.filter((a: Article) =>
+            a.categories?.some((c) =>
+              c.toLowerCase().includes(normalized)
+            )
+          );
+        }
+
+        setArticles(filtered.slice(0, 12));
       } catch (err) {
         console.error("❌ Erreur chargement articles :", err);
         setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -31,15 +49,38 @@ export default function ProduitsPage() {
       }
     };
     fetchArticles();
-  }, []);
+  }, [categoryParam]);
+
+  // 🏷️ Définir le titre selon la catégorie
+  const categoryTitle = (() => {
+    if (!categoryParam) return "Tous les produits";
+    switch (categoryParam.toLowerCase()) {
+      case "mode":
+        return "Mode & Accessoires";
+      case "maison":
+        return "Maison & Décoration";
+      case "art":
+        return "Art & Artisanat";
+      case "beaute":
+        return "Beauté & Bien-être";
+      case "bijoux":
+        return "Bijoux";
+      case "textile":
+        return "Textile";
+      default:
+        return "Produits";
+    }
+  })();
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <h1 className="text-4xl font-bold mb-2 text-sawaka-800 text-center">
-        Tous les produits
+        {categoryTitle}
       </h1>
       <p className="text-center text-sawaka-600 mb-10">
-        Découvrez les créations artisanales authentiques de nos vendeurs
+        {categoryParam
+          ? `Découvrez les articles de la catégorie ${categoryTitle}`
+          : "Découvrez les créations artisanales authentiques de nos vendeurs"}
       </p>
 
       {loading ? (
@@ -51,7 +92,7 @@ export default function ProduitsPage() {
         <p className="text-center text-red-500">{error}</p>
       ) : articles.length === 0 ? (
         <p className="text-center text-sawaka-600">
-          Aucun article n’est disponible pour le moment.
+          Aucun article trouvé dans cette catégorie.
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
