@@ -163,6 +163,13 @@ export default function VendorArticlesPage() {
       images: [],
       categories: [],
       sku: "",
+      promotion: {
+        isActive: false,
+        discountPercent: 0,
+        newPrice: 0,
+        durationDays: 0,
+        durationHours: 0,
+      },
     }),
     []
   );
@@ -171,7 +178,6 @@ export default function VendorArticlesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
 
-  // 📚 Liste des catégories affichées sur la page d’accueil
   const categoriesList = [
     "Mode & Accessoires",
     "Maison & Décoration",
@@ -232,6 +238,13 @@ export default function VendorArticlesPage() {
       images: a.images ?? [],
       categories: a.categories ?? [],
       sku: a.sku ?? "",
+      promotion: a.promotion ?? {
+        isActive: false,
+        discountPercent: 0,
+        newPrice: 0,
+        durationDays: 0,
+        durationHours: 0,
+      },
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -258,7 +271,7 @@ export default function VendorArticlesPage() {
         </div>
       )}
 
-      {/* 🧾 Formulaire de création/modification */}
+      {/* 🧾 Formulaire */}
       <form
         onSubmit={onSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-2xl shadow-sm"
@@ -279,27 +292,22 @@ export default function VendorArticlesPage() {
           <input
             className="border p-2 rounded w-full"
             placeholder="Ex: 10000"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
+            type="number"
             value={form.price}
             onChange={(e) =>
               setForm((f) => ({
                 ...f,
-                price: parseInt(e.target.value || "0"),
+                price: parseFloat(e.target.value || "0"),
               }))
             }
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Nombre d’articles</label>
+          <label className="block text-sm font-medium mb-1">Stock</label>
           <input
             className="border p-2 rounded w-full"
-            placeholder="Ex: 5"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
+            type="number"
             value={form.stock}
             onChange={(e) =>
               setForm((f) => ({
@@ -316,9 +324,7 @@ export default function VendorArticlesPage() {
             className="border p-2 rounded w-full"
             placeholder="Ex: CHAP-001"
             value={form.sku ?? ""}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, sku: e.target.value }))
-            }
+            onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
           />
         </div>
 
@@ -348,7 +354,7 @@ export default function VendorArticlesPage() {
               setForm((f) => ({ ...f, categories: [e.target.value] }))
             }
           >
-            <option value="">-- Sélectionner une catégorie --</option>
+            <option value="">-- Choisir une catégorie --</option>
             {categoriesList.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
@@ -369,7 +375,118 @@ export default function VendorArticlesPage() {
           />
         </div>
 
-        {/* 📸 Upload images */}
+        {/* 💸 Section Promotion */}
+        <div className="md:col-span-2 border-t pt-4 mt-4">
+          <h3 className="text-lg font-semibold mb-2">💸 Promotion</h3>
+
+          <label className="flex items-center gap-2 mb-2">
+            <input
+              type="checkbox"
+              checked={form.promotion?.isActive || false}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  promotion: { ...f.promotion, isActive: e.target.checked },
+                }))
+              }
+            />
+            Activer une promotion
+          </label>
+
+          {form.promotion?.isActive && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Nouveau prix (FCFA)
+                </label>
+                <input
+                  type="number"
+                  className="border p-2 rounded w-full"
+                  value={form.promotion?.newPrice || ""}
+                  onChange={(e) => {
+                    const newPrice = parseFloat(e.target.value || "0");
+                    const discountPercent =
+                      form.price > 0
+                        ? Math.round(
+                            ((form.price - newPrice) / form.price) * 100
+                          )
+                        : 0;
+                    setForm((f) => ({
+                      ...f,
+                      promotion: { ...f.promotion, newPrice, discountPercent },
+                    }));
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Réduction (%)
+                </label>
+                <input
+                  type="number"
+                  className="border p-2 rounded w-full"
+                  value={form.promotion?.discountPercent || ""}
+                  onChange={(e) => {
+                    const discountPercent = parseFloat(e.target.value || "0");
+                    const newPrice =
+                      form.price > 0
+                        ? Math.round(
+                            form.price * (1 - discountPercent / 100)
+                          )
+                        : 0;
+                    setForm((f) => ({
+                      ...f,
+                      promotion: { ...f.promotion, discountPercent, newPrice },
+                    }));
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Durée (jours)
+                </label>
+                <input
+                  type="number"
+                  className="border p-2 rounded w-full"
+                  value={form.promotion?.durationDays || ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      promotion: {
+                        ...f.promotion,
+                        durationDays: parseInt(e.target.value || "0"),
+                      },
+                    }))
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Durée (heures)
+                </label>
+                <input
+                  type="number"
+                  className="border p-2 rounded w-full"
+                  value={form.promotion?.durationHours || ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      promotion: {
+                        ...f.promotion,
+                        durationHours: parseInt(e.target.value || "0"),
+                      },
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 📸 Upload */}
         <UploadImages
           onUploadComplete={(urls) =>
             setForm((f) => ({ ...f, images: urls }))
@@ -392,7 +509,7 @@ export default function VendorArticlesPage() {
         </div>
       </form>
 
-      {/* 🗂 Tableau des articles */}
+      {/* 🗂 Tableau */}
       <div className="overflow-x-auto border rounded-2xl">
         <table className="min-w-full text-sm">
           <thead>
@@ -402,13 +519,14 @@ export default function VendorArticlesPage() {
               <th className="text-left p-3">Stock</th>
               <th className="text-left p-3">Catégorie</th>
               <th className="text-left p-3">Statut</th>
+              <th className="text-left p-3">Promo</th>
               <th className="text-left p-3">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={6} className="p-3">
+                <td colSpan={7} className="p-3">
                   Chargement…
                 </td>
               </tr>
@@ -422,6 +540,11 @@ export default function VendorArticlesPage() {
                     {a.categories?.length ? a.categories.join(", ") : "-"}
                   </td>
                   <td className="p-3">{a.status}</td>
+                  <td className="p-3">
+                    {a.promotion?.isActive
+                      ? `${a.promotion.discountPercent}% (${a.promotion.newPrice} FCFA)`
+                      : "-"}
+                  </td>
                   <td className="p-3 flex gap-2">
                     <button
                       onClick={() => onEdit(a)}
@@ -440,7 +563,7 @@ export default function VendorArticlesPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={6} className="p-3">
+                   <td colSpan={7} className="p-3">
                   Aucun article.
                 </td>
               </tr>

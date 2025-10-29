@@ -5,10 +5,8 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
 /* ===========================================================
-   🔐 MIDDLEWARES D'AUTHENTIFICATION ET DE ROLE
+   🔐 AUTHENTIFICATION & RÔLES
 =========================================================== */
-
-// Authentification
 function requireAuth(req, res, next) {
   const bearer = req.headers.authorization;
   const headerToken =
@@ -16,37 +14,31 @@ function requireAuth(req, res, next) {
   const cookieToken = req.cookies?.token;
   const token = headerToken || cookieToken;
 
-  if (!token)
-    return res.status(401).json({ message: "Non autorisé. Aucun token fourni." });
+  if (!token) return res.status(401).json({ message: "Non autorisé. Aucun token fourni." });
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
-  } catch (e) {
+  } catch {
     return res.status(401).json({ message: "Token invalide ou expiré." });
   }
 }
 
-// Vérification du rôle vendeur/admin
 function requireRole(...roles) {
   return (req, res, next) => {
-    if (!req.user) return res.status(401).json({ message: "Non autorisé." });
     const userRoles = Array.isArray(req.user.roles)
       ? req.user.roles
       : req.user.role
       ? [req.user.role]
       : [];
     const hasRole = roles.some((r) => userRoles.includes(r));
-    if (!hasRole)
-      return res
-        .status(403)
-        .json({ message: "Accès refusé. Rôle insuffisant." });
+    if (!hasRole) return res.status(403).json({ message: "Accès refusé." });
     next();
   };
 }
 
 /* ===========================================================
-   ☁️ CONFIGURATION CLOUDINARY
+   ☁️ CLOUDINARY CONFIG
 =========================================================== */
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -75,25 +67,19 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur upload Cloudinary :", err);
-    res.status(500).json({
-      message: "Erreur upload Cloudinary",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Erreur upload Cloudinary", error: err.message });
   }
 });
 
 /* ===========================================================
    📰 ROUTES PUBLIQUES
 =========================================================== */
-
-// ✅ Liste publique des articles publiés + recherche + pagination
 router.get("/public", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
     const search = req.query.q ? { title: { $regex: req.query.q, $options: "i" } } : {};
-
     const filter = { status: "published", ...search };
 
     const total = await Article.countDocuments(filter);
@@ -101,20 +87,12 @@ router.get("/public", async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-
-    res.json({
-      items,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-    });
+    res.json({ items, total, page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    console.error("Erreur route /public :", e);
     res.status(500).json({ message: e.message });
   }
 });
 
-// 🆕 Détail public d’un article
 router.get("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findById(req.params.id)
@@ -128,34 +106,42 @@ router.get("/articles/:id", async (req, res) => {
 });
 
 /* ===========================================================
-   🔐 ROUTES PROTÉGÉES : VENDEUR / ADMIN
+   🔐 ROUTES PROTÉGÉES
 =========================================================== */
 router.use(requireAuth, requireRole("vendeur", "admin"));
 
-// ➕ Créer un article
 router.post("/articles", async (req, res) => {
   try {
+    const body = req.body;
+
+    // Auto-calcul de la date de fin si durée définie
+    if (body.promotion?.isActive) {
+      const now = new Date();
+      const end = new Date(now);
+      end.setDate(end.getDate() + (body.promotion.durationDays || 0));
+      end.setHours(end.getHours() + (body.promotion.durationHours || 0));
+      body.promotion.startDate = now;
+      body.promotion.endDate = end;
+    }
+
     const article = new Article({
-      ...req.body,
+      ...body,
       vendorId: req.user.id,
-      status: req.body.status || "published", // ✅ Publie automatiquement si rien n'est précisé
+      status: body.status || "draft",
     });
+
     await article.save();
     res.status(201).json(article);
   } catch (e) {
-    console.error("Erreur création article:", e);
     res.status(500).json({ message: e.message });
   }
 });
 
-
-// 📜 Lister les articles du vendeur connecté
 router.get("/articles", async (req, res) => {
   try {
     const query = { vendorId: req.user.id };
     if (req.query.status) query.status = req.query.status;
-    if (req.query.q)
-      query.title = { $regex: req.query.q, $options: "i" };
+    if (req.query.q) query.title = { $regex: req.query.q, $options: "i" };
 
     const page = Number(req.query.page) || 1;
     const limit = 10;
@@ -167,42 +153,44 @@ router.get("/articles", async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.json({
-      items,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-    });
+    res.json({ items, total, page, pages: Math.ceil(total / limit) });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });
 
-// ✏️ Modifier un article
 router.patch("/articles/:id", async (req, res) => {
   try {
+    const body = req.body;
+
+    if (body.promotion?.isActive) {
+      const now = new Date();
+      const end = new Date(now);
+      end.setDate(end.getDate() + (body.promotion.durationDays || 0));
+      end.setHours(end.getHours() + (body.promotion.durationHours || 0));
+      body.promotion.startDate = now;
+      body.promotion.endDate = end;
+    }
+
     const article = await Article.findOneAndUpdate(
       { _id: req.params.id, vendorId: req.user.id },
-      req.body,
+      body,
       { new: true }
     );
-    if (!article)
-      return res.status(404).json({ message: "Article non trouvé." });
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
     res.json(article);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });
 
-// 🗑 Supprimer un article
 router.delete("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findOneAndDelete({
       _id: req.params.id,
       vendorId: req.user.id,
     });
-    if (!article)
-      return res.status(404).json({ message: "Article non trouvé." });
+    if (!article) return res.status(404).json({ message: "Article non trouvé." });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -210,10 +198,8 @@ router.delete("/articles/:id", async (req, res) => {
 });
 
 /* ===========================================================
-   🆕 LIKE & COMMENTAIRES (Protégés)
+   ❤️ LIKE & COMMENTAIRES
 =========================================================== */
-
-// ❤️ Like / Unlike un article
 router.post("/articles/:id/like", requireAuth, async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
@@ -222,11 +208,8 @@ router.post("/articles/:id/like", requireAuth, async (req, res) => {
     const userId = req.user.id;
     const alreadyLiked = article.likes?.includes(userId);
 
-    if (alreadyLiked) {
-      article.likes.pull(userId);
-    } else {
-      article.likes.push(userId);
-    }
+    if (alreadyLiked) article.likes.pull(userId);
+    else article.likes.push(userId);
 
     await article.save();
     res.json({ liked: !alreadyLiked, totalLikes: article.likes.length });
@@ -235,7 +218,6 @@ router.post("/articles/:id/like", requireAuth, async (req, res) => {
   }
 });
 
-// 💬 Ajouter un commentaire
 router.post("/articles/:id/comment", requireAuth, async (req, res) => {
   try {
     const { text, rating } = req.body;

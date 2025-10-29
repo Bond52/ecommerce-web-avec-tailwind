@@ -1,6 +1,5 @@
 // app/lib/apiSeller.ts
 
-// ✅ Détermine l’URL de base au moment du build (compatible client & serveur)
 const API =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
@@ -18,13 +17,24 @@ export type Article = {
   sku?: string;
   createdAt?: string;
   updatedAt?: string;
+
+  // 🆕 Champs promotion
+  promotion?: {
+    isActive: boolean;
+    discountPercent: number;
+    newPrice: number;
+    durationDays: number;
+    durationHours: number;
+    startDate?: string;
+    endDate?: string;
+  };
 };
 
 // --- Requête générique ---
 async function http<T = any>(path: string, init?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
     ...init,
-    credentials: "include", // garde les cookies JWT
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers || {}),
@@ -40,7 +50,7 @@ async function http<T = any>(path: string, init?: RequestInit) {
 }
 
 /* ===========================================================
-   📰 ARTICLES PUBLICS (visibles sur la page d’accueil / produits)
+   📰 ARTICLES PUBLICS
 =========================================================== */
 export async function listPublicArticles() {
   const data = await http<{ items?: Article[]; total?: number; page?: number; pages?: number }>(
@@ -48,7 +58,6 @@ export async function listPublicArticles() {
     { method: "GET" }
   );
 
-  // ✅ Retourne toujours un tableau d’articles
   if (Array.isArray(data)) return data;
   if (Array.isArray(data.items)) return data.items;
   return [];

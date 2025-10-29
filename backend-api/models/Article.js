@@ -12,7 +12,18 @@ const articleSchema = new mongoose.Schema(
     categories: [{ type: String }],
     sku: { type: String, unique: false, sparse: true },
 
-    // 🆕 Ajouts pour likes et commentaires
+    // 🆕 Ajout du bloc promotion
+    promotion: {
+      isActive: { type: Boolean, default: false },
+      discountPercent: { type: Number, default: 0 },
+      newPrice: { type: Number, default: 0 },
+      durationDays: { type: Number, default: 0 },
+      durationHours: { type: Number, default: 0 },
+      startDate: { type: Date },
+      endDate: { type: Date },
+    },
+
+    // 👍 Likes et commentaires
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [
       {
@@ -27,4 +38,3 @@ const articleSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Article", articleSchema);
-
