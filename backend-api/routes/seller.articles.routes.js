@@ -72,35 +72,32 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
 });
 
 /* ===========================================================
-   📰 ROUTES PUBLIQUES
+   📰 ROUTES PUBLIQUES (produits visibles : published + auction)
 =========================================================== */
 router.get("/public", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
-    const search = req.query.q ? { title: { $regex: req.query.q, $options: "i" } } : {};
-    const filter = { status: "published", ...search };
+
+    const search = req.query.q
+      ? { title: { $regex: req.query.q, $options: "i" } }
+      : {};
+
+    // ✅ Inclure published + auction
+    const statusFilter = { status: { $in: ["published", "auction"] } };
+
+    const filter = { ...statusFilter, ...search };
 
     const total = await Article.countDocuments(filter);
     const items = await Article.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
+
     res.json({ items, total, page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-});
-
-router.get("/articles/:id", async (req, res) => {
-  try {
-    const article = await Article.findById(req.params.id)
-      .populate("vendorId", "username email")
-      .populate("comments.user", "username");
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
-    res.json(article);
-  } catch (e) {
+    console.error("Erreur route /public :", e);
     res.status(500).json({ message: e.message });
   }
 });
