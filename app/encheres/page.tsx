@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,10 +10,11 @@ interface Article {
   description?: string;
   price: number;
   images?: string[];
+  status?: string;
   auction?: {
-    isActive: boolean;
-    highestBid: number;
-    endDate: string;
+    isActive?: boolean;
+    highestBid?: number;
+    endDate?: string;
   };
 }
 
@@ -29,9 +29,8 @@ export default function EncheresPage() {
         setLoading(true);
         setError("");
         const allArticles = await listPublicArticles();
-        const encheres = allArticles.filter(
-          (a) => a.status === "auction" && a.auction?.isActive
-        );
+        // ✅ Correction : on filtre uniquement sur le statut
+        const encheres = allArticles.filter((a) => a.status === "auction");
         setArticles(encheres);
       } catch (err) {
         console.error("Erreur chargement enchères :", err);
@@ -43,7 +42,9 @@ export default function EncheresPage() {
     fetchEncheres();
   }, []);
 
-  const formatTimeLeft = (endDate: string) => {
+  // 🕒 Formatage du temps restant
+  const formatTimeLeft = (endDate?: string) => {
+    if (!endDate) return "En cours...";
     const now = new Date().getTime();
     const end = new Date(endDate).getTime();
     const diff = end - now;
@@ -55,8 +56,8 @@ export default function EncheresPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-sawaka-900 mb-6">
-        🏆 Ventes aux enchères
+      <h1 className="text-3xl font-bold text-sawaka-900 mb-6 flex items-center gap-2">
+        🏆 <span>Ventes aux enchères</span>
       </h1>
 
       {loading ? (
@@ -101,11 +102,11 @@ export default function EncheresPage() {
                   <p className="font-medium text-sawaka-800">
                     Offre actuelle :{" "}
                     <span className="text-green-700 font-bold">
-                      {article.auction?.highestBid?.toLocaleString()} FCFA
+                      {(article.auction?.highestBid ?? article.price).toLocaleString()} FCFA
                     </span>
                   </p>
                   <p className="text-sawaka-600 mt-1">
-                    ⏰ {formatTimeLeft(article.auction?.endDate || "")}
+                    ⏰ {formatTimeLeft(article.auction?.endDate)}
                   </p>
                 </div>
 
