@@ -14,7 +14,8 @@ function requireAuth(req, res, next) {
   const cookieToken = req.cookies?.token;
   const token = headerToken || cookieToken;
 
-  if (!token) return res.status(401).json({ message: "Non autorisé. Aucun token fourni." });
+  if (!token)
+    return res.status(401).json({ message: "Non autorisé. Aucun token fourni." });
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
@@ -67,7 +68,9 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur upload Cloudinary :", err);
-    res.status(500).json({ message: "Erreur upload Cloudinary", error: err.message });
+    res
+      .status(500)
+      .json({ message: "Erreur upload Cloudinary", error: err.message });
   }
 });
 
@@ -86,7 +89,6 @@ router.get("/public", async (req, res) => {
 
     // ✅ Inclure published + auction
     const statusFilter = { status: { $in: ["published", "auction"] } };
-
     const filter = { ...statusFilter, ...search };
 
     const total = await Article.countDocuments(filter);
@@ -98,6 +100,32 @@ router.get("/public", async (req, res) => {
     res.json({ items, total, page, pages: Math.ceil(total / limit) });
   } catch (e) {
     console.error("Erreur route /public :", e);
+    res.status(500).json({ message: e.message });
+  }
+});
+
+/* ===========================================================
+   📦 DÉTAIL PUBLIC D’UN ARTICLE (accessible à tous)
+=========================================================== */
+router.get("/public/:id", async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id)
+      .populate("vendorId", "username commerceName city province")
+      .populate("comments.user", "username firstName lastName");
+
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
+
+    // ✅ Ne renvoyer que les statuts visibles publiquement
+    if (!["published", "auction"].includes(article.status)) {
+      return res
+        .status(403)
+        .json({ message: "Article non accessible publiquement." });
+    }
+
+    res.json(article);
+  } catch (e) {
+    console.error("Erreur /public/:id :", e);
     res.status(500).json({ message: e.message });
   }
 });
@@ -174,7 +202,8 @@ router.patch("/articles/:id", async (req, res) => {
       body,
       { new: true }
     );
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
     res.json(article);
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -187,7 +216,8 @@ router.delete("/articles/:id", async (req, res) => {
       _id: req.params.id,
       vendorId: req.user.id,
     });
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -200,7 +230,8 @@ router.delete("/articles/:id", async (req, res) => {
 router.post("/articles/:id/like", requireAuth, async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
 
     const userId = req.user.id;
     const alreadyLiked = article.likes?.includes(userId);
@@ -219,7 +250,8 @@ router.post("/articles/:id/comment", requireAuth, async (req, res) => {
   try {
     const { text, rating } = req.body;
     const article = await Article.findById(req.params.id);
-    if (!article) return res.status(404).json({ message: "Article non trouvé." });
+    if (!article)
+      return res.status(404).json({ message: "Article non trouvé." });
 
     article.comments.push({
       user: req.user.id,

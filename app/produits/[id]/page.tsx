@@ -61,9 +61,8 @@ export default function ProduitDetail() {
         setLoading(true);
         setError("");
 
-        const res = await fetch(`${API_BASE}/api/seller/articles/${id}`, {
-          credentials: "include",
-        });
+        const res = await fetch(`${API_BASE}/api/seller/public/${id}`);
+
 
         if (!res.ok) {
           throw new Error(`Erreur ${res.status}`);
