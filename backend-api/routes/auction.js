@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Article = require("../models/Article");
-const { requireAuth } = require("../middlewares/auth");
+const { requireAuth } = require("../middleware/auth");
 
 // 💰 Enchérir sur un article
 router.post("/:id/bid", requireAuth, async (req, res) => {
