@@ -5,20 +5,23 @@ const API =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
   "https://ecommerce-web-avec-tailwind.onrender.com";
 
+/* ===========================================================
+   📦 TYPE Article
+=========================================================== */
 export type Article = {
   _id?: string;
   title: string;
   description?: string;
   price: number;
   stock: number;
-  status: "draft" | "published";
+  status: "draft" | "published" | "auction"; // ✅ ajout du statut "auction"
   images?: string[];
   categories?: string[];
   sku?: string;
   createdAt?: string;
   updatedAt?: string;
 
-  // 🆕 Champs promotion
+  // 💸 Bloc promotion (inchangé)
   promotion?: {
     isActive: boolean;
     discountPercent: number;
@@ -28,9 +31,19 @@ export type Article = {
     startDate?: string;
     endDate?: string;
   };
+
+  // 🆕 Bloc enchères
+  auction?: {
+    isActive: boolean;
+    endDate: string | Date;
+    highestBid: number;
+    highestBidder?: string;
+  };
 };
 
-// --- Requête générique ---
+/* ===========================================================
+   🌍 REQUÊTE GÉNÉRIQUE
+=========================================================== */
 async function http<T = any>(path: string, init?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
     ...init,

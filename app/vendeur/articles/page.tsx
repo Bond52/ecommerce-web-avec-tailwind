@@ -170,6 +170,11 @@ export default function VendorArticlesPage() {
         durationDays: 0,
         durationHours: 0,
       },
+      auction: {
+        isActive: false,
+        endDate: "",
+        highestBid: 0,
+      },
     }),
     []
   );
@@ -328,22 +333,72 @@ export default function VendorArticlesPage() {
           />
         </div>
 
+
+
         <div>
           <label className="block text-sm font-medium mb-1">Statut</label>
-          <select
-            className="border p-2 rounded w-full"
-            value={form.status}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                status: e.target.value as "draft" | "published",
-              }))
-            }
-          >
-            <option value="draft">Brouillon</option>
-            <option value="published">Publié</option>
-          </select>
+
+<select
+  className="border p-2 rounded w-full"
+  value={form.status}
+  onChange={(e) =>
+    setForm((f) => ({
+      ...f,
+      status: e.target.value as "draft" | "published" | "auction",
+    }))
+  }
+>
+  <option value="draft">Brouillon</option>
+  <option value="published">Publié</option>
+  <option value="auction">Vente aux enchères</option>
+</select>
+
         </div>
+
+
+
+        {/* 🕒 Vente aux enchères (option rapide) */}
+{form.status === "auction" && (
+  <div className="md:col-span-2 border-t pt-4 mt-4">
+    <label className="flex items-center gap-2 mb-3">
+      <input
+        type="checkbox"
+        checked={form.auction?.isActive || false}
+        onChange={(e) =>
+          setForm((f) => ({
+            ...f,
+            auction: { ...f.auction, isActive: e.target.checked },
+          }))
+        }
+      />
+      Activer la vente aux enchères
+    </label>
+
+    {form.auction?.isActive && (
+      <>
+        <label className="block text-sm font-medium mb-1">
+          Date et heure de fin
+        </label>
+        <input
+          type="datetime-local"
+          className="border p-2 rounded w-full"
+          value={
+            form.auction?.endDate
+              ? new Date(form.auction.endDate).toISOString().slice(0, 16)
+              : ""
+          }
+          onChange={(e) =>
+            setForm((f) => ({
+              ...f,
+              auction: { ...f.auction, endDate: e.target.value },
+            }))
+          }
+        />
+      </>
+    )}
+  </div>
+)}
+
 
         <div>
           <label className="block text-sm font-medium mb-1">Catégorie</label>

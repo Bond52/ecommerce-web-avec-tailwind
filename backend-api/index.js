@@ -65,7 +65,14 @@ app.use("/api/products", productRoutes);
 const artisansRoute = require("./routes/artisans");
 app.use("/api/artisans", artisansRoute);
 
+const auctionRoutes = require("./routes/auction");
+app.use("/api/auction", auctionRoutes);
 
+const cron = require("node-cron");
+const closeExpiredAuctions = require("./cronJobs/endAuction");
+
+// Vérifie toutes les 5 minutes
+cron.schedule("*/5 * * * *", closeExpiredAuctions);
 
 // 🔎 Route de test rapide
 app.get("/", (_, res) => res.send("🎉 API e-commerce Sawaka opérationnelle !"));
