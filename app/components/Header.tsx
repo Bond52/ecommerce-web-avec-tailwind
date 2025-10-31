@@ -187,32 +187,38 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Nav Bar */}
-      <div className="border-t bg-cream-50">
-        <div className="wrap py-3 flex gap-8 text-sm">
-          <button
-            onClick={() => setShowCategoryMenu(!showCategoryMenu)}
-            className="px-4 py-2 bg-sawaka-500 text-white rounded-lg"
-          >
-            ☰ Catégories
-          </button>
-          {showCategoryMenu && (
-            <div className="absolute mt-1 w-64 bg-white border rounded-lg shadow-lg py-2 z-50">
-              {categories.map((c, i) => (
-                <Link key={i} href={c.href} className="block px-4 py-2 hover:bg-cream-50">
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-          )}
+{/* Nav Bar */}
+<div className="border-t bg-cream-50 relative">
+  <div className="wrap py-3 flex flex-wrap gap-8 text-sm items-center">
+    <button
+      onClick={() => setShowCategoryMenu(!showCategoryMenu)}
+      className="px-4 py-2 bg-sawaka-500 text-white rounded-lg"
+    >
+      ☰ Catégories
+    </button>
 
-          <Link href="/">Accueil</Link>
-          <Link href="/produits">Produits</Link>
-          <Link href="/nouveautes">Nouveautés</Link>
-          <Link href="/promotions">Promotions</Link>
-          <Link href="/artisans">Artisans</Link>
-        </div>
+    {showCategoryMenu && (
+      <div className="absolute mt-1 w-64 bg-white border rounded-lg shadow-lg py-2 z-50">
+        {categories.map((c, i) => (
+          <Link key={i} href={c.href} className="block px-4 py-2 hover:bg-cream-50">
+            {c.name}
+          </Link>
+        ))}
       </div>
+    )}
+
+    <Link href="/">Accueil</Link>
+    <Link href="/produits">Produits</Link>
+    <Link href="/nouveautes">Nouveautés</Link>
+    <Link href="/promotions">Promotions</Link>
+    {/* 🆕 Nouveau lien ventes aux enchères */}
+    <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
+      Ventes aux enchères
+    </Link>
+    <Link href="/artisans">Artisans</Link>
+  </div>
+</div>
+
     </header>
   );
 }
