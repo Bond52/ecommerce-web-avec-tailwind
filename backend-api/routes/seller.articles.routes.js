@@ -47,6 +47,18 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+console.log("🧩 Cloudinary ENV TEST:", {
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET ? "OK" : "MISSING",
+});
+
+cloudinary.api
+  .ping()
+  .then(() => console.log("✅ Cloudinary OK"))
+  .catch((err) => console.error("❌ Cloudinary invalide :", err.message));
+
+  
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
