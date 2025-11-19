@@ -1,3 +1,4 @@
+// backend-api/routes/feedback.js
 const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
@@ -5,38 +6,36 @@ const { feedbackRecipients } = require("../config/feedback");
 
 router.post("/", async (req, res) => {
   try {
-    const { email, message } = req.body;
+    const { message, email } = req.body;
 
     if (!message || message.trim().length < 3) {
-      return res.status(400).json({ success: false, error: "Message trop court" });
+      return res.status(400).json({ success: false, msg: "Message trop court" });
     }
 
-    // Transporter SMTP (Brevo)
+    // 🔥 Config SMTP Brevo via Render ENV
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: false, // Brevo = false
+      host: process.env.BREVO_SMTP_HOST,
+      port: parseInt(process.env.BREVO_SMTP_PORT),
+      secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: process.env.BREVO_SMTP_USER,
+        pass: process.env.BREVO_SMTP_PASS,
       },
     });
 
-    // Email à toi
     await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: feedbackRecipients.join(","),
-      subject: "🟠 Nouveau feedback Sawaka",
-      text: `Email: ${email || "Anonyme"}\n\nMessage:\n${message}`,
+      from: process.env.BREVO_SMTP_USER,
+      to: feedbackRecipients.join(", "),
+      subject: "🛠 Nouveau feedback Sawaka",
+      text: `Email: ${email || "Non fourni"}\n\nMessage:\n${message}`,
     });
 
-    return res.json({ success: true, message: "Feedback envoyé !" });
+    return res.json({ success: true });
   } catch (err) {
-    console.error("Erreur feedback:", err);
-    return res.status(500).json({
-      success: false,
-      error: "Erreur serveur (envoi impossible)",
-    });
+    console.error("Erreur feedback SMTP:", err);
+    return res
+      .status(500)
+      .json({ success: false, msg: "Erreur serveur", error: err.message });
   }
 });
 

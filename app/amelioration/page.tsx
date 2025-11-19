@@ -24,25 +24,27 @@ export default function AmeliorationPage() {
         }
       );
 
+      // Tentative de lecture JSON
       let data = null;
       try {
         data = await res.json();
       } catch {
-        alert("Réponse serveur invalide.");
+        alert("Réponse du serveur invalide.");
         setLoading(false);
         return;
       }
 
+      // Vérifier succès
       if (data.success) {
         alert("Merci ! Votre message a été envoyé. 🙏");
         setEmail("");
         setMessage("");
       } else {
-        alert(data.error || "Erreur lors de l’envoi.");
+        alert(data.msg || "Erreur lors de l’envoi.");
       }
     } catch (err) {
-      console.error(err);
-      alert("Erreur réseau. Vérifiez votre connexion.");
+      console.error("Erreur front:", err);
+      alert("Erreur réseau : impossible de contacter le serveur.");
     }
 
     setLoading(false);
