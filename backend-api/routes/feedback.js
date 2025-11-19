@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
-const { feedbackRecipients } = require("../../config/feedback");
+const { feedbackRecipients } = require("../config/feedback");
 require("dotenv").config();
 
 // Transporteur SMTP Brevo
