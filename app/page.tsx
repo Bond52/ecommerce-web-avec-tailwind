@@ -108,7 +108,7 @@ export default function HomePage() {
     <div className="w-full overflow-hidden rounded-xl">
       <iframe
         className="w-full h-[260px] md:h-[380px] lg:h-[420px] rounded-xl"
-        src="https://youtu.be/8X8LoKrfNVY"
+        src="https://www.youtube.com/embed/8X8LoKrfNVY"
         title="Présentation Sawaka"
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
