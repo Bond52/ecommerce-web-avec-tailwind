@@ -68,6 +68,8 @@ app.use("/api/artisans", artisansRoute);
 const auctionRoutes = require("./routes/auction");
 app.use("/api/auction", auctionRoutes);
 
+app.use("/api/feedback", require("./routes/feedback"));
+
 const cron = require("node-cron");
 const closeExpiredAuctions = require("./cronJobs/endAuction");
 

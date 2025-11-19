@@ -227,6 +227,8 @@ export default function Header() {
       Ventes aux enchères
     </Link>
     <Link href="/artisans">Artisans</Link>
+    <Link href="/amelioration">Améliorer Sawaka</Link>
+
   </div>
 </div>
 
