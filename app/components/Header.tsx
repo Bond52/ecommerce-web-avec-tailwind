@@ -142,9 +142,12 @@ export default function Header() {
                   <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">
                     👤 Profil
                   </Link>
+                  
+                  {/*
                   <Link href="/acheteur/commandes" className="block px-4 py-2 hover:bg-cream-50">
                     📦 Achats
                   </Link>
+                  */}
 {/*
   <Link href="/budget" className="block px-4 py-2 hover:bg-cream-50">
     📑 Projets
