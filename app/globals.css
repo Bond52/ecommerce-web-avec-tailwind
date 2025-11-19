@@ -2,235 +2,305 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===========================================
-   PALETTE PREMIUM AMAZON x ETSY
-   Marron foncé – Beige sable – Ocre
-   =========================================== */
+/* ===== Base ===== */
 @layer base {
   :root {
-    /* Palette Artisanale Premium */
-    --brown-900: #4F2D18; /* Titres, CTA, header */
-    --brown-800: #6A4125;
-    --brown-700: #734C2C;
-    --brown-600: #8B5F38;
-
-    --sand-100: #FAF7F2; /* fond très clair */
-    --sand-200: #F3E9DA; /* beige sable */
-    --sand-300: #E8DCC8;
-    --sand-400: #DBC8B0;
-
-    --amber-500: #D39C5E; /* couleur bouton */
-    --amber-600: #BF8747;
-
-    /* Ombres premium style Amazon */
-    --shadow-card: 0 2px 8px rgba(0,0,0,.08);
-    --shadow-hover: 0 4px 14px rgba(0,0,0,.12);
+    --rings: 0 0 0 4px rgba(166,119,76,.18);
+    /* Palette Sawaka */
+    --sawaka-50:  #F9F3EC;
+    --sawaka-100: #F4E8D9;
+    --sawaka-200: #EEDCC3;
+    --sawaka-300: #E3CBA6;
+    --sawaka-400: #C9A57A;
+    --sawaka-500: #A6774C;
+    --sawaka-600: #8B5F38;
+    --sawaka-700: #734C2C;
+    --sawaka-800: #5A3B22;
+    --sawaka-900: #2d1606; /* texte foncé */
+    --cream-50:   #FFFCF8;
+    --cream-100:  #FEF7F0;
+    --cream-200:  #FBF0E3;
   }
 
   html, body {
-    background-color: var(--sand-100);
-    color: var(--brown-900);
-    font-family: Inter, system-ui, sans-serif;
+    background-color: #fff;
+    color: var(--sawaka-900);
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3 {
-    color: var(--brown-900);
-    font-family: ui-serif, Georgia, serif;
-    letter-spacing: -0.01em;
+  h1 {
+    font-family: var(--font-display, ui-serif, Georgia, serif);
+    font-size: 2.25rem;      /* text-4xl */
+    line-height: 2.5rem;     /* leading-tight */
+    letter-spacing: -0.015em;/* tracking-tight */
+  }
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 3rem;       /* md:text-5xl */
+      line-height: 1;
+    }
   }
 
-  p {
-    color: var(--brown-700);
+  h2 {
+    font-family: var(--font-display, ui-serif, Georgia, serif);
+    font-size: 1.875rem;     /* text-3xl */
+    line-height: 2.25rem;    /* leading-snug */
+  }
+  @media (min-width: 768px) {
+    h2 { font-size: 2.25rem; } /* md:text-4xl */
+  }
+
+  h3 {
+    font-weight: 600;        /* font-semibold */
+    font-size: 1.25rem;      /* text-xl */
+    line-height: 1.75rem;
+  }
+
+  p  {
+    font-size: 15px;         /* text-[15px] */
+    line-height: 1.75rem;    /* leading-7 */
+    color: var(--sawaka-800);
   }
 
   a {
-    color: var(--brown-700);
-    transition: .2s ease;
+    color: var(--sawaka-700);
+    transition: color .2s ease;
   }
-  a:hover { color: var(--brown-900); }
+  a:hover { color: var(--sawaka-800); }
 }
 
-/* ===========================================
-   UTILITAIRES VISUELS PREMIUM
-   =========================================== */
+/* ===== Utilitaires visuels ===== */
 @layer utilities {
-
   .text-gradient {
-    background: linear-gradient(180deg, var(--brown-700), var(--brown-900));
+    background: linear-gradient(180deg, #A6774C 0%, #734C2C 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
   }
-
   .section {
-    padding-top: 3rem;
+    padding-top: 3rem;       /* py-12 */
     padding-bottom: 3rem;
   }
   @media (min-width: 768px) {
     .section {
-      padding-top: 4rem;
+      padding-top: 4rem;     /* md:py-16 */
       padding-bottom: 4rem;
     }
   }
-
-  .section-muted {
-    background-color: var(--sand-200);
-  }
+  .section-muted { background-color: var(--cream-200); }
 }
 
-/* ===========================================
-   COMPOSANTS PREMIUM
-   =========================================== */
+/* ===== Composants ===== */
 @layer components {
-
-  /* --- Conteneur --- */
+  /* Conteneur + grilles */
   .wrap {
     width: 100%;
-    max-width: 1250px;
-    margin: auto;
-    padding: 0 1rem;
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .grid-products {
+    display: grid;
+    gap: 1.5rem; /* 24px */
+  }
+  @media (min-width: 768px) {
+    .grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
-  /* --- Boutons --- */
+  .grid-steps {
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .grid-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 768px) {
+    .grid-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+
+  /* Navigation */
+  .nav-link {
+    font-size: 0.875rem;     /* text-sm */
+    font-weight: 500;        /* medium */
+    color: var(--sawaka-800);
+  }
+  .nav-link:hover { color: var(--sawaka-900); }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;             /* 24px */
+    font-size: 0.875rem;
+  }
+
+  /* Boutons */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: .5rem;
-    padding: .6rem 1.2rem;
+    border-radius: 1rem;     /* rounded-xl (custom) */
+    padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
     font-weight: 600;
-    transition: .2s ease;
+    transition: all .2s ease;
   }
-
   .btn-primary {
-    background-color: var(--amber-500);
+    background-color: var(--sawaka-700);
     color: #fff;
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--rings);
   }
-  .btn-primary:hover {
-    background-color: var(--amber-600);
-    box-shadow: var(--shadow-hover);
+  .btn-primary:hover,
+  .btn-primary:active {
+    background-color: var(--sawaka-800);
   }
 
   .btn-outline {
-    border: 1px solid var(--brown-700);
-    color: var(--brown-800);
-    background-color: #fff;
+    border: 1px solid var(--sawaka-300);
+    color: var(--sawaka-800);
+    background-color: transparent;
   }
-  .btn-outline:hover {
-    background-color: var(--sand-200);
+  .btn-outline:hover { background-color: var(--cream-100); }
+
+  .btn-small {
+    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    font-size: 0.875rem;
+    border-radius: 0.5rem;   /* rounded-lg */
   }
 
-  /* --- Cartes produits (Amazon/Etsy style) --- */
+  /* Cartes produits */
   .card {
-    border-radius: .75rem;
-    background-color: #fff;
-    box-shadow: var(--shadow-card);
-    border: 1px solid var(--sand-300);
+    border-radius: 1.25rem;  /* rounded-2xl */
+    background-color: var(--cream-100);
+    box-shadow:
+      0 1px 2px rgba(16, 24, 40, .06),
+      0 1px 3px rgba(16, 24, 40, .10);
     overflow: hidden;
-    transition: .2s ease;
   }
-
-  .card:hover {
-    box-shadow: var(--shadow-hover);
-    border-color: var(--sand-400);
-  }
-
+  .card-body { padding: 1rem; }
   .card-thumb {
-    background-color: var(--sand-200);
-    height: 14rem;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
+    background-color: var(--cream-200);
+    height: 14rem;           /* h-56 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-
-  .card-thumb img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    transition: .3s ease;
-  }
-
-  .card:hover .card-thumb img {
-    transform: scale(1.05);
-  }
-
-  .card-body {
-    padding: 1rem;
-  }
-
   .card-title {
     font-weight: 600;
-    color: var(--brown-900);
+    color: var(--sawaka-900);
   }
-
+  .card-sub {
+    font-size: 0.75rem;      /* text-xs */
+    line-height: 1rem;
+    color: var(--sawaka-700);
+  }
+  .card-desc {
+    font-size: 0.875rem;     /* text-sm */
+    line-height: 1.25rem;
+    color: var(--sawaka-800);
+  }
   .price {
-    font-weight: 700;
-    color: var(--brown-900);
-  }
-
-  /* --- Catégories façon Etsy/Amazon --- */
-  .category-card {
-    border: 1px solid var(--sand-300);
-    background-color: #fff;
-    border-radius: .75rem;
-    padding: 1.5rem;
-    text-align: center;
-    transition: .2s ease;
-  }
-
-  .category-card:hover {
-    border-color: var(--brown-700);
-    box-shadow: var(--shadow-hover);
-  }
-
-  .category-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 9999px;
-    background-color: var(--sand-200);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color: var(--brown-900);
-    font-size: 1.6rem;
-    margin:0 auto 1rem auto;
-    transition: .2s ease;
-  }
-
-  .category-card:hover .category-icon {
-    transform: scale(1.08);
-    background-color: var(--sand-300);
-  }
-
-
-  /* --- How it works (icônes pro) --- */
-  .howit-card {
-    background-color: var(--sand-200);
-    border-radius: .75rem;
-    padding: 1.5rem;
-    text-align:center;
-  }
-
-  .howit-title {
-    margin-top: .5rem;
     font-weight: 600;
-    color: var(--brown-900);
+    color: var(--sawaka-800);
   }
 
-  .howit-text {
-    color: var(--brown-700);
-    font-size: .9rem;
+  /* Pastille icône (section “Comment ça marche”) */
+  .icon-circle {
+    width: 3rem; height: 3rem;         /* 12 */
+    border-radius: 9999px;
+    background-color: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--sawaka-100);
   }
 
-  /* --- Footer premium --- */
+  /* Bandeau “How it works” */
+  .howit-card {
+    background-color: var(--cream-200);
+    border-radius: 1.25rem;
+    padding: 1.5rem; /* p-6 */
+    text-align: center;
+  }
+  .howit-title {
+    margin-top: 0.75rem;
+    font-weight: 600;
+    color: var(--sawaka-900);
+  }
+  .howit-text  {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--sawaka-800);
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding-top: 4rem;       /* py-16 */
+    padding-bottom: 4rem;
+  }
+  @media (min-width: 768px) {
+    .hero { padding-top: 5rem; padding-bottom: 5rem; } /* md:py-20 */
+  }
+  .hero-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 11px;
+    color: var(--sawaka-700);
+  }
+  .hero-title {
+    font-family: var(--font-display, ui-serif, Georgia, serif);
+    font-size: 3rem;         /* text-5xl */
+    line-height: 1.25;       /* leading-tight */
+  }
+  @media (min-width: 768px) {
+    .hero-title { font-size: 3.75rem; } /* md:text-6xl */
+  }
+  .hero-sub {
+    margin-top: 0.75rem;
+    color: var(--sawaka-700);
+  }
+
+  /* Footer */
   .site-footer {
-    background-color: var(--brown-900);
-    color: var(--sand-100);
-    padding: 3rem 0;
+    background-color: var(--sawaka-900);
+    color: var(--cream-50);
   }
+  .footer-wrap {
+    /* .wrap + py-10 */
+    width: 100%;
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 2.5rem;     /* py-10 */
+    padding-bottom: 2.5rem;
+  }
+  .footer-col  { display: grid; gap: 0.75rem; font-size: 0.875rem; }
+  .footer-title{ font-size: 0.875rem; font-weight: 600; color: var(--cream-50); }
+  .footer-link { color: #f1efe9; }        /* cream-200 approx */
+  .footer-link:hover { color: #fff; }
 
-  .footer-link:hover {
-    color: white;
+  /* Formulaire newsletter */
+  .newsletter { display: flex; align-items: center; gap: 0.5rem; }
+  .newsletter input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--sawaka-700);
+    background-color: var(--sawaka-800);
+    color: var(--cream-50);
   }
+  .newsletter input::placeholder { color: #f1efe9; }
+  .newsletter .ok {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    background-color: var(--sawaka-500);
+    color: #fff;
+  }
+  .newsletter .ok:hover { background-color: #955f3f; } /* sawaka-600-ish */
 }
