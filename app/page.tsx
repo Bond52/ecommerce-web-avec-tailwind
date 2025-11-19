@@ -77,7 +77,8 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            
+
+           {/* 
             <div className="relative">
               <div className="aspect-square rounded-2xl bg-white p-8 shadow-xl">
                 <div className="grid grid-cols-2 gap-4 h-full">
@@ -99,6 +100,31 @@ export default function HomePage() {
                 ✨
               </div>
             </div>
+            */}
+
+{/* Bloc vidéo YouTube */}
+<div className="relative">
+  <div className="rounded-2xl bg-white p-4 shadow-xl">
+    <div className="w-full overflow-hidden rounded-xl">
+      <iframe
+        className="w-full h-[260px] md:h-[380px] lg:h-[420px] rounded-xl"
+        src="https://youtu.be/8X8LoKrfNVY"
+        title="Présentation Sawaka"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      ></iframe>
+    </div>
+  </div>
+
+  {/* Icône décorative conservée */}
+  <div className="absolute -top-4 -right-4 w-16 h-16 bg-sawaka-500 rounded-full flex items-center justify-center text-white text-xl">
+    ✨
+  </div>
+</div>
+
+
+
           </div>
         </div>
       </section>
