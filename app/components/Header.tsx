@@ -181,6 +181,7 @@ export default function Header() {
             </Link>
           )}
 
+          {/*
           <Link href="/panier" className="relative p-3">
             🛒
             {cartCount > 0 && (
@@ -189,6 +190,8 @@ export default function Header() {
               </span>
             )}
           </Link>
+          */}
+
         </div>
       </div>
 
