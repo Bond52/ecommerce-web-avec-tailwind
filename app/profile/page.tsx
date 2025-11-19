@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { Pencil } from "lucide-react";
 
@@ -22,18 +23,16 @@ export default function ProfilePage() {
   const [tempValue, setTempValue] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Même logique que sur register et vendeur
+  // API URL identique
   const API_URL =
     process.env.NEXT_PUBLIC_API_BASE ||
     (typeof window !== "undefined" && window.location.hostname === "localhost"
       ? "http://localhost:5000"
       : "https://ecommerce-web-avec-tailwind.onrender.com");
 
-  // 🧭 Récupération du profil utilisateur
+  // Récupération du profil utilisateur
   useEffect(() => {
-    fetch(`${API_URL}/api/user/profile`, {
-      credentials: "include",
-    })
+    fetch(`${API_URL}/api/user/profile`, { credentials: "include" })
       .then(async (res) => {
         if (!res.ok) {
           if (res.status === 401) throw new Error("Session expirée");
@@ -41,14 +40,11 @@ export default function ProfilePage() {
         }
         return res.json();
       })
-      .then((data) => setUser(data))
-      .catch((err) => {
-        console.error(err);
-        setError(err.message);
-      });
+      .then(setUser)
+      .catch((err) => setError(err.message));
   }, [API_URL]);
 
-  // 🧩 Sauvegarde d'un champ modifié
+  // Sauvegarde
   const handleSave = async (field: string) => {
     const payload =
       field === "isSeller"
@@ -66,148 +62,157 @@ export default function ProfilePage() {
       const updated = await res.json();
       setUser(updated);
       setEditingField(null);
-    } else {
-      alert("Erreur lors de la mise à jour");
-    }
+    } else alert("Erreur lors de la mise à jour");
   };
 
-  if (error)
-    return <p className="text-center text-red-600 mt-6">{error}</p>;
-  if (!user)
-    return <p className="text-center text-gray-500 mt-6">Chargement...</p>;
+  if (error) return <p className="text-center text-red-600 mt-6">{error}</p>;
+  if (!user) return <p className="text-center text-gray-500 mt-6">Chargement...</p>;
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
-      <h1 className="text-2xl font-bold mb-6 text-center">Mon profil</h1>
+    <div className="wrap py-12">
+      <div className="max-w-2xl mx-auto bg-white shadow-md rounded-2xl border border-cream-200 p-8">
+        
+        <h1 className="text-3xl font-bold text-sawaka-800 text-center mb-8">
+          Mon profil
+        </h1>
 
-      {Object.entries(user).map(([key, value]) => {
-        if (["_id", "__v", "password"].includes(key)) return null;
+        {/* LISTE DES CHAMPS */}
+        <div className="flex flex-col divide-y divide-cream-200">
 
-        const isEditing = editingField === key;
-        const isSelectProvince = key === "province";
-        const isSelectCity = key === "city";
-        const isCheckbox = key === "isSeller";
-        const isCountry = key === "country";
+          {Object.entries(user).map(([key, value]) => {
+            if (["_id", "__v", "password"].includes(key)) return null;
 
-        return (
-          <div
-            key={key}
-            className="flex justify-between items-center border-b py-3 gap-4"
-          >
-            <div className="flex-1">
-              <p className="text-sm text-gray-500">{key}</p>
+            const isEditing = editingField === key;
+            const isSelectProvince = key === "province";
+            const isSelectCity = key === "city";
+            const isCheckbox = key === "isSeller";
+            const isCountry = key === "country";
 
-              {/* Province */}
-              {isEditing && isSelectProvince ? (
-                <select
-                  value={tempValue || ""}
-                  onChange={(e) => setTempValue(e.target.value)}
-                  className="border p-1 rounded w-full"
-                >
-                  <option value="">Province</option>
-                  {Object.keys(provincesCM).map((prov) => (
-                    <option key={prov} value={prov}>
-                      {prov}
-                    </option>
-                  ))}
-                </select>
-              ) : isSelectProvince ? (
-                <p className="font-medium">{user.province || "—"}</p>
-              ) : null}
+            return (
+              <div key={key} className="py-4 flex justify-between items-start gap-4">
+                
+                {/* LABEL + VALUE */}
+                <div className="flex-1">
 
-              {/* Ville */}
-              {isEditing && isSelectCity ? (
-                <select
-                  value={tempValue || ""}
-                  onChange={(e) => setTempValue(e.target.value)}
-                  className="border p-1 rounded w-full"
-                >
-                  <option value="">Ville</option>
-                  {user.province &&
-                    provincesCM[user.province]?.map((city) => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                </select>
-              ) : isSelectCity ? (
-                <p className="font-medium">{user.city || "—"}</p>
-              ) : null}
+                  <p className="text-sm text-sawaka-600 mb-1 capitalize">
+                    {key}
+                  </p>
 
-              {/* Checkbox isSeller */}
-              {isCheckbox ? (
-                <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="checkbox"
-                    checked={user.isSeller}
-                    onChange={() => handleSave("isSeller")}
-                    className="h-4 w-4"
-                  />
-                  <span>{user.isSeller ? "Vendeur" : "Acheteur"}</span>
+                  {/* Province */}
+                  {isEditing && isSelectProvince ? (
+                    <select
+                      value={tempValue || ""}
+                      onChange={(e) => setTempValue(e.target.value)}
+                      className="border border-sawaka-300 rounded-lg p-2 w-full"
+                    >
+                      <option>Choisir une province</option>
+                      {Object.keys(provincesCM).map((prov) => (
+                        <option key={prov}>{prov}</option>
+                      ))}
+                    </select>
+                  ) : isSelectProvince ? (
+                    <p className="font-medium">{user.province || "—"}</p>
+                  ) : null}
+
+                  {/* City */}
+                  {isEditing && isSelectCity ? (
+                    <select
+                      value={tempValue || ""}
+                      onChange={(e) => setTempValue(e.target.value)}
+                      className="border border-sawaka-300 rounded-lg p-2 w-full"
+                    >
+                      <option>Choisir une ville</option>
+                      {user.province &&
+                        provincesCM[user.province]?.map((city) => (
+                          <option key={city}>{city}</option>
+                        ))}
+                    </select>
+                  ) : isSelectCity ? (
+                    <p className="font-medium">{user.city || "—"}</p>
+                  ) : null}
+
+                  {/* isSeller */}
+                  {isCheckbox && (
+                    <label className="flex items-center gap-2 mt-1">
+                      <input
+                        type="checkbox"
+                        checked={user.isSeller}
+                        onChange={() => handleSave("isSeller")}
+                        className="h-4 w-4"
+                      />
+                      <span className="font-medium">
+                        {user.isSeller ? "Vendeur" : "Acheteur"}
+                      </span>
+                    </label>
+                  )}
+
+                  {/* Country */}
+                  {isEditing && isCountry ? (
+                    <select
+                      className="border border-sawaka-300 rounded-lg p-2 w-full"
+                      value={tempValue}
+                      onChange={(e) => setTempValue(e.target.value)}
+                    >
+                      <option value="Cameroun">Cameroun</option>
+                      <option value="Canada">Canada</option>
+                    </select>
+                  ) : isCountry ? (
+                    <p className="font-medium">{user.country}</p>
+                  ) : null}
+
+                  {/* Autres champs */}
+                  {!isCheckbox &&
+                    !isSelectProvince &&
+                    !isSelectCity &&
+                    !isCountry &&
+                    !isEditing && (
+                      <p className="font-medium break-all">
+                        {String(value ?? "—")}
+                      </p>
+                    )}
+
+                  {isEditing &&
+                    !isCheckbox &&
+                    !isSelectProvince &&
+                    !isSelectCity &&
+                    !isCountry && (
+                      <input
+                        className="border border-sawaka-300 rounded-lg p-2 w-full"
+                        value={tempValue ?? ""}
+                        onChange={(e) => setTempValue(e.target.value)}
+                      />
+                    )}
                 </div>
-              ) : null}
 
-              {/* Country */}
-              {isEditing && isCountry ? (
-                <select
-                  value={tempValue}
-                  onChange={(e) => setTempValue(e.target.value)}
-                  className="border p-1 rounded w-full"
-                >
-                  <option value="Cameroun">Cameroun</option>
-                  <option value="Canada">Canada</option>
-                </select>
-              ) : isCountry ? (
-                <p className="font-medium">{user.country}</p>
-              ) : null}
-
-              {/* Autres champs */}
-              {!isCheckbox &&
-                !isSelectProvince &&
-                !isSelectCity &&
-                !isCountry &&
-                !isEditing && (
-                  <p className="font-medium">{String(value ?? "—")}</p>
-                )}
-
-              {isEditing &&
-                !isSelectProvince &&
-                !isSelectCity &&
-                !isCountry &&
-                !isCheckbox && (
-                  <input
-                    className="border p-1 rounded w-full"
-                    value={tempValue ?? ""}
-                    onChange={(e) => setTempValue(e.target.value)}
-                  />
-                )}
-            </div>
-
-            {!isCheckbox && (
-              <div className="flex items-center">
-                {isEditing ? (
-                  <button
-                    className="text-green-600 font-semibold ml-2"
-                    onClick={() => handleSave(key)}
-                  >
-                    ✅
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setEditingField(key);
-                      setTempValue(user[key]);
-                    }}
-                    className="text-blue-500"
-                  >
-                    <Pencil size={18} />
-                  </button>
+                {/* Boutons */}
+                {!isCheckbox && (
+                  <div>
+                    {isEditing ? (
+                      <button
+                        onClick={() => handleSave(key)}
+                        className="text-green-600 text-lg"
+                      >
+                        ✔
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingField(key);
+                          setTempValue(user[key]);
+                        }}
+                        className="text-sawaka-600 hover:text-sawaka-800"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+
+        </div>
+      </div>
     </div>
   );
 }
