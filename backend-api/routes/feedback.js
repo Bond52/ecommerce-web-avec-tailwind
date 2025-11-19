@@ -2,42 +2,41 @@ const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 const { feedbackRecipients } = require("../config/feedback");
-require("dotenv").config();
-
-// Transporteur SMTP Brevo
-const transporter = nodemailer.createTransport({
-  host: process.env.BREVO_SMTP_HOST,
-  port: process.env.BREVO_SMTP_PORT,
-  secure: false, // Brevo utilise STARTTLS sur le port 587
-  auth: {
-    user: process.env.BREVO_SMTP_USER,
-    pass: process.env.BREVO_SMTP_PASS,
-  },
-});
 
 router.post("/", async (req, res) => {
   try {
-    const { message } = req.body;
+    const { email, message } = req.body;
 
-    if (!message || message.trim().length === 0) {
-      return res.status(400).json({ success: false, error: "Message requis" });
+    if (!message || message.trim().length < 3) {
+      return res.status(400).json({ success: false, error: "Message trop court" });
     }
 
-    // Email
-    const info = await transporter.sendMail({
-      from: `"Sawaka Feedback" <${process.env.BREVO_SMTP_USER}>`,
-      to: feedbackRecipients.join(","),
-      subject: "📝 Nouveau feedback utilisateur",
-      text: message,
-      html: `<p>${message}</p>`,
+    // Transporter SMTP (Brevo)
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      secure: false, // Brevo = false
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
     });
 
-    console.log("✉️ Email envoyé :", info.messageId);
+    // Email à toi
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: feedbackRecipients.join(","),
+      subject: "🟠 Nouveau feedback Sawaka",
+      text: `Email: ${email || "Anonyme"}\n\nMessage:\n${message}`,
+    });
 
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Erreur Feedback:", error);
-    res.status(500).json({ success: false, error: "Erreur envoi email" });
+    return res.json({ success: true, message: "Feedback envoyé !" });
+  } catch (err) {
+    console.error("Erreur feedback:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Erreur serveur (envoi impossible)",
+    });
   }
 });
 

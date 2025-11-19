@@ -4,24 +4,59 @@ import { useState } from "react";
 export default function AmeliorationPage() {
   const [message, setMessage] = useState("");
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
-    const res = await fetch("/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, email }),
-    });
+    if (!message.trim()) {
+      alert("Veuillez écrire un message.");
+      return;
+    }
 
-    const data = await res.json();
-    if (data.success) alert("Merci pour votre retour !");
-    else alert("Erreur lors de l’envoi");
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE}/api/feedback`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, email }),
+        }
+      );
+
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        alert("Réponse serveur invalide.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.success) {
+        alert("Merci ! Votre message a été envoyé. 🙏");
+        setEmail("");
+        setMessage("");
+      } else {
+        alert(data.error || "Erreur lors de l’envoi.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur réseau. Vérifiez votre connexion.");
+    }
+
+    setLoading(false);
   };
 
   return (
     <div className="wrap py-12">
-      <h1 className="text-3xl font-bold mb-4">Améliorer Sawaka</h1>
+      <h1 className="text-3xl font-bold mb-4 text-sawaka-800">
+        Améliorer Sawaka
+      </h1>
+
       <p className="text-sawaka-700 mb-6">
-        Sawaka est en phase de test. Donnez-nous vos idées, remarques ou bugs rencontrés !
+        Sawaka est en phase de test. Donnez-nous vos idées, vos suggestions,
+        vos retours sur l'expérience utilisateur ou les bugs rencontrés !
       </p>
 
       <input
@@ -41,9 +76,12 @@ export default function AmeliorationPage() {
 
       <button
         onClick={handleSend}
-        className="mt-4 bg-sawaka-600 text-white px-6 py-3 rounded-lg"
+        disabled={loading}
+        className={`mt-4 bg-sawaka-600 text-white px-6 py-3 rounded-lg transition ${
+          loading ? "opacity-50 cursor-not-allowed" : "hover:bg-sawaka-700"
+        }`}
       >
-        Envoyer
+        {loading ? "Envoi en cours..." : "Envoyer"}
       </button>
     </div>
   );
