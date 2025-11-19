@@ -90,7 +90,9 @@ export default function Header() {
       <div className="wrap py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
+        {/*
           <img src="/images/logo.jpg" alt="Sawaka" className="w-10 h-10 rounded-lg" />
+*/}
           <span className="font-display text-2xl font-bold text-sawaka-700">Sawaka</span>
         </Link>
 
