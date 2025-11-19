@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// 🔗 On importe la constante API de ton lib pour garder la même base URL
+// 🔗 API
 const API =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
@@ -30,8 +30,6 @@ export default function ArtisansPage() {
         const res = await fetch(`${API}/api/artisans`, { cache: "no-store" });
         const data = await res.json();
 
-        console.log("🧾 Réponse API artisans :", data); // 🧩 debug important
-
         const filtered = data.filter(
           (a: Artisan) => a.isSeller === true || a.roles?.includes("vendeur")
         );
@@ -54,38 +52,41 @@ export default function ArtisansPage() {
   }
 
   return (
-    <main className="min-h-screen bg-amber-50 p-8">
-      <h1 className="text-3xl font-bold text-center text-[#5C3A1E] mb-10">
+    <main className="min-h-screen bg-cream-100 px-6 py-12">
+      <h1 className="text-4xl font-bold text-center text-sawaka-800 mb-12">
         Nos Artisans
       </h1>
 
       {artisans.length === 0 ? (
         <p className="text-center text-gray-500">Aucun artisan trouvé.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {artisans.map((artisan) => (
             <div
               key={artisan._id}
-              className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition"
+              className="bg-white p-6 rounded-2xl shadow-md border border-cream-200 hover:shadow-lg transition"
             >
               <img
                 src={
                   artisan.idCardImage ||
-                  "https://via.placeholder.com/150?text=Artisan"
+                  "/images/profile-placeholder.png"
                 }
                 alt={`${artisan.firstName || ""} ${artisan.lastName || ""}`}
-                className="w-full h-40 object-cover rounded-xl mb-4"
+                className="w-full h-40 object-cover rounded-xl border border-cream-300"
               />
-              <h2 className="text-xl font-semibold text-[#5C3A1E]">
+
+              <h2 className="text-xl font-semibold text-sawaka-800 mt-4">
                 {artisan.firstName || artisan.lastName
                   ? `${artisan.firstName || ""} ${artisan.lastName || ""}`
-                  : artisan.username}
+                  : artisan.username || "Artisan"}
               </h2>
+
               <p className="text-sm text-gray-600 mt-1">
                 {artisan.email || "Aucun contact"}
               </p>
-              <p className="text-sm text-gray-500 mt-3 italic">
-                Inscrit depuis le{" "}
+
+              <p className="text-sm text-gray-500 mt-4 italic">
+                Inscrit depuis{" "}
                 {artisan.createdAt
                   ? new Date(artisan.createdAt).toLocaleDateString()
                   : "N/A"}
