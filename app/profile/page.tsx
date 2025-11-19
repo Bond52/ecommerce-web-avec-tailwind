@@ -160,15 +160,6 @@ export default function ProfilePage() {
                   <Input label="Pièce d'identité (lien)" value={form.idCardImage}
                          onChange={(e) => updateField("idCardImage", e.target.value)} />
                 </Grid>
-
-                <label className="inline-flex items-center gap-2 mt-2">
-                  <input
-                    type="checkbox"
-                    checked={form.isSeller}
-                    onChange={(e) => updateField("isSeller", e.target.checked)}
-                  />
-                  <span className="font-medium">Compte vendeur activé</span>
-                </label>
               </Section>
             )}
 
