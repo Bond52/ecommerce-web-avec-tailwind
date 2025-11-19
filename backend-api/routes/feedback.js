@@ -24,15 +24,19 @@ console.log("BREVO SMTP CONFIG:", {
 
 
     // 🔥 Config SMTP Brevo via Render ENV
-    const transporter = nodemailer.createTransport({
-      host: process.env.BREVO_SMTP_HOST,
-      port: parseInt(process.env.BREVO_SMTP_PORT),
-      secure: false,
-      auth: {
-        user: process.env.BREVO_SMTP_USER,
-        pass: process.env.BREVO_SMTP_PASS,
-      },
-    });
+const transporter = nodemailer.createTransport({
+  host: process.env.BREVO_SMTP_HOST,
+  port: 465, // IMPORTANT : port SSL
+  secure: true, // SSL obligatoire pour Brevo sur ce port
+  auth: {
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  }
+});
+
 
     await transporter.sendMail({
       from: process.env.BREVO_SMTP_USER,
