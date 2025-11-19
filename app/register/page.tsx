@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -20,7 +20,9 @@ const provincesCM = {
 export default function RegisterPage() {
   const router = useRouter();
 
-  const [isSeller, setIsSeller] = useState(false);
+  // ✔ plus de "isSeller" dynamique → tout le monde est vendeur !
+  const isSeller = true;
+
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -57,32 +59,35 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // ✔ transmettre toujours les deux rôles
+    const roles = "acheteur,vendeur";
+
     try {
       const res = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ ...form, isSeller }),
+        body: JSON.stringify({ ...form, isSeller, roles }),
       });
 
       const data = await res.json();
       if (!res.ok) return alert(data.error || 'Erreur à l’inscription');
 
-      // 🔑 Sauvegarde user complet
+      // 🔑 Sauvegarde local
       if (data.token) {
         localStorage.setItem(
           'user',
           JSON.stringify({
             token: data.token,
-            roles: data.roles,
-            username: data.username || form.username,
-            firstName: data.firstName || form.firstName,
-            lastName: data.lastName || form.lastName,
+            roles: roles,
+            username: form.username,
+            firstName: form.firstName,
+            lastName: form.lastName,
           })
         );
       }
 
-      router.push('/'); // retour accueil
+      router.push('/');
     } catch (err) {
       console.error(err);
       alert('Erreur de connexion au serveur');
@@ -141,21 +146,16 @@ export default function RegisterPage() {
 
             <input type="password" name="password" placeholder="Mot de passe" value={form.password} onChange={handleChange} required className="input w-full" />
 
-            {/* Case vendeur */}
-            <label className="flex items-center gap-2">
-              <input type="checkbox" checked={isSeller} onChange={() => setIsSeller(!isSeller)} />
-              Je suis vendeur
-            </label>
+            {/* ✔ CHAMPS VENDEUR TOUJOURS VISIBLES, OPTIONNELS */}
+            <div className="space-y-3 border-t pt-4">
+              <input name="commerceName" placeholder="Nom du commerce (optionnel)" value={form.commerceName} onChange={handleChange} className="input w-full" />
+              <textarea name="neighborhood" placeholder="Quartier / Description (optionnel)" value={form.neighborhood} onChange={handleChange} className="input w-full" />
+              <input name="idCardImage" placeholder="Lien vers carte d’identité (URL) (optionnel)" value={form.idCardImage} onChange={handleChange} className="input w-full" />
+            </div>
 
-            {isSeller && (
-              <div className="space-y-3 border-t pt-4">
-                <input name="commerceName" placeholder="Nom du commerce" value={form.commerceName} onChange={handleChange} className="input w-full" />
-                <textarea name="neighborhood" placeholder="Quartier / Description" value={form.neighborhood} onChange={handleChange} className="input w-full" />
-                <input name="idCardImage" placeholder="Lien vers carte d’identité (URL)" value={form.idCardImage} onChange={handleChange} className="input w-full" />
-              </div>
-            )}
-
-            <button type="submit" className="btn-primary w-full mt-4">S’inscrire</button>
+            <button type="submit" className="btn-primary w-full mt-4">
+              S’inscrire
+            </button>
           </form>
         </div>
       </div>
