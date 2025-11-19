@@ -123,15 +123,18 @@ export default function ProduitsPage() {
                       <span className="text-sm font-medium">FCFA</span>
                     </span>
 
-                    <button
-                      className="bg-sawaka-500 hover:bg-sawaka-600 text-white text-sm px-3 py-2 rounded-lg transition-all"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        alert(`🛍️ "${a.title}" ajouté au panier`);
-                      }}
-                    >
-                      🛒 Ajouter
-                    </button>
+{/* 
+<button
+  className="bg-sawaka-500 hover:bg-sawaka-600 text-white text-sm px-3 py-2 rounded-lg transition-all"
+  onClick={(e) => {
+    e.preventDefault();
+    alert(`🛍️ "${a.title}" ajouté au panier`);
+  }}
+>
+  🛒 Ajouter
+</button>
+*/}
+
                   </div>
                 </div>
               </div>
