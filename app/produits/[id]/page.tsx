@@ -317,43 +317,69 @@ export default function ProduitDetail() {
                 </div>
               )}
 
-              {/* Quantité + Panier */}
+{/* Quantité + Panier */}
 {article.status !== "auction" && (
   <div className="mb-6">
-    {/* Le panier est désactivé pour le moment */}
+
+    {/* 🛒 Panier désactivé (masqué) */}
     {/*
     <div className="mb-6">
       <label className="block text-sawaka-800 font-medium mb-2">Quantité</label>
       <div className="flex items-center gap-3">
-        <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
-        <input type="number" value={quantity} />
-        <button onClick={() => setQuantity(quantity + 1)}>+</button>
+        <button
+          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          className="w-10 h-10 rounded-lg border-2 border-sawaka-300"
+        >
+          -
+        </button>
+
+        <input
+          type="number"
+          value={quantity}
+          onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+          className="w-20 h-10 text-center border-2 border-sawaka-300 rounded-lg"
+          min="1"
+          max={article.stock}
+        />
+
+        <button
+          onClick={() => setQuantity(quantity + 1)}
+          className="w-10 h-10 rounded-lg border-2 border-sawaka-300"
+        >
+          +
+        </button>
       </div>
     </div>
 
     <div className="flex gap-3 mb-6">
-      <button onClick={handleAddToCart} disabled={article.stock === 0}>
-        <ShoppingCart /> Ajouter au panier
+      <button
+        onClick={handleAddToCart}
+        disabled={article.stock === 0}
+        className="flex-1 btn-primary flex items-center justify-center gap-2"
+      >
+        <ShoppingCart size={20} /> Ajouter au panier
       </button>
     </div>
     */}
 
-    {/* 🔥 Nouveau bouton Contact à la place exacte du panier */}
-    <button
-      onClick={() => router.push(`/artisans/${article.vendorId?._id}`)}
-      className="w-full btn-primary flex items-center justify-center gap-2"
-    >
-      <MessageCircle size={18} /> Contacter l’artisan
-    </button>
+    {/* ⭐ Nouveau bouton Contact = même taille que “Ajouter au panier” */}
+    <div className="flex gap-3">
+      <button
+        onClick={() => router.push(`/artisans/${article.vendorId?._id}`)}
+        className="flex-1 btn-primary flex items-center justify-center gap-2"
+      >
+        <MessageCircle size={18} /> Contacter l’artisan
+      </button>
 
-    {/* Bouton Like laissé en dessous */}
-    <div className="mt-4 flex justify-center">
+      {/* ❤️ Bouton Like placé à droite du bouton Contact */}
       <button
         type="button"
         onClick={handleLike}
         aria-label={liked ? "Retirer des favoris" : "Ajouter aux favoris"}
         className={`w-12 h-12 rounded-lg transition flex items-center justify-center ${
-          liked ? "bg-red-500 text-white" : "border-2 border-red-500 text-red-500 hover:bg-red-50"
+          liked
+            ? "bg-red-500 text-white"
+            : "border-2 border-red-500 text-red-500 hover:bg-red-50"
         }`}
       >
         <Heart size={20} className={liked ? "fill-current" : ""} />
@@ -361,6 +387,7 @@ export default function ProduitDetail() {
     </div>
   </div>
 )}
+
 
 
               <p className="text-sm text-sawaka-600">
@@ -383,9 +410,12 @@ export default function ProduitDetail() {
                       {article.vendorId.city}, {article.vendorId.province}
                     </p>
                   )}
-                  <button className="mt-3 btn-secondary w-full flex items-center justify-center gap-2">
-                    <MessageCircle size={18} /> Contacter l'artisan
-                  </button>
+{/* 
+<button className="mt-3 btn-secondary w-full flex items-center justify-center gap-2">
+  <MessageCircle size={18} /> Contacter l'artisan
+</button> 
+*/}
+
                 </div>
               </div>
             )}
