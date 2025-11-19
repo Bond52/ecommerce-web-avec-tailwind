@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 // API
 const API =
-  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
-  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_BASE ||
   "https://ecommerce-web-avec-tailwind.onrender.com";
 
 interface Artisan {
@@ -33,6 +34,7 @@ export default function ArtisansPage() {
         const filtered = data.filter(
           (a: Artisan) => a.isSeller === true || a.roles?.includes("vendeur")
         );
+
         setArtisans(filtered);
       } catch (error) {
         console.error("Erreur lors du chargement :", error);
@@ -63,21 +65,22 @@ export default function ArtisansPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {artisans.map((artisan) => (
-            <div
+            <Link
               key={artisan._id}
-              className="bg-white p-6 rounded-2xl shadow-md border border-cream-200 hover:shadow-lg transition"
+              href={`/artisans/${artisan._id}`}
+              className="bg-white p-6 rounded-2xl shadow-md border border-cream-200 hover:shadow-lg transition block"
             >
-              {/* IMAGE EN HAUT GAUCHE — GRANDE */} 
+              {/* IMAGE */}
               <img
                 src={
                   artisan.idCardImage ||
                   "https://via.placeholder.com/300x200?text=Artisan"
                 }
-                alt={`${artisan.firstName} ${artisan.lastName}`}
+                alt={`${artisan.firstName || ""} ${artisan.lastName || ""}`}
                 className="w-full h-48 object-cover rounded-xl"
               />
 
-              {/* TEXTES EN BAS */}
+              {/* TEXTES */}
               <h2 className="mt-4 text-xl font-semibold text-sawaka-900">
                 {artisan.firstName || artisan.lastName
                   ? `${artisan.firstName || ""} ${artisan.lastName || ""}`
@@ -94,7 +97,7 @@ export default function ArtisansPage() {
                   ? new Date(artisan.createdAt).toLocaleDateString()
                   : "N/A"}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       )}

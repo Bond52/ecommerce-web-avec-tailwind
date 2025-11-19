@@ -3,28 +3,36 @@ const router = express.Router();
 const User = require("../models/user");
 
 /**
- * 🎨 Récupère tous les artisans (vendeurs)
+ * 🎨 Récupère tous les artisans
  */
 router.get("/", async (req, res) => {
   try {
     const artisans = await User.find({
-      $or: [
-        { isSeller: true },
-        { roles: { $in: ["vendeur"] } }
-      ]
+      $or: [{ isSeller: true }, { roles: { $in: ["vendeur"] } }]
     })
       .select("-password")
       .sort({ createdAt: -1 });
 
-    if (!artisans.length) {
-      console.warn("⚠️ Aucun artisan trouvé dans la base");
-      return res.status(200).json([]);
-    }
-
     res.json(artisans);
   } catch (err) {
-    console.error("❌ Erreur /api/artisans :", err.message);
     res.status(500).json({ message: "Erreur lors du chargement des artisans" });
+  }
+});
+
+/**
+ * 🔎 Récupère 1 artisan par ID
+ */
+router.get("/:id", async (req, res) => {
+  try {
+    const artisan = await User.findById(req.params.id).select("-password");
+
+    if (!artisan) {
+      return res.status(404).json({ message: "Artisan introuvable" });
+    }
+
+    res.json(artisan);
+  } catch (err) {
+    res.status(500).json({ message: "Erreur lors du chargement de l’artisan" });
   }
 });
 
