@@ -56,7 +56,7 @@ export default function ProfilePage() {
     setForm((prev: any) => ({ ...prev, [key]: value }));
   };
 
-  // On envoie tout d’un coup
+  // Enregistrer
   const handleSave = async () => {
     setSaving(true);
 
@@ -107,18 +107,18 @@ export default function ProfilePage() {
           {/* FORM */}
           <div className="col-span-2 space-y-10">
 
-            {/* --- INFORMATIONS PROFIL --- */}
+            {/* --- PROFIL --- */}
             <Section title="Informations du profil">
               <Grid>
-                <Input label="username" value={form.username}
+                <Input label="Nom d'utilisateur" value={form.username}
                        onChange={(e) => updateField("username", e.target.value)} />
-                <Input label="firstName" value={form.firstName}
+                <Input label="Prénom" value={form.firstName}
                        onChange={(e) => updateField("firstName", e.target.value)} />
-                <Input label="lastName" value={form.lastName}
+                <Input label="Nom" value={form.lastName}
                        onChange={(e) => updateField("lastName", e.target.value)} />
-                <Input label="nickname" value={form.nickname}
+                <Input label="Surnom / Nom affiché" value={form.nickname}
                        onChange={(e) => updateField("nickname", e.target.value)} />
-                <Input label="roles" value={form.roles}
+                <Input label="Rôles" value={form.roles}
                        onChange={(e) => updateField("roles", e.target.value)} />
               </Grid>
             </Section>
@@ -126,25 +126,25 @@ export default function ProfilePage() {
             {/* --- CONTACT --- */}
             <Section title="Informations de contact">
               <Grid>
-                <Input label="email" value={form.email}
+                <Input label="Email" value={form.email}
                        onChange={(e) => updateField("email", e.target.value)} />
-                <Input label="phone" value={form.phone}
+                <Input label="Téléphone" value={form.phone}
                        onChange={(e) => updateField("phone", e.target.value)} />
-                <Input label="country" value={form.country}
+                <Input label="Pays" value={form.country}
                        onChange={(e) => updateField("country", e.target.value)} />
                 <Select
-                  label="province"
+                  label="Province"
                   value={form.province}
                   onChange={(e) => updateField("province", e.target.value)}
                   options={Object.keys(provincesCM)}
                 />
                 <Select
-                  label="city"
+                  label="Ville"
                   value={form.city}
                   onChange={(e) => updateField("city", e.target.value)}
                   options={form.province ? provincesCM[form.province] : []}
                 />
-                <Input label="pickupPoint" value={form.pickupPoint}
+                <Input label="Point de retrait" value={form.pickupPoint}
                        onChange={(e) => updateField("pickupPoint", e.target.value)} />
               </Grid>
             </Section>
@@ -153,11 +153,11 @@ export default function ProfilePage() {
             {form.isSeller && (
               <Section title="Informations vendeur">
                 <Grid>
-                  <Input label="commerceName" value={form.commerceName}
+                  <Input label="Nom du commerce" value={form.commerceName}
                          onChange={(e) => updateField("commerceName", e.target.value)} />
-                  <Input label="neighborhood" value={form.neighborhood}
+                  <Input label="Quartier" value={form.neighborhood}
                          onChange={(e) => updateField("neighborhood", e.target.value)} />
-                  <Input label="idCardImage" value={form.idCardImage}
+                  <Input label="Pièce d'identité (lien)" value={form.idCardImage}
                          onChange={(e) => updateField("idCardImage", e.target.value)} />
                 </Grid>
 
@@ -172,20 +172,21 @@ export default function ProfilePage() {
               </Section>
             )}
 
-            {/* --- ABOUT --- */}
-            <Section title="À propos">
+            {/* --- À propos --- */}
+            <Section title="À propos de moi">
               <textarea
                 value={form.about || ""}
                 onChange={(e) => updateField("about", e.target.value)}
                 className="w-full border border-gray-300 rounded-lg p-3 h-32"
+                placeholder="Écrivez quelque chose à propos de vous..."
               />
             </Section>
 
             {/* --- PASSWORD --- */}
             <Section title="Mot de passe">
               <Grid>
-                <Input placeholder="Ancien mot de passe" />
-                <Input placeholder="Nouveau mot de passe" />
+                <Input label="Ancien mot de passe" placeholder="Ancien mot de passe" />
+                <Input label="Nouveau mot de passe" placeholder="Nouveau mot de passe" />
               </Grid>
 
               <button className="mt-4 px-4 py-2 bg-sawaka-600 text-white rounded-lg hover:bg-sawaka-700">
@@ -196,7 +197,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* --- BOUTON SAVE GLOBAL --- */}
+        {/* --- SAVE --- */}
         <div className="mt-10 text-center">
           <button
             disabled={!isModified || saving}
@@ -217,7 +218,7 @@ export default function ProfilePage() {
   );
 }
 
-/* --- COMPOSANTS UTILITAIRES --- */
+/* --- COMPONENTS UTILITAIRES --- */
 
 function Section({ title, children }: any) {
   return (
@@ -236,9 +237,7 @@ function Input({ label, value, onChange, placeholder }: any) {
   return (
     <div className="flex flex-col">
       {label && (
-        <label className="text-sm text-sawaka-600 mb-1 capitalize">
-          {label}
-        </label>
+        <label className="text-sm text-sawaka-600 mb-1">{label}</label>
       )}
       <input
         value={value}
@@ -253,7 +252,7 @@ function Input({ label, value, onChange, placeholder }: any) {
 function Select({ label, value, onChange, options }: any) {
   return (
     <div className="flex flex-col">
-      <label className="text-sm text-sawaka-600 mb-1 capitalize">{label}</label>
+      <label className="text-sm text-sawaka-600 mb-1">{label}</label>
       <select
         value={value || ""}
         onChange={onChange}
