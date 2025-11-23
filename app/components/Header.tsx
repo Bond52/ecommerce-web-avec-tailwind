@@ -155,7 +155,7 @@ export default function Header() {
 */}
 
                   <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">
-                    🛍️ Ventes
+                    🛍️ Mes créations
                   </Link>
 
                   {/* 🧭 Sous-menu spécial pour admin */}
@@ -222,13 +222,25 @@ export default function Header() {
     <Link href="/produits">Produits</Link>
     <Link href="/nouveautes">Nouveautés</Link>
     <Link href="/promotions">Promotions</Link>
-    {/* 🆕 Nouveau lien ventes aux enchères */}
+
+    {/* 🆕 NOUVEAUX MENUS */}
+    <Link href="/fournisseurs" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
+      Fournisseurs
+    </Link>
+    <Link href="/projets" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
+      Projets en cours
+    </Link>
+    <Link href="/arbre-outils" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
+      L’Arbre à outils
+    </Link>
+
+    {/* Enchères */}
     <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
       Ventes aux enchères
     </Link>
+
     <Link href="/artisans">Artisans</Link>
     <Link href="/amelioration">Améliorer Sawaka</Link>
-
   </div>
 </div>
 

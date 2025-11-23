@@ -45,7 +45,7 @@ export default function HomePage() {
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-sawaka-800 leading-tight mb-6">
                 Partagez vos
-                <span className="block text-gradient">créations uniques</span>
+                <span className="block text-gradient">créations</span>
               </h1>
               <p className="text-lg text-sawaka-600 mb-8 max-w-xl">
                 Connectez-vous directement avec d'autres artisans du Cameroun. Des créations uniques, 
@@ -173,7 +173,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-2">
-                Nos créations populaires
+                Créations populaires
               </h2>
               <p className="text-lg text-sawaka-600">
                 Découvrez les produits les plus appréciés par nos clients
