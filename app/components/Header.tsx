@@ -19,7 +19,6 @@ export default function Header() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [user, setUser] = useState<UserData | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -53,15 +52,6 @@ export default function Header() {
     }
   };
 
-  const categories = [
-    { name: "Mode & Accessoires", href: "/produits?category=mode" },
-    { name: "Maison & Décoration", href: "/produits?category=maison" },
-    { name: "Art & Artisanat", href: "/produits?category=art" },
-    { name: "Beauté & Bien-être", href: "/produits?category=beaute" },
-    { name: "Bijoux", href: "/produits?category=bijoux" },
-    { name: "Textile", href: "/produits?category=textile" },
-  ];
-
   const isAdmin = user?.roles?.includes("admin");
 
   return (
@@ -82,7 +72,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Header */}
+      {/* Main */}
       <div className="wrap py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -99,10 +89,7 @@ export default function Header() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full h-12 pl-4 pr-12 rounded-lg border-2 border-cream-200 focus:border-sawaka-500 focus:ring-0"
             />
-            <button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-sawaka-500 text-white rounded-md"
-            >
+            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-sawaka-500 text-white rounded-md">
               🔍
             </button>
           </div>
@@ -119,6 +106,7 @@ export default function Header() {
                 <div className="w-8 h-8 bg-sawaka-500 rounded-full flex items-center justify-center text-white">
                   {user.firstName?.charAt(0) || user.username.charAt(0)}
                 </div>
+
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-medium text-sawaka-800">
                     Bonjour, {user.firstName || user.username}
@@ -131,13 +119,8 @@ export default function Header() {
 
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 z-50">
-                  <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">
-                    👤 Profil
-                  </Link>
-
-                  <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">
-                    🛍️ Mes créations
-                  </Link>
+                  <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">👤 Mon Profil</Link>
+                  <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">🛍️ Mes créations</Link>
 
                   {isAdmin && (
                     <>
@@ -166,61 +149,32 @@ export default function Header() {
         </div>
       </div>
 
-      {/* NAV BAR */}
-      <div className="border-t bg-cream-50 relative">
-        <div className="wrap py-3 flex flex-nowrap gap-6 text-sm items-center overflow-x-auto whitespace-nowrap">
+      {/* NAV BAR — NO CATEGORIES */}
+      <div className="border-t bg-cream-50">
+        <div className="wrap py-3 flex gap-8 text-sm items-center whitespace-nowrap">
 
-          {/* Bouton Catégories */}
-          <button
-            onClick={() => setShowCategoryMenu(!showCategoryMenu)}
-            className="px-4 py-2 bg-sawaka-500 text-white rounded-lg"
-          >
+          {/* Catégories désactivé */}
+          {/* 
+          <button className="px-4 py-2 bg-sawaka-500 text-white rounded-lg">
             ☰ Catégories
           </button>
+          */}
 
-          {/* Dropdown Catégories */}
-          {showCategoryMenu && (
-            <div className="absolute left-0 top-full mt-1 w-64 bg-white border rounded-lg shadow-xl py-2 z-50">
-              {categories.map((c, i) => (
-                <Link
-                  key={i}
-                  href={c.href}
-                  className="block px-4 py-2 hover:bg-cream-50"
-                  onClick={() => setShowCategoryMenu(false)}  // Auto-fermeture
-                >
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-          )}
+          <Link href="/">Accueil</Link>
+          <Link href="/artisans">Artisans</Link>
+          <Link href="/produits">Produits</Link>
+          <Link href="/nouveautes">Nouveautés</Link>
+          <Link href="/promotions">Promotions</Link>
 
-          {/* Liens */}
-          <Link href="/" className="hover:text-sawaka-700">Accueil</Link>
-          <Link href="/artisans" className="hover:text-sawaka-700">Artisans</Link>
-          <Link href="/produits" className="hover:text-sawaka-700">Produits</Link>
-          <Link href="/nouveautes" className="hover:text-sawaka-700">Nouveautés</Link>
-          <Link href="/promotions" className="hover:text-sawaka-700">Promotions</Link>
-
-          <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
+          <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900">
             Ventes aux enchères
           </Link>
 
-          <Link href="/fournisseurs" className="hover:text-sawaka-700">
-            Fournisseurs
-          </Link>
+          <Link href="/fournisseurs">Fournisseurs</Link>
+          <Link href="/projets">Projets en cours</Link>
+          <Link href="/arbre">L’Arbre à outils</Link>
 
-          <Link href="/projets" className="hover:text-sawaka-700">
-            Projets en cours
-          </Link>
-
-          <Link href="/arbre" className="hover:text-sawaka-700">
-            L’Arbre à outils
-          </Link>
-
-          <Link href="/amelioration" className="hover:text-sawaka-700">
-            Améliorer Sawaka
-          </Link>
-
+          <Link href="/amelioration">Améliorer Sawaka</Link>
         </div>
       </div>
     </header>
