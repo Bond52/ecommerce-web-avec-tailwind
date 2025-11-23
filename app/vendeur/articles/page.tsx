@@ -353,7 +353,7 @@ export default function VendorArticlesPage() {
 >
   <option value="draft">Brouillon</option>
   <option value="published">Publié</option>
-  <option value="auction">Vente aux enchères</option>
+  {/* <option value="auction">Vente aux enchères</option> */}
 </select>
 
         </div>
