@@ -1,0 +1,18 @@
+export default function FournisseursPage() {
+  return (
+    <div className="wrap py-12">
+      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">
+        Fournisseurs
+      </h1>
+
+      <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl">
+        Cette page affichera une liste de fournisseurs de matières premières
+        pour vos projets et vos créations artisanales.
+      </p>
+
+      <div className="mt-6 p-4 bg-cream-100 border border-cream-300 rounded-lg text-sawaka-600">
+        (Section en cours de développement)
+      </div>
+    </div>
+  );
+}

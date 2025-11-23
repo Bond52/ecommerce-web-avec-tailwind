@@ -230,7 +230,7 @@ export default function Header() {
 
     {/* 🆕 NOUVEAUX MENUS */}
  <Link href="/fournisseurs" className="text-sawaka-700 hover:text-sawaka-900">
-  Fournisseurs
+  Fournisseur
 </Link>
 
 <Link href="/projets" className="text-sawaka-700 hover:text-sawaka-900">
