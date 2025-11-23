@@ -268,7 +268,7 @@ export default function VendorArticlesPage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
-      <h1 className="text-2xl font-semibold">Mes articles</h1>
+      <h1 className="text-2xl font-semibold">Mes créations</h1>
 
       {error && (
         <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700">
@@ -425,7 +425,7 @@ export default function VendorArticlesPage() {
           <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
             className="border p-2 rounded w-full"
-            placeholder="Décrivez votre article"
+            placeholder="Décrivez votre création"
             value={form.description}
             onChange={(e) =>
               setForm((f) => ({ ...f, description: e.target.value }))
