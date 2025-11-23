@@ -53,8 +53,8 @@ export default function ArbrePage() {
         Cette section vous donnera accès aux outils nécessaires ainsi qu’aux vendeurs
         locaux qui les proposent pour soutenir vos projets — artisanaux ou industriels.
         <br /><br />
-        Lorsqu’aucun fabricant national n’existe pour un outil, cela révèle une
-        opportunité de création locale !
+      Lorsqu’il n’existe aucun fabricant national pour un outil, c’est une excellente opportunité de lancer un projet pour le produire localement !
+      De plus, n’hésitez pas à rechercher aussi les outils… qui servent à fabriquer d’autres outils.
       </p>
 
       {/* 🔍 Barre de recherche */}

@@ -37,7 +37,7 @@ export default function NouveautesPage() {
             )
             .slice(0, siteConfig.nouveautes.limit);
         } else {
-          // 🕒 Mode "articles créés depuis Y jours/heures"
+          // 🕒 Mode "depuis X jours/heures"
           const now = new Date();
           const cutoff = new Date(
             now.getTime() -
@@ -79,28 +79,25 @@ export default function NouveautesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {articles.map((a) => (
-            <div
+            <Link
               key={a._id}
-              className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all bg-white"
+              href={`/produit/${a._id}`}
+              className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all bg-white block"
             >
               <img
                 src={a.images?.[0] || "/images/placeholder.png"}
                 alt={a.title}
                 className="w-full h-48 object-cover"
               />
+
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-1">{a.title}</h3>
+
                 <div className="text-sawaka-600 font-medium">
                   {a.price.toLocaleString()} FCFA
                 </div>
-                <Link
-                  href={`/produit/${a._id}`}
-                  className="inline-block mt-2 text-sm text-sawaka-700 hover:underline"
-                >
-                  Voir le produit →
-                </Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}
