@@ -62,7 +62,7 @@ export default function PromotionsPage() {
           {articles.map((a) => (
             <Link
               key={a._id}
-              href={`/produit/${a._id}`}
+              href={`/produits/${a._id}`}
               className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all bg-white block"
             >
               <img
