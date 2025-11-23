@@ -9,20 +9,20 @@ router.post("/", async (req, res) => {
     const brevoApiKey = process.env.BREVO_API_KEY;
 
     if (!brevoApiKey) {
-      console.error("❌ BREVO_API_KEY manquant");
+      console.error("❌ BREVO_API_KEY manquante");
       return res.status(500).json({ success: false, error: "Configuration manquante." });
     }
 
     const payload = {
-      sender: { name: "Sawaka Feedback", email: "no-reply@sawaka.com" },
+      sender: { name: "Sawaka Feedback", email: "contact@sawaka.org" },
       to: [
-        { email: "bertrand.ond@gmail.com" },
-        { email: "test2@sawaka.com" }
+        { email: "contact@sawaka.org" } // tu reçois le message ici
       ],
-      subject: "📝 Nouveau feedback Sawaka",
+      replyTo: { email: email || "contact@sawaka.org" },
+      subject: "📝 Nouveau message d'un utilisateur",
       htmlContent: `
-        <h2>Nouveau message d'un utilisateur</h2>
-        <p><strong>Email :</strong> ${email || "non fourni"}</p>
+        <h2>Nouveau message depuis Sawaka</h2>
+        <p><strong>Email utilisateur :</strong> ${email || "non fourni"}</p>
         <p><strong>Message :</strong></p>
         <p>${message}</p>
       `
@@ -40,7 +40,6 @@ router.post("/", async (req, res) => {
     );
 
     console.log("📨 Email envoyé :", response.data);
-
     res.json({ success: true });
 
   } catch (error) {

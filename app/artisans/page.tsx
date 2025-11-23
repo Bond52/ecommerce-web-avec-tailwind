@@ -57,7 +57,7 @@ export default function ArtisansPage() {
   return (
     <main className="min-h-screen bg-cream-100 p-8">
       <h1 className="text-3xl font-bold text-center text-sawaka-900 mb-10">
-        Nos Artisans
+        Les Artisans
       </h1>
 
       {artisans.length === 0 ? (
