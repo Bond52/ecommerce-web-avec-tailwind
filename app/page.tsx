@@ -176,7 +176,7 @@ export default function HomePage() {
                 Créations populaires
               </h2>
               <p className="text-lg text-sawaka-600">
-                Découvrez les produits les plus appréciés par nos clients
+                Découvrez les produits les plus appréciés
               </p>
             </div>
             <Link 
