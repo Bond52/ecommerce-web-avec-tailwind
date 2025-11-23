@@ -22,7 +22,13 @@ export default function CameroonMap() {
     fillOpacity: 0.6,
   };
 
-  if (!geo) return <p className="text-center py-6">Chargement de la carte…</p>;
+  if (!geo) {
+    return (
+      <div className="text-center py-6 text-sawaka-600">
+        Chargement de la carte…
+      </div>
+    );
+  }
 
   return (
     <div className="wrap my-16">
@@ -33,18 +39,22 @@ export default function CameroonMap() {
         Découvrez la répartition géographique des artisans sur la plateforme
       </p>
 
-      <MapContainer
-        center={[7.3697, 12.3547]} // centre du Cameroun
-        zoom={6}
-        scrollWheelZoom={false}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
-        />
+      {/* Ajout d’une hauteur fixe pour que la carte apparaisse */}
+      <div className="w-full h-[500px] rounded-xl overflow-hidden shadow-md">
+        <MapContainer
+          center={[7.3697, 12.3547]}
+          zoom={6}
+          scrollWheelZoom={false}
+          style={{ width: "100%", height: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; OpenStreetMap contributors"
+          />
 
-        <GeoJSON data={geo} style={() => style} />
-      </MapContainer>
+          <GeoJSON data={geo} style={() => style} />
+        </MapContainer>
+      </div>
     </div>
   );
 }
