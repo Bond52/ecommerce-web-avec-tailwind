@@ -12,10 +12,13 @@ app.set("trust proxy", 1);
 
 // 🌍 Origines autorisées
 const allowedOrigins = [
-  "https://ecommerce-web-avec-tailwind.vercel.app", // ton frontend en production (Vercel)
-  process.env.FRONTEND_URL, // optionnel : URL de préproduction ou variable d'env
-  "http://localhost:3000", // ton frontend en local
+  "https://ecommerce-web-avec-tailwind.vercel.app",
+  "https://sawaka.org",
+  "https://www.sawaka.org",
+  process.env.FRONTEND_URL,
+  "http://localhost:3000",
 ].filter(Boolean);
+
 
 // 🧩 Middleware CORS (version stable et compatible Render/Vercel)
 app.use(
