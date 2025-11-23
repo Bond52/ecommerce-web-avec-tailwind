@@ -224,15 +224,17 @@ export default function Header() {
     <Link href="/promotions">Promotions</Link>
 
     {/* 🆕 NOUVEAUX MENUS */}
-    <Link href="/fournisseurs" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
-      Fournisseurs
-    </Link>
-    <Link href="/projets" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
-      Projets en cours
-    </Link>
-    <Link href="/arbre-outils" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
-      L’Arbre à outils
-    </Link>
+ <Link href="/fournisseurs" className="text-sawaka-700 hover:text-sawaka-900">
+  Fournisseurs
+</Link>
+
+<Link href="/projets" className="text-sawaka-700 hover:text-sawaka-900">
+  Projets en cours
+</Link>
+
+<Link href="/arbre-outils" className="text-sawaka-700 hover:text-sawaka-900">
+  L’Arbre à outils
+</Link>
 
     {/* Enchères */}
     <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
