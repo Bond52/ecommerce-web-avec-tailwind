@@ -199,7 +199,10 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {articles.slice(0, 8).map(article => (
+              {[...articles]
+                .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+                .slice(0, 4)
+                .map(article => (
                 <div key={article._id} className="group bg-white rounded-xl border border-cream-200 overflow-hidden hover:border-sawaka-300 hover:shadow-lg transition-all duration-300">
                   {/* Product Image */}
                   <div className="aspect-square bg-cream-100 relative overflow-hidden">
@@ -259,8 +262,8 @@ export default function HomePage() {
                         Plus que {article.stock} en stock
                       </div>
                     )}
-
-                   {/* <button
+                    {/* 
+                    <button
                       onClick={() => addToCart(article)}
                       disabled={article.stock <= 0}
                       className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
