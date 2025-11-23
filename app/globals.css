@@ -33,35 +33,35 @@
 
   h1 {
     font-family: var(--font-display, ui-serif, Georgia, serif);
-    font-size: 2.25rem;      /* text-4xl */
-    line-height: 2.5rem;     /* leading-tight */
-    letter-spacing: -0.015em;/* tracking-tight */
+    font-size: 2.25rem;      
+    line-height: 2.5rem;     
+    letter-spacing: -0.015em;
   }
   @media (min-width: 768px) {
     h1 {
-      font-size: 3rem;       /* md:text-5xl */
+      font-size: 3rem;       
       line-height: 1;
     }
   }
 
   h2 {
     font-family: var(--font-display, ui-serif, Georgia, serif);
-    font-size: 1.875rem;     /* text-3xl */
-    line-height: 2.25rem;    /* leading-snug */
+    font-size: 1.875rem;    
+    line-height: 2.25rem;    
   }
   @media (min-width: 768px) {
-    h2 { font-size: 2.25rem; } /* md:text-4xl */
+    h2 { font-size: 2.25rem; }
   }
 
   h3 {
-    font-weight: 600;        /* font-semibold */
-    font-size: 1.25rem;      /* text-xl */
+    font-weight: 600;        
+    font-size: 1.25rem;      
     line-height: 1.75rem;
   }
 
   p  {
-    font-size: 15px;         /* text-[15px] */
-    line-height: 1.75rem;    /* leading-7 */
+    font-size: 15px;        
+    line-height: 1.75rem;    
     color: var(--sawaka-800);
   }
 
@@ -81,12 +81,12 @@
     color: transparent;
   }
   .section {
-    padding-top: 3rem;       /* py-12 */
+    padding-top: 3rem;
     padding-bottom: 3rem;
   }
   @media (min-width: 768px) {
     .section {
-      padding-top: 4rem;     /* md:py-16 */
+      padding-top: 4rem;
       padding-bottom: 4rem;
     }
   }
@@ -95,7 +95,6 @@
 
 /* ===== Composants ===== */
 @layer components {
-  /* Conteneur + grilles */
   .wrap {
     width: 100%;
     max-width: 1140px;
@@ -104,9 +103,10 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
+
   .grid-products {
     display: grid;
-    gap: 1.5rem; /* 24px */
+    gap: 1.5rem;
   }
   @media (min-width: 768px) {
     .grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -123,27 +123,26 @@
     .grid-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   }
 
-  /* Navigation */
   .nav-link {
-    font-size: 0.875rem;     /* text-sm */
-    font-weight: 500;        /* medium */
+    font-size: 0.875rem;
+    font-weight: 500;
     color: var(--sawaka-800);
   }
   .nav-link:hover { color: var(--sawaka-900); }
+
   .nav {
     display: flex;
     align-items: center;
-    gap: 1.5rem;             /* 24px */
+    gap: 1.5rem;
     font-size: 0.875rem;
   }
 
-  /* Boutons */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 1rem;     /* rounded-xl (custom) */
-    padding: 0.625rem 1.25rem; /* py-2.5 px-5 */
+    border-radius: 1rem;
+    padding: 0.625rem 1.25rem;
     font-weight: 600;
     transition: all .2s ease;
   }
@@ -164,15 +163,9 @@
   }
   .btn-outline:hover { background-color: var(--cream-100); }
 
-  .btn-small {
-    padding: 0.5rem 0.75rem; /* py-2 px-3 */
-    font-size: 0.875rem;
-    border-radius: 0.5rem;   /* rounded-lg */
-  }
-
-  /* Cartes produits */
+  /* Cards produits */
   .card {
-    border-radius: 1.25rem;  /* rounded-2xl */
+    border-radius: 1.25rem;
     background-color: var(--cream-100);
     box-shadow:
       0 1px 2px rgba(16, 24, 40, .06),
@@ -182,7 +175,7 @@
   .card-body { padding: 1rem; }
   .card-thumb {
     background-color: var(--cream-200);
-    height: 14rem;           /* h-56 */
+    height: 14rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -192,13 +185,11 @@
     color: var(--sawaka-900);
   }
   .card-sub {
-    font-size: 0.75rem;      /* text-xs */
-    line-height: 1rem;
+    font-size: 0.75rem;
     color: var(--sawaka-700);
   }
   .card-desc {
-    font-size: 0.875rem;     /* text-sm */
-    line-height: 1.25rem;
+    font-size: 0.875rem;
     color: var(--sawaka-800);
   }
   .price {
@@ -206,62 +197,23 @@
     color: var(--sawaka-800);
   }
 
-  /* Pastille icône (section “Comment ça marche”) */
-  .icon-circle {
-    width: 3rem; height: 3rem;         /* 12 */
-    border-radius: 9999px;
-    background-color: #fff;
-    box-shadow: 0 8px 24px rgba(0,0,0,.06);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--sawaka-100);
-  }
-
-  /* Bandeau “How it works” */
-  .howit-card {
-    background-color: var(--cream-200);
-    border-radius: 1.25rem;
-    padding: 1.5rem; /* p-6 */
-    text-align: center;
-  }
-  .howit-title {
-    margin-top: 0.75rem;
-    font-weight: 600;
-    color: var(--sawaka-900);
-  }
-  .howit-text  {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    color: var(--sawaka-800);
-  }
-
   /* Hero */
   .hero {
     text-align: center;
-    padding-top: 4rem;       /* py-16 */
+    padding-top: 4rem;
     padding-bottom: 4rem;
   }
   @media (min-width: 768px) {
-    .hero { padding-top: 5rem; padding-bottom: 5rem; } /* md:py-20 */
+    .hero { padding-top: 5rem; padding-bottom: 5rem; }
   }
-  .hero-eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 11px;
-    color: var(--sawaka-700);
-  }
+
   .hero-title {
     font-family: var(--font-display, ui-serif, Georgia, serif);
-    font-size: 3rem;         /* text-5xl */
-    line-height: 1.25;       /* leading-tight */
+    font-size: 3rem;
+    line-height: 1.25;
   }
   @media (min-width: 768px) {
-    .hero-title { font-size: 3.75rem; } /* md:text-6xl */
-  }
-  .hero-sub {
-    margin-top: 0.75rem;
-    color: var(--sawaka-700);
+    .hero-title { font-size: 3.75rem; }
   }
 
   /* Footer */
@@ -270,37 +222,47 @@
     color: var(--cream-50);
   }
   .footer-wrap {
-    /* .wrap + py-10 */
     width: 100%;
     max-width: 1140px;
     margin-left: auto;
     margin-right: auto;
     padding-left: 1rem;
     padding-right: 1rem;
-    padding-top: 2.5rem;     /* py-10 */
+    padding-top: 2.5rem;
     padding-bottom: 2.5rem;
   }
-  .footer-col  { display: grid; gap: 0.75rem; font-size: 0.875rem; }
-  .footer-title{ font-size: 0.875rem; font-weight: 600; color: var(--cream-50); }
-  .footer-link { color: #f1efe9; }        /* cream-200 approx */
-  .footer-link:hover { color: #fff; }
+}
 
-  /* Formulaire newsletter */
-  .newsletter { display: flex; align-items: center; gap: 0.5rem; }
-  .newsletter input {
-    width: 100%;
-    border-radius: 0.5rem;
-    border: 1px solid var(--sawaka-700);
-    background-color: var(--sawaka-800);
-    color: var(--cream-50);
-  }
-  .newsletter input::placeholder { color: #f1efe9; }
-  .newsletter .ok {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    border-radius: 0.5rem;
-    background-color: var(--sawaka-500);
-    color: #fff;
-  }
-  .newsletter .ok:hover { background-color: #955f3f; } /* sawaka-600-ish */
+/* ===================================================================================== */
+/*                           🎉 AJOUT LEAFLET (obligatoire)                             */
+/* ===================================================================================== */
+
+/* Import du CSS Leaflet */
+@import "leaflet/dist/leaflet.css";
+
+/* Empêche Leaflet de casser le layout Next.js */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
+}
+
+/* Hauteur de la carte Cameroun */
+.cameroon-map {
+  width: 100%;
+  height: 500px;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+
+/* Popups plus élégants */
+.leaflet-popup-content {
+  font-size: 14px;
+  color: var(--sawaka-900);
+}
+
+/* Fix icônes Leaflet sur Next.js */
+.leaflet-div-icon, .leaflet-marker-icon, .leaflet-marker-shadow {
+  image-rendering: auto;
 }

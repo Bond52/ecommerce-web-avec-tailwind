@@ -3,6 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { listPublicArticles, Article } from './lib/apiSeller';
+import dynamic from "next/dynamic";
+
+const CameroonMap = dynamic(() => import("./components/CameroonMap"), {
+  ssr: false,
+});
+
 
 type CartItem = Article & { quantity: number };
 
@@ -128,6 +134,20 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+
+import dynamic from "next/dynamic";
+
+const CameroonMap = dynamic(() => import("./components/CameroonMap"), {
+  ssr: false,
+});
+
+<section className="py-12 md:py-16">
+  <CameroonMap />
+</section>
+
+
+
 
       {/* ===== Categories Grid ===== */}
       <section className="py-12 md:py-16">

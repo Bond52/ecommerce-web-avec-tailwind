@@ -54,7 +54,7 @@ export default function ArbrePage() {
         locaux qui les proposent pour soutenir vos projets — artisanaux ou industriels.
         <br /><br />
       Lorsqu’il n’existe aucun fabricant national pour un outil, c’est une excellente opportunité de lancer un projet pour le produire localement !
-      De plus, n’hésitez pas à rechercher aussi les outils… qui servent à fabriquer d’autres outils.
+      De plus, n’hésitez pas à rechercher aussi les outils… qui servent à fabriquer d’autres outils et contactez l'association des forgerons du Cameroun !
       </p>
 
       {/* 🔍 Barre de recherche */}
