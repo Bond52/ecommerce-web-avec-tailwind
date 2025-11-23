@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Artisan = require("../models/Artisan");
+const User = require("../models/user");
 
+// Association ville → région
 const REGIONS = {
   "Yaoundé": "Centre",
   "Mbalmayo": "Centre",
@@ -44,22 +45,36 @@ const REGIONS = {
   "Tibati": "Adamaoua"
 };
 
+// GET /stats/artisans-par-region
 router.get("/artisans-par-region", async (req, res) => {
   try {
-    const artisans = await Artisan.find({}, { ville: 1 });
+    // On récupère uniquement les vendeurs
+    const artisans = await User.find(
+      { roles: { $in: ["vendeur"] } },
+      { city: 1 }
+    );
 
     let counts = {};
 
     for (const art of artisans) {
-      const region = REGIONS[art.ville] || null;
+      if (!art.city) continue;
+
+      // Normalize: enlever accents + maj/min
+      const ville = art.city.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+
+      // Trouver la région correspondante
+      const region = REGIONS[ville] || null;
       if (!region) continue;
 
       counts[region] = (counts[region] || 0) + 1;
     }
 
     res.json(counts);
+
   } catch (err) {
-    console.error(err);
+    console.error("Erreur dans /artisans-par-region:", err);
     res.status(500).json({ error: "Erreur serveur" });
   }
 });
