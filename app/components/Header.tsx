@@ -237,7 +237,7 @@ export default function Header() {
   Projets en cours
 </Link>
 
-<Link href="/arbre-outils" className="text-sawaka-700 hover:text-sawaka-900">
+<Link href="/arbre" className="text-sawaka-700 hover:text-sawaka-900">
   L’Arbre à outils
 </Link>
 
