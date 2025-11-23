@@ -132,7 +132,7 @@ function UploadImages({
           uploading ? "bg-gray-400" : "bg-sawaka-600 hover:bg-sawaka-700"
         }`}
       >
-        {uploading ? "⏳ Upload en cours..." : "⬆️ Envoyer sur Cloudinary"}
+        {uploading ? "⏳ Upload en cours..." : "⬆️ Importer les images"}
       </button>
     </div>
   );
@@ -294,33 +294,35 @@ export default function VendorArticlesPage() {
 
         <div>
           <label className="block text-sm font-medium mb-1">Prix (FCFA)</label>
-          <input
-            className="border p-2 rounded w-full"
-            placeholder="Ex: 10000"
-            type="number"
-            value={form.price}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                price: parseFloat(e.target.value || "0"),
-              }))
-            }
-          />
+<input
+  className="border p-2 rounded w-full"
+  placeholder="Ex: 10000"
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  value={form.price}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, ""); // garde uniquement les chiffres
+    setForm((f) => ({ ...f, price: parseInt(value || "0") }));
+  }}
+/>
+
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Stock</label>
-          <input
-            className="border p-2 rounded w-full"
-            type="number"
-            value={form.stock}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                stock: parseInt(e.target.value || "0"),
-              }))
-            }
-          />
+<input
+  className="border p-2 rounded w-full"
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  value={form.stock}
+  onChange={(e) => {
+    const value = e.target.value.replace(/\D/g, ""); 
+    setForm((f) => ({ ...f, stock: parseInt(value || "0") }));
+  }}
+/>
+
         </div>
 
         <div>
@@ -344,7 +346,8 @@ export default function VendorArticlesPage() {
   onChange={(e) =>
     setForm((f) => ({
       ...f,
-      status: e.target.value as "draft" | "published" | "auction",
+      status: e.target.value as "draft" | "published",
+      // status: e.target.value as "draft" | "published" | "auction",
     }))
   }
 >
