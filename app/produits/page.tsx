@@ -80,7 +80,7 @@ export default function ProduitsPage() {
       <p className="text-center text-sawaka-600 mb-10">
         {categoryParam
           ? `Découvrez les articles de la catégorie ${categoryTitle}`
-          : "Découvrez les créations artisanales authentiques de nos vendeurs"}
+          : "Découvrez les créations artisanales authentiques"}
       </p>
 
       {loading ? (

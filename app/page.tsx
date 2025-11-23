@@ -260,7 +260,7 @@ export default function HomePage() {
                       </div>
                     )}
 
-                    <button
+                   {/* <button
                       onClick={() => addToCart(article)}
                       disabled={article.stock <= 0}
                       className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
@@ -271,6 +271,7 @@ export default function HomePage() {
                     >
                       {article.stock <= 0 ? 'Rupture de stock' : '🛒 Ajouter au panier'}
                     </button>
+                    */}
                   </div>
                 </div>
               ))}
