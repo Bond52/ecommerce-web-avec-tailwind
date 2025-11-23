@@ -219,9 +219,14 @@ export default function Header() {
     )}
 
     <Link href="/">Accueil</Link>
+    <Link href="/artisans">Artisans</Link>
     <Link href="/produits">Produits</Link>
     <Link href="/nouveautes">Nouveautés</Link>
     <Link href="/promotions">Promotions</Link>
+    {/* Enchères */}
+    <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900">
+      Ventes aux enchères
+    </Link>
 
     {/* 🆕 NOUVEAUX MENUS */}
  <Link href="/fournisseurs" className="text-sawaka-700 hover:text-sawaka-900">
@@ -236,12 +241,6 @@ export default function Header() {
   L’Arbre à outils
 </Link>
 
-    {/* Enchères */}
-    <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
-      Ventes aux enchères
-    </Link>
-
-    <Link href="/artisans">Artisans</Link>
     <Link href="/amelioration">Améliorer Sawaka</Link>
   </div>
 </div>
