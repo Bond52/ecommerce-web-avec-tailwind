@@ -50,7 +50,7 @@ export default function ArbrePage() {
       </h1>
 
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl mb-8">
-        Cette section vous donne accès aux outils nécessaires ainsi qu’aux vendeurs
+        Cette section vous donnera accès aux outils nécessaires ainsi qu’aux vendeurs
         locaux qui les proposent pour soutenir vos projets — artisanaux ou industriels.
         <br /><br />
         Lorsqu’aucun fabricant national n’existe pour un outil, cela révèle une

@@ -75,12 +75,8 @@ export default function Header() {
               <span>🛡️ Garantie artisan</span>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/aide" className="hover:text-sawaka-200">
-                Aide
-              </Link>
-              <Link href="/contact" className="hover:text-sawaka-200">
-                Contact
-              </Link>
+              <Link href="/aide" className="hover:text-sawaka-200">Aide</Link>
+              <Link href="/contact" className="hover:text-sawaka-200">Contact</Link>
             </div>
           </div>
         </div>
@@ -90,9 +86,6 @@ export default function Header() {
       <div className="wrap py-3 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-        {/*
-          <img src="/images/logo.jpg" alt="Sawaka" className="w-10 h-10 rounded-lg" />
-*/}
           <span className="font-display text-2xl font-bold text-sawaka-700">Sawaka</span>
         </Link>
 
@@ -115,7 +108,7 @@ export default function Header() {
           </div>
         </form>
 
-        {/* User + Cart */}
+        {/* User */}
         <div className="flex items-center gap-3">
           {user ? (
             <div className="relative">
@@ -136,29 +129,16 @@ export default function Header() {
                 </div>
               </button>
 
-              {/* 🔽 Menu déroulant utilisateur */}
               {showUserMenu && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-lg py-2 z-50">
                   <Link href="/profile" className="block px-4 py-2 hover:bg-cream-50">
                     👤 Profil
                   </Link>
-                  
-                  {/*
-                  <Link href="/acheteur/commandes" className="block px-4 py-2 hover:bg-cream-50">
-                    📦 Achats
-                  </Link>
-                  */}
-{/*
-  <Link href="/budget" className="block px-4 py-2 hover:bg-cream-50">
-    📑 Projets
-  </Link>
-*/}
 
                   <Link href="/vendeur/articles" className="block px-4 py-2 hover:bg-cream-50">
                     🛍️ Mes créations
                   </Link>
 
-                  {/* 🧭 Sous-menu spécial pour admin */}
                   {isAdmin && (
                     <>
                       <hr className="my-2" />
@@ -183,68 +163,66 @@ export default function Header() {
               👤 Se connecter
             </Link>
           )}
-
-          {/*
-          <Link href="/panier" className="relative p-3">
-            🛒
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-sawaka-500 text-white text-xs rounded-full flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-          */}
-
         </div>
       </div>
 
-{/* Nav Bar */}
-<div className="border-t bg-cream-50 relative">
-  <div className="wrap py-3 flex flex-wrap gap-8 text-sm items-center">
-    <button
-      onClick={() => setShowCategoryMenu(!showCategoryMenu)}
-      className="px-4 py-2 bg-sawaka-500 text-white rounded-lg"
-    >
-      ☰ Catégories
-    </button>
+      {/* NAV BAR */}
+      <div className="border-t bg-cream-50 relative">
+        <div className="wrap py-3 flex flex-nowrap gap-6 text-sm items-center overflow-x-auto whitespace-nowrap">
 
-    {showCategoryMenu && (
-      <div className="absolute mt-1 w-64 bg-white border rounded-lg shadow-lg py-2 z-50">
-        {categories.map((c, i) => (
-          <Link key={i} href={c.href} className="block px-4 py-2 hover:bg-cream-50">
-            {c.name}
+          {/* Bouton Catégories */}
+          <button
+            onClick={() => setShowCategoryMenu(!showCategoryMenu)}
+            className="px-4 py-2 bg-sawaka-500 text-white rounded-lg"
+          >
+            ☰ Catégories
+          </button>
+
+          {/* Dropdown Catégories */}
+          {showCategoryMenu && (
+            <div className="absolute left-0 top-full mt-1 w-64 bg-white border rounded-lg shadow-xl py-2 z-50">
+              {categories.map((c, i) => (
+                <Link
+                  key={i}
+                  href={c.href}
+                  className="block px-4 py-2 hover:bg-cream-50"
+                  onClick={() => setShowCategoryMenu(false)}  // Auto-fermeture
+                >
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Liens */}
+          <Link href="/" className="hover:text-sawaka-700">Accueil</Link>
+          <Link href="/artisans" className="hover:text-sawaka-700">Artisans</Link>
+          <Link href="/produits" className="hover:text-sawaka-700">Produits</Link>
+          <Link href="/nouveautes" className="hover:text-sawaka-700">Nouveautés</Link>
+          <Link href="/promotions" className="hover:text-sawaka-700">Promotions</Link>
+
+          <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900 font-medium">
+            Ventes aux enchères
           </Link>
-        ))}
+
+          <Link href="/fournisseurs" className="hover:text-sawaka-700">
+            Fournisseurs
+          </Link>
+
+          <Link href="/projets" className="hover:text-sawaka-700">
+            Projets en cours
+          </Link>
+
+          <Link href="/arbre" className="hover:text-sawaka-700">
+            L’Arbre à outils
+          </Link>
+
+          <Link href="/amelioration" className="hover:text-sawaka-700">
+            Améliorer Sawaka
+          </Link>
+
+        </div>
       </div>
-    )}
-
-    <Link href="/">Accueil</Link>
-    <Link href="/artisans">Artisans</Link>
-    <Link href="/produits">Produits</Link>
-    <Link href="/nouveautes">Nouveautés</Link>
-    <Link href="/promotions">Promotions</Link>
-    {/* Enchères */}
-    <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900">
-      Ventes aux enchères
-    </Link>
-
-    {/* 🆕 NOUVEAUX MENUS */}
- <Link href="/fournisseurs" className="text-sawaka-700 hover:text-sawaka-900">
-  Fournisseurs
-</Link>
-
-<Link href="/projets" className="text-sawaka-700 hover:text-sawaka-900">
-  Projets en cours
-</Link>
-
-<Link href="/arbre" className="text-sawaka-700 hover:text-sawaka-900">
-  L’Arbre à outils
-</Link>
-
-    <Link href="/amelioration">Améliorer Sawaka</Link>
-  </div>
-</div>
-
     </header>
   );
 }
