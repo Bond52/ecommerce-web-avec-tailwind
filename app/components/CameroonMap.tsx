@@ -6,55 +6,66 @@ import { useEffect, useState } from "react";
 
 export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
+
+    fetch("https://backend-sawaka.onrender.com/stats/artisans-par-region")
+      .then((res) => res.json())
+      .then(setStats)
+      .catch(console.error);
   }, []);
 
-  const style = {
-    fillColor: "#f4c27a",
-    weight: 1,
-    opacity: 1,
-    color: "#8a5500",
-    fillOpacity: 0.6,
+  const getColor = (count: number) => {
+    if (count > 20) return "#8b0000"; // rouge foncé
+    if (count > 10) return "#c0392b"; // rouge
+    if (count > 5) return "#e67e22";  // orange
+    if (count > 0) return "#f1c40f";  // jaune
+    return "#ecf0f1";                // gris clair
   };
 
-  if (!geo) {
-    return (
-      <div className="text-center py-6 text-sawaka-600">
-        Chargement de la carte…
-      </div>
-    );
-  }
+  const style = (feature: any) => {
+    const regionName = feature.properties.name;
+    const count = stats?.[regionName] || 0;
+
+    return {
+      fillColor: getColor(count),
+      weight: 1,
+      opacity: 1,
+      color: "#555",
+      fillOpacity: 0.7,
+    };
+  };
+
+  if (!geo || !stats)
+    return <p className="text-center py-6">Chargement de la carte…</p>;
 
   return (
     <div className="wrap my-16">
-      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
+      <h2 className="text-3xl md:text-4xl font-bold text-center text-sawaka-800 mb-4">
         Artisans par région du Cameroun
       </h2>
       <p className="text-lg text-sawaka-600 max-w-2xl mx-auto text-center mb-8">
         Découvrez la répartition géographique des artisans sur la plateforme
       </p>
 
-      {/* Ajout d’une hauteur fixe pour que la carte apparaisse */}
-      <div className="w-full h-[500px] rounded-xl overflow-hidden shadow-md">
-        <MapContainer
-          center={[7.3697, 12.3547]}
-          zoom={6}
-          scrollWheelZoom={false}
-          style={{ width: "100%", height: "100%" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
+      <MapContainer
+        center={[7.3697, 12.3547]}
+        zoom={6}
+        scrollWheelZoom={false}
+        className="cameroon-map"
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="&copy; OpenStreetMap contributors"
+        />
 
-          <GeoJSON data={geo} style={() => style} />
-        </MapContainer>
-      </div>
+        <GeoJSON data={geo} style={style} />
+      </MapContainer>
     </div>
   );
 }

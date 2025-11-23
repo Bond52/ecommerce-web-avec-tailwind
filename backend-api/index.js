@@ -76,6 +76,10 @@ app.use("/api/feedback", require("./routes/feedback"));
 const cron = require("node-cron");
 const closeExpiredAuctions = require("./cronJobs/endAuction");
 
+const statsRoutes = require("./routes/stats");
+app.use("/stats", statsRoutes);
+
+
 // Vérifie toutes les 5 minutes
 cron.schedule("*/5 * * * *", closeExpiredAuctions);
 
