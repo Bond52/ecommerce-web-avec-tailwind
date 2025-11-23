@@ -44,12 +44,12 @@ export default function HomePage() {
                 ✨ Artisanat authentique du Cameroun
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-sawaka-800 leading-tight mb-6">
-                Découvrez l'art
-                <span className="block text-gradient">authentique</span>
+                Partagez vos
+                <span className="block text-gradient">créations uniques</span>
               </h1>
               <p className="text-lg text-sawaka-600 mb-8 max-w-xl">
-                Connectez-vous directement avec les artisans du Cameroun. Des créations uniques, 
-                faites à la main avec amour et livrées avec soin.
+                Connectez-vous directement avec d'autres artisans du Cameroun. Des créations uniques, 
+                faites sur mesure ou selon votre imagination.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link href="/produits" className="btn-sawaka inline-flex items-center gap-2 rounded-lg px-4 py-2 bg-sawaka-500 text-white hover:bg-sawaka-600 transition-colors">
@@ -303,15 +303,15 @@ export default function HomePage() {
               <div className="w-20 h-20 bg-sawaka-500 rounded-full flex items-center justify-center text-3xl mb-6 mx-auto group-hover:scale-110 transition-transform">
                 🔎
               </div>
-              <h3 className="text-xl font-semibold text-sawaka-800 mb-3">Parcourez & Commandez</h3>
-              <p className="text-sawaka-600">Trouvez l'article unique qui vous plaît parmi notre collection</p>
+              <h3 className="text-xl font-semibold text-sawaka-800 mb-3">Parcourez & Contactez</h3>
+              <p className="text-sawaka-600">Trouvez l'article unique qui vous plaît parmi la collection</p>
             </div>
             <div className="text-center group">
               <div className="w-20 h-20 bg-sawaka-500 rounded-full flex items-center justify-center text-3xl mb-6 mx-auto group-hover:scale-110 transition-transform">
                 🛠️
               </div>
               <h3 className="text-xl font-semibold text-sawaka-800 mb-3">L'artisan prépare</h3>
-              <p className="text-sawaka-600">Votre commande est préparée avec soin par l'artisan</p>
+              <p className="text-sawaka-600">Votre article est préparée avec soin </p>
             </div>
             <div className="text-center group">
               <div className="w-20 h-20 bg-sawaka-500 rounded-full flex items-center justify-center text-3xl mb-6 mx-auto group-hover:scale-110 transition-transform">
@@ -325,7 +325,7 @@ export default function HomePage() {
                 📦
               </div>
               <h3 className="text-xl font-semibold text-sawaka-800 mb-3">Retrait pratique</h3>
-              <p className="text-sawaka-600">Récupérez votre commande près de chez vous</p>
+              <p className="text-sawaka-600">Récupérez votre article près de chez vous</p>
             </div>
           </div>
         </div>
