@@ -6,38 +6,43 @@ import { useEffect, useState } from "react";
 
 export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
-  const [regionCounts, setRegionCounts] = useState<any>(null);
+  const [counts, setCounts] = useState<any>({});
 
+  // Charger le GeoJSON
   useEffect(() => {
-    // 1) Charger la carte géographique
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
 
-    // 2) Charger les stats
+    // Charger les données du backend
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
-      .then(setRegionCounts)
+      .then(setCounts)
       .catch(console.error);
   }, []);
 
-  const style = (feature: any) => {
-    const region = feature.properties.name;
-    const count = regionCounts?.[region] || 0;
+  // Style dynamique selon le nombre d’artisans
+  const regionStyle = (feature: any) => {
+    const regionName = feature.properties.name;
+    const value = counts[regionName] || 0;
+
+    const color =
+      value === 0 ? "#f0e5d8" :
+      value === 1 ? "#f7c58d" :
+      value === 2 ? "#ee9f49" :
+      "#d97904"; // + de 3 artisans
 
     return {
-      fillColor: count > 0 ? "#f4c27a" : "#ddd",
+      fillColor: color,
       weight: 1,
       opacity: 1,
       color: "#8a5500",
-      fillOpacity: count > 0 ? 0.7 : 0.3,
+      fillOpacity: 0.7,
     };
   };
 
-  if (!geo || !regionCounts) {
-    return <p className="text-center py-6">Chargement de la carte…</p>;
-  }
+  if (!geo) return <p className="text-center py-6">Chargement de la carte…</p>;
 
   return (
     <div className="wrap my-16">
@@ -48,12 +53,19 @@ export default function CameroonMap() {
         Découvrez la répartition géographique des artisans sur la plateforme
       </p>
 
-      <MapContainer center={[7.3697, 12.3547]} zoom={6} scrollWheelZoom={false}>
+      <MapContainer
+        center={[7.3697, 12.3547]}
+        zoom={6}
+        scrollWheelZoom={false}
+        style={{ height: "600px", width: "100%" }}
+      >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; OpenStreetMap contributors"
         />
-        <GeoJSON data={geo} style={style} />
+
+        {/* GeoJSON avec style dynamique */}
+        <GeoJSON data={geo} style={regionStyle} />
       </MapContainer>
     </div>
   );
