@@ -49,7 +49,7 @@ export default function CameroonMap() {
   if (!geo) return <p className="text-center py-6">Chargement de la carte…</p>;
 
   return (
-    <div className="wrap my-16">
+    <div className="my-16" style={{ width: "100%" }}>
       <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
         Artisans par région du Cameroun
       </h2>
