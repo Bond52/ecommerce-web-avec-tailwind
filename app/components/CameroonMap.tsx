@@ -8,38 +8,26 @@ export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
   const [counts, setCounts] = useState<any>({});
 
-  // Correspondance GeoJSON → noms des régions en français
-  const REGION_MAP: Record<string, string> = {
-    "Centre": "Centre",
-    "Littoral": "Littoral",
-    "West": "Ouest",
-    "North-West": "Nord-Ouest",
-    "South-West": "Sud-Ouest",
-    "Far-North": "Extrême-Nord",
-    "North": "Nord",
-    "Adamawa": "Adamaoua",
-    "East": "Est",
-    "South": "Sud"
-  };
-
-  // Charger GeoJSON + statistiques
+  // Charger le GeoJSON + les stats
   useEffect(() => {
-    fetch("/maps/cm.json")
+    fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
 
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
-      .then(setCounts)
+      .then((data) => {
+        console.log("📌 STATISTIQUES RECUES:", data);
+        setCounts(data);
+      })
       .catch(console.error);
   }, []);
 
-  // Style dynamique des régions
+  // Style selon le nombre d’artisans
   const regionStyle = (feature: any) => {
-    const raw = feature.properties.region || feature.properties.name;
-    const regionName = REGION_MAP[raw] || raw;
-    const value = counts[regionName] || 0;
+    const name = feature.properties?.region || feature.properties?.name;
+    const value = counts[name] ?? 0;
 
     const color =
       value === 0 ? "#f0e5d8" :
@@ -49,71 +37,73 @@ export default function CameroonMap() {
 
     return {
       fillColor: color,
-      weight: 1.2,
+      weight: 1,
       opacity: 1,
       color: "#8a5500",
       fillOpacity: 0.7,
     };
   };
 
-  // Tooltip (inclus dans chaque région)
+  // Tooltip simple
   const onEachRegion = (feature: any, layer: any) => {
-    const raw = feature.properties.region || feature.properties.name;
-    const regionName = REGION_MAP[raw] || raw;
-    const value = counts[regionName] || 0;
+    const name = feature.properties?.region || feature.properties?.name;
+    const value = counts[name] ?? 0;
 
     layer.bindTooltip(
-      `${regionName} : ${value} artisan(s)`,
-      { sticky: true }
+      `${name} : ${value} artisan(s)`,
+      { permanent: false, sticky: true }
     );
   };
 
-  if (!geo) return <p className="text-center py-6">Chargement de la carte…</p>;
+  if (!geo)
+    return <p className="text-center py-6">Chargement de la carte…</p>;
 
   return (
-    <div className="wrap my-10">
-      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-2 text-center">
+    <div className="wrap my-12">
+
+      {/* ===== Titre ===== */}
+      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
         Artisans par région du Cameroun
       </h2>
-      <p className="text-lg text-sawaka-600 max-w-2xl mx-auto text-center mb-6">
+
+      <p className="text-lg text-sawaka-600 text-center mb-6">
         Découvrez la répartition géographique des artisans sur la plateforme
       </p>
 
-      {/* Légende */}
+      {/* ===== Légende ===== */}
       <div className="flex justify-center gap-6 mb-4 text-sm">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-4 h-4 rounded" style={{ background: "#f0e5d8" }}></span>
-          0 artisan
+          <span style={{ width: 20, height: 20, background: "#f0e5d8", border: "1px solid #aaa" }}></span> 0 artisan
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-4 h-4 rounded" style={{ background: "#f7c58d" }}></span>
-          1 artisan
+          <span style={{ width: 20, height: 20, background: "#f7c58d", border: "1px solid #aaa" }}></span> 1 artisan
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-4 h-4 rounded" style={{ background: "#ee9f49" }}></span>
-          2 artisans
+          <span style={{ width: 20, height: 20, background: "#ee9f49", border: "1px solid #aaa" }}></span> 2 artisans
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-4 h-4 rounded" style={{ background: "#d97904" }}></span>
-          3+ artisans
+          <span style={{ width: 20, height: 20, background: "#d97904", border: "1px solid #aaa" }}></span> 3+ artisans
         </div>
       </div>
 
-      <div className="w-full max-w-5xl mx-auto border rounded-xl overflow-hidden shadow-lg">
-        <MapContainer
-          center={[7.5, 12.5]}
-          zoom={7}
-          scrollWheelZoom={false}
-          style={{ height: "550px", width: "100%" }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap contributors"
-          />
+      {/* ===== Carte ===== */}
+      <MapContainer
+        center={[7.3, 12.4]}
+        zoom={6.3}
+        scrollWheelZoom={false}
+        style={{ height: "550px", width: "100%" }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="© OpenStreetMap contributors"
+        />
 
-          <GeoJSON data={geo} style={regionStyle} onEachFeature={onEachRegion} />
-        </MapContainer>
-      </div>
+        <GeoJSON
+          data={geo}
+          style={regionStyle}
+          onEachFeature={onEachRegion}
+        />
+      </MapContainer>
     </div>
   );
 }
