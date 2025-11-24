@@ -1,15 +1,15 @@
 "use client";
 
-import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
-import L from "leaflet";
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import { useEffect, useState } from "react";
 
 export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
   const [counts, setCounts] = useState<any>({});
 
-  // Charger GeoJSON + données backend
+  // Charger GeoJSON + backend
   useEffect(() => {
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
@@ -22,10 +22,12 @@ export default function CameroonMap() {
       .catch(console.error);
   }, []);
 
-  // Couleurs
+  // Style simple des régions
   const regionStyle = (feature: any) => {
     const name =
-      feature.properties?.region ?? feature.properties?.name ?? "??";
+      feature.properties?.region ??
+      feature.properties?.name ??
+      "Région";
 
     const value = counts[name] || 0;
 
@@ -44,54 +46,18 @@ export default function CameroonMap() {
     };
   };
 
-  // Hook pour centrer sur le Cameroun
-  function AutoCenter() {
-    const map = useMap();
-
-    useEffect(() => {
-      map.setView([7.3697, 12.3547], 7); // centre + zoom parfaits
-    }, [map]);
-
-    return null;
-  }
-
-  // Tooltip + Label
+  // Tooltip simple au survol
   const onEachRegion = (feature: any, layer: L.Layer) => {
     const name =
-      feature.properties?.region ?? feature.properties?.name ?? "Région";
+      feature.properties?.region ??
+      feature.properties?.name ??
+      "Région";
+
     const value = counts[name] || 0;
 
-    // Tooltip
-    layer.bindTooltip(
-      `${name} : ${value} artisan(s)`,
-      { sticky: true, direction: "top" }
-    );
-
-    // Label : utiliser "layer.getBounds()" → UNIQUEMENT si le layer est bien un Polygon
-    if ((layer as any).getBounds) {
-      const center = (layer as any).getBounds().getCenter();
-
-      const labelIcon = L.divIcon({
-        className: "region-label",
-        html: `
-          <div style="
-            font-size:14px;
-            font-weight:bold;
-            background:white;
-            padding:2px 5px;
-            border-radius:4px;
-            border:1px solid #aaa;
-          ">
-            ${name}
-          </div>
-        `,
-      });
-
-      L.marker(center, {
-        icon: labelIcon,
-        interactive: false,
-      }).addTo((layer as any)._eventParents[Object.keys((layer as any)._eventParents)[0]]);
-    }
+    layer.bindTooltip(`${name} : ${value} artisan(s)`, {
+      sticky: true,
+    });
   };
 
   if (!geo)
@@ -99,14 +65,16 @@ export default function CameroonMap() {
 
   return (
     <div className="wrap my-12">
-      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
+
+      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 text-center mb-2">
         Artisans par région du Cameroun
       </h2>
-      <p className="text-lg text-sawaka-600 max-w-2xl mx-auto text-center mb-6">
-        Répartition géographique des artisans
+
+      <p className="text-lg text-sawaka-600 text-center mb-6">
+        Découvrez la répartition géographique des artisans
       </p>
 
-      {/* Légende */}
+      {/* ⭐ Légende simple */}
       <div className="flex justify-center gap-6 mb-4">
         <Legend color="#f0e5d8" label="0 artisan" />
         <Legend color="#f7c58d" label="1 artisan" />
@@ -120,28 +88,25 @@ export default function CameroonMap() {
         scrollWheelZoom={false}
         style={{ height: "550px", width: "100%", borderRadius: "12px" }}
       >
-        <AutoCenter />
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
+        {/* GeoJSON simple + tooltip */}
         <GeoJSON data={geo} style={regionStyle} onEachFeature={onEachRegion} />
       </MapContainer>
     </div>
   );
 }
 
-/* Légende */
+/* Composant légende */
 function Legend({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-2">
       <div
         style={{
-          width: 18,
-          height: 18,
+          width: 16,
+          height: 16,
           backgroundColor: color,
-          border: "1px solid #666",
+          border: "1px solid #555",
         }}
       ></div>
       <span className="text-sawaka-700 text-sm">{label}</span>
