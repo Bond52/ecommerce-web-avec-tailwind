@@ -4,25 +4,29 @@ import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
+const API =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_BASE ||
+  "https://ecommerce-web-avec-tailwind.onrender.com";
+
 export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
   const [counts, setCounts] = useState<any>({});
 
-  // Charger le GeoJSON
   useEffect(() => {
+    // GeoJSON servi par Next.js
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
 
-    // Charger les données du backend
-    fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
+    // Stats récupérées avec la même logique que toutes les autres API
+    fetch(`${API}/stats/artisans-par-region`, { cache: "no-store" })
       .then((res) => res.json())
       .then(setCounts)
       .catch(console.error);
   }, []);
 
-  // Style dynamique selon le nombre d’artisans
   const regionStyle = (feature: any) => {
     const regionName = feature.properties.name;
     const value = counts[regionName] || 0;
@@ -31,7 +35,7 @@ export default function CameroonMap() {
       value === 0 ? "#f0e5d8" :
       value === 1 ? "#f7c58d" :
       value === 2 ? "#ee9f49" :
-      "#d97904"; // + de 3 artisans
+      "#d97904";
 
     return {
       fillColor: color,
@@ -64,7 +68,6 @@ export default function CameroonMap() {
           attribution="&copy; OpenStreetMap contributors"
         />
 
-        {/* GeoJSON avec style dynamique */}
         <GeoJSON data={geo} style={regionStyle} />
       </MapContainer>
     </div>
