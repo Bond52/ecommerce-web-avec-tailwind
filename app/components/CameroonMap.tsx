@@ -2,16 +2,29 @@
 
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 import { useEffect, useState } from "react";
 
 export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
   const [counts, setCounts] = useState<any>({});
 
-  // Charger GeoJSON + backend
+  // Correspondance GeoJSON → noms des régions en français
+  const REGION_MAP: Record<string, string> = {
+    "Centre": "Centre",
+    "Littoral": "Littoral",
+    "West": "Ouest",
+    "North-West": "Nord-Ouest",
+    "South-West": "Sud-Ouest",
+    "Far-North": "Extrême-Nord",
+    "North": "Nord",
+    "Adamawa": "Adamaoua",
+    "East": "Est",
+    "South": "Sud"
+  };
+
+  // Charger GeoJSON + statistiques
   useEffect(() => {
-    fetch("/maps/cameroon-regions.json")
+    fetch("/maps/cm.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
@@ -22,14 +35,11 @@ export default function CameroonMap() {
       .catch(console.error);
   }, []);
 
-  // Style simple des régions
+  // Style dynamique des régions
   const regionStyle = (feature: any) => {
-    const name =
-      feature.properties?.region ??
-      feature.properties?.name ??
-      "Région";
-
-    const value = counts[name] || 0;
+    const raw = feature.properties.region || feature.properties.name;
+    const regionName = REGION_MAP[raw] || raw;
+    const value = counts[regionName] || 0;
 
     const color =
       value === 0 ? "#f0e5d8" :
@@ -39,77 +49,71 @@ export default function CameroonMap() {
 
     return {
       fillColor: color,
-      weight: 1,
+      weight: 1.2,
       opacity: 1,
       color: "#8a5500",
       fillOpacity: 0.7,
     };
   };
 
-  // Tooltip simple au survol
-  const onEachRegion = (feature: any, layer: L.Layer) => {
-    const name =
-      feature.properties?.region ??
-      feature.properties?.name ??
-      "Région";
+  // Tooltip (inclus dans chaque région)
+  const onEachRegion = (feature: any, layer: any) => {
+    const raw = feature.properties.region || feature.properties.name;
+    const regionName = REGION_MAP[raw] || raw;
+    const value = counts[regionName] || 0;
 
-    const value = counts[name] || 0;
-
-    layer.bindTooltip(`${name} : ${value} artisan(s)`, {
-      sticky: true,
-    });
+    layer.bindTooltip(
+      `${regionName} : ${value} artisan(s)`,
+      { sticky: true }
+    );
   };
 
-  if (!geo)
-    return <p className="text-center py-6">Chargement de la carte…</p>;
+  if (!geo) return <p className="text-center py-6">Chargement de la carte…</p>;
 
   return (
-    <div className="wrap my-12">
-
-      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 text-center mb-2">
+    <div className="wrap my-10">
+      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-2 text-center">
         Artisans par région du Cameroun
       </h2>
-
-      <p className="text-lg text-sawaka-600 text-center mb-6">
-        Découvrez la répartition géographique des artisans
+      <p className="text-lg text-sawaka-600 max-w-2xl mx-auto text-center mb-6">
+        Découvrez la répartition géographique des artisans sur la plateforme
       </p>
 
-      {/* ⭐ Légende simple */}
-      <div className="flex justify-center gap-6 mb-4">
-        <Legend color="#f0e5d8" label="0 artisan" />
-        <Legend color="#f7c58d" label="1 artisan" />
-        <Legend color="#ee9f49" label="2 artisans" />
-        <Legend color="#d97904" label="3+ artisans" />
+      {/* Légende */}
+      <div className="flex justify-center gap-6 mb-4 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-4 h-4 rounded" style={{ background: "#f0e5d8" }}></span>
+          0 artisan
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-4 h-4 rounded" style={{ background: "#f7c58d" }}></span>
+          1 artisan
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-4 h-4 rounded" style={{ background: "#ee9f49" }}></span>
+          2 artisans
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-4 h-4 rounded" style={{ background: "#d97904" }}></span>
+          3+ artisans
+        </div>
       </div>
 
-      <MapContainer
-        center={[7.3697, 12.3547]}
-        zoom={7}
-        scrollWheelZoom={false}
-        style={{ height: "550px", width: "100%", borderRadius: "12px" }}
-      >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <div className="w-full max-w-5xl mx-auto border rounded-xl overflow-hidden shadow-lg">
+        <MapContainer
+          center={[7.5, 12.5]}
+          zoom={7}
+          scrollWheelZoom={false}
+          style={{ height: "550px", width: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; OpenStreetMap contributors"
+          />
 
-        {/* GeoJSON simple + tooltip */}
-        <GeoJSON data={geo} style={regionStyle} onEachFeature={onEachRegion} />
-      </MapContainer>
-    </div>
-  );
-}
-
-/* Composant légende */
-function Legend({ color, label }: { color: string; label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div
-        style={{
-          width: 16,
-          height: 16,
-          backgroundColor: color,
-          border: "1px solid #555",
-        }}
-      ></div>
-      <span className="text-sawaka-700 text-sm">{label}</span>
+          <GeoJSON data={geo} style={regionStyle} onEachFeature={onEachRegion} />
+        </MapContainer>
+      </div>
     </div>
   );
 }
