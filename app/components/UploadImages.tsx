@@ -18,23 +18,23 @@ export default function UploadImages({
   const API_BASE =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.NEXT_PUBLIC_API_BASE ||
-    "http://localhost:5000";
+    "https://ecommerce-web-avec-tailwind.onrender.com";
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files ? Array.from(e.target.files) : [];
-    if (!selected.length) return;
+    if (selected.length) {
+      setFiles((prev) => [...prev, ...selected]);
+      setPreview((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
+    }
+  };
 
-    setFiles((prev) => [...prev, ...selected]);
-    setPreview((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
-  }
-
-  async function handleUpload() {
+  const handleUpload = async () => {
     if (!files.length) return;
 
+    setUploading(true);
     const formData = new FormData();
     files.forEach((f) => formData.append("images", f));
 
-    setUploading(true);
     const res = await fetch(`${API_BASE}/api/seller/upload`, {
       method: "POST",
       credentials: "include",
@@ -42,31 +42,32 @@ export default function UploadImages({
     });
 
     const data = await res.json();
-
-    // 🔥 IMPORTANT : renvoie au parent exactement ce que le backend attend
     onUploadComplete(data.urls);
 
     setFiles([]);
     setPreview([]);
     setUploading(false);
-  }
+  };
 
   return (
-    <div className="border p-4 bg-white rounded-xl space-y-4">
+    <div className="border border-cream-200 bg-cream-50 rounded-2xl p-8">
 
+      {/* ============================== */}
       {/* IMAGES EXISTANTES */}
+      {/* ============================== */}
       {existingImages.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           {existingImages.map((url) => (
             <div key={url} className="relative group">
               <img
                 src={url}
-                className="w-full h-24 object-cover rounded-lg border"
+                className="w-full h-24 object-contain rounded-xl border bg-white shadow-sm"
               />
+
               <button
                 type="button"
                 onClick={() => onRemoveExisting?.(url)}
-                className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100"
+                className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition"
               >
                 ✖
               </button>
@@ -75,29 +76,41 @@ export default function UploadImages({
         </div>
       )}
 
-      {/* SELECTEUR */}
-      <label className="block border-2 border-dashed p-6 rounded-lg text-center cursor-pointer bg-gray-50">
-        <input type="file" multiple accept="image/*" className="hidden" onChange={handleChange} />
-        <p>Choisir des images</p>
+      {/* ============================== */}
+      {/* ZONE UPLOAD */}
+      {/* ============================== */}
+      <label className="block w-full border-2 border-dashed border-cream-300 bg-cream-100 rounded-xl py-10 text-center cursor-pointer hover:bg-cream-200 transition">
+        <input type="file" multiple className="hidden" onChange={handleChange} />
+        <p className="text-sawaka-700 text-sm">Téléverser un fichier ou glisser-déposer</p>
+        <p className="mt-3 inline-block border px-4 py-2 rounded-lg bg-white">
+          Sélectionner des images
+        </p>
       </label>
 
-      {/* PREVIEW LOCALE */}
+      {/* ============================== */}
+      {/* Prévisualisations */}
+      {/* ============================== */}
       {preview.length > 0 && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-4 mt-4">
           {preview.map((src, i) => (
-            <img key={i} src={src} className="w-full h-24 object-cover rounded-lg border" />
+            <img
+              key={i}
+              src={src}
+              className="w-full h-24 object-contain rounded-xl border bg-white"
+            />
           ))}
         </div>
       )}
 
-      {/* BOUTON UPLOAD */}
+      {/* ============================== */}
+      {/* Bouton Upload */}
+      {/* ============================== */}
       {preview.length > 0 && (
         <button
-          type="button"
           onClick={handleUpload}
-          className="px-4 py-2 bg-sawaka-600 text-white rounded-lg"
+          className="mt-4 px-5 py-2 rounded-xl bg-sawaka-700 text-white hover:bg-sawaka-800"
         >
-          {uploading ? "Envoi..." : "Envoyer les images"}
+          {uploading ? "Envoi..." : "Importer les images"}
         </button>
       )}
     </div>
