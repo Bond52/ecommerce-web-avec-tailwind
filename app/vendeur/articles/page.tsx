@@ -12,6 +12,8 @@ import type { Article } from "../../lib/apiSeller";
 /* ============================================================
    📸 UploadImages — version finale mockup + images existantes
 ============================================================ */
+
+
 function UploadImages({
   existingImages = [],
   onRemoveExisting,
@@ -51,6 +53,8 @@ function UploadImages({
     });
 
     const data = await res.json();
+
+    // 🔥 ENVOI DES URLS AU FORM PARENT
     onUploadComplete(data.urls);
 
     setFiles([]);
@@ -61,22 +65,15 @@ function UploadImages({
   return (
     <div className="border border-cream-200 bg-cream-50 rounded-2xl p-8">
 
-      {/* ============================== */}
       {/* IMAGES EXISTANTES */}
-      {/* ============================== */}
       {existingImages.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           {existingImages.map((url) => (
             <div key={url} className="relative group">
-             
-             
-<img
-  src={url}
-  className="w-full h-24 object-contain rounded-xl border bg-white shadow-sm"
-/>
-
-
-
+              <img
+                src={url}
+                className="w-full h-24 object-contain rounded-xl border bg-white shadow-sm"
+              />
               <button
                 type="button"
                 onClick={() => onRemoveExisting?.(url)}
@@ -89,9 +86,7 @@ function UploadImages({
         </div>
       )}
 
-      {/* ============================== */}
-      {/* ZONE UPLOAD */}
-      {/* ============================== */}
+      {/* UPLOAD */}
       <label className="block w-full border-2 border-dashed border-cream-300 bg-cream-100 rounded-xl py-10 text-center cursor-pointer hover:bg-cream-200 transition">
         <input type="file" multiple className="hidden" onChange={handleChange} />
         <p className="text-sawaka-700 text-sm">Téléverser un fichier ou glisser-déposer</p>
@@ -100,21 +95,16 @@ function UploadImages({
         </p>
       </label>
 
-      {/* Préviews locales */}
+      {/* Préviews */}
       {preview.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mt-4">
           {preview.map((src, i) => (
-
-
-          <img
-  key={i}
-  src={src}
-  className="w-full h-24 object-contain rounded-xl border bg-white"
-/>
-
-         
-         
-         ))}
+            <img
+              key={i}
+              src={src}
+              className="w-full h-24 object-contain rounded-xl border bg-white"
+            />
+          ))}
         </div>
       )}
 
@@ -129,6 +119,11 @@ function UploadImages({
     </div>
   );
 }
+
+
+
+
+
 
 /* ============================================================
    🧵 PAGE RESPÉRANT EXACTEMENT TON MOCKUP

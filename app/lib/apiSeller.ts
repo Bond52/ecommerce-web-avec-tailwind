@@ -1,27 +1,29 @@
 // app/lib/apiSeller.ts
 
+/* ============================================
+   🌍 API BASE URL
+============================================ */
 const API =
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
   (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
   "https://ecommerce-web-avec-tailwind.onrender.com";
 
-/* ===========================================================
+/* ============================================
    📦 TYPE Article
-=========================================================== */
+============================================ */
 export type Article = {
   _id?: string;
   title: string;
   description?: string;
   price: number;
   stock: number;
-  status: "draft" | "published" | "auction"; // ✅ ajout du statut "auction"
+  status: "draft" | "published" | "auction";
   images?: string[];
   categories?: string[];
   sku?: string;
   createdAt?: string;
   updatedAt?: string;
 
-  // 💸 Bloc promotion (inchangé)
   promotion?: {
     isActive: boolean;
     discountPercent: number;
@@ -32,7 +34,6 @@ export type Article = {
     endDate?: string;
   };
 
-  // 🆕 Bloc enchères
   auction?: {
     isActive: boolean;
     endDate: string | Date;
@@ -41,9 +42,9 @@ export type Article = {
   };
 };
 
-/* ===========================================================
-   🌍 REQUÊTE GÉNÉRIQUE
-=========================================================== */
+/* ============================================
+   🌍 GENERIC HTTP WRAPPER
+============================================ */
 async function http<T = any>(path: string, init?: RequestInit) {
   const res = await fetch(`${API}${path}`, {
     ...init,
@@ -62,11 +63,11 @@ async function http<T = any>(path: string, init?: RequestInit) {
   return res.json() as Promise<T>;
 }
 
-/* ===========================================================
-   📰 ARTICLES PUBLICS
-=========================================================== */
+/* ============================================
+   📰 PUBLIC ARTICLES
+============================================ */
 export async function listPublicArticles() {
-  const data = await http<{ items?: Article[]; total?: number; page?: number; pages?: number }>(
+  const data = await http<{ items?: Article[] }>(
     "/api/seller/public",
     { method: "GET" }
   );
@@ -76,42 +77,61 @@ export async function listPublicArticles() {
   return [];
 }
 
-/* ===========================================================
-   👤 ARTICLES DU VENDEUR CONNECTÉ
-=========================================================== */
+/* ============================================
+   👤 MY ARTICLES (SELLER)
+============================================ */
 export async function listMyArticles(params?: {
   page?: number;
   q?: string;
   status?: string;
 }) {
-  const search = new URLSearchParams();
-  if (params?.page) search.set("page", String(params.page));
-  if (params?.q) search.set("q", params.q);
-  if (params?.status) search.set("status", params.status);
-  const qs = search.toString();
+  const qs = new URLSearchParams();
+  if (params?.page) qs.set("page", String(params.page));
+  if (params?.q) qs.set("q", params.q);
+  if (params?.status) qs.set("status", params.status);
 
   return http<{ items: Article[]; total: number; page: number; pages: number }>(
-    `/api/seller/articles${qs ? `?${qs}` : ""}`
+    `/api/seller/articles${qs.toString() ? `?${qs}` : ""}`
   );
 }
 
-/* ===========================================================
-   ✏️ CRUD ARTICLES
-=========================================================== */
-export async function createArticle(payload: Partial<Article>) {
-  return http<Article>("/api/seller/articles", {
+/* ============================================
+   ✏️ CREATE ARTICLE
+============================================ */
+export async function createArticle(data: Article) {
+  const res = await fetch(`${API}/api/seller/articles`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...data,
+      images: data.images ?? [],
+    }),
   });
+
+  return res.json();
 }
 
-export async function updateArticle(id: string, payload: Partial<Article>) {
-  return http<Article>(`/api/seller/articles/${id}`, {
+/* ============================================
+   ✏️ UPDATE ARTICLE
+============================================ */
+export async function updateArticle(id: string, data: Article) {
+  const res = await fetch(`${API}/api/seller/articles/${id}`, {
     method: "PATCH",
-    body: JSON.stringify(payload),
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...data,
+      images: data.images ?? [],
+    }),
   });
+
+  return res.json();
 }
 
+/* ============================================
+   ❌ DELETE ARTICLE
+============================================ */
 export async function deleteArticle(id: string) {
   return http<{ ok: boolean }>(`/api/seller/articles/${id}`, {
     method: "DELETE",
