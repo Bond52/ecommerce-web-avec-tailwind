@@ -532,20 +532,39 @@ const emptyForm: Article = {
 /* ======================================================= */
 /* 🔧 INPUT + SELECT Components (identiques au mockup UI)  */
 /* ======================================================= */
-function Input({ label, placeholder, type = "text", value, onChange }: any) {
+function Input({ label, value, onChange, placeholder, type = "text", numeric }: any) {
   return (
     <div>
       <label className="text-sm text-sawaka-800 mb-1 block">{label}</label>
+
       <input
-        type={type}
+        type="text"
+        inputMode={numeric ? "numeric" : undefined}
+        pattern={numeric ? "[0-9]*" : undefined}
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          const raw = e.target.value;
+
+          if (!numeric) return onChange(raw);
+
+          // Autorise uniquement les chiffres 0-9
+          const digits = raw.replace(/\D/g, "");
+
+          onChange(digits === "" ? 0 : Number(digits));
+        }}
+        onKeyDown={(e) => {
+          if (!numeric) return;
+          // Interdire :, -, ., e, + etc.
+          const forbidden = ["-", "+", "e", "E", ".", ","];
+          if (forbidden.includes(e.key)) e.preventDefault();
+        }}
         className="border border-gray-300 rounded-xl p-3 w-full"
       />
     </div>
   );
 }
+
 
 function Select({ label, value, onChange, options, displayMap }: any) {
   return (
