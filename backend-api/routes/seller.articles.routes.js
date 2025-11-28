@@ -4,6 +4,8 @@ const Article = require("../models/Article");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
+console.log("🟡 BODY REÇU (POST) :", req.body);
+
 /* ===========================================================
    AUTH
 =========================================================== */

@@ -88,6 +88,9 @@ export default function VendorArticlesPage() {
     load();
   }
 
+  console.log("📤 FORMULAIRE ENVOYÉ AU BACKEND :", JSON.stringify(form, null, 2));
+
+
   async function onDelete(id?: string) {
   if (!id) return;
   if (!confirm("Supprimer cet article ?")) return;
