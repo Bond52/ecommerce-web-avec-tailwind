@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export default function UploadImages({
   existingImages = [],
@@ -20,18 +20,29 @@ export default function UploadImages({
     process.env.NEXT_PUBLIC_API_BASE ||
     "https://ecommerce-web-avec-tailwind.onrender.com";
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files ? Array.from(e.target.files) : [];
-    if (selected.length) {
-      setFiles((prev) => [...prev, ...selected]);
-      setPreview((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
-    }
-  };
+  /** =========================================================
+   *  🔥 Aucune réinitialisation du parent !
+   *  Le composant ne modifie plus rien concernant editingId.
+   ============================================================ */
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = e.target.files ? Array.from(e.target.files) : [];
+      if (!selected.length) return;
 
-  const handleUpload = async () => {
+      setFiles((prev) => [...prev, ...selected]);
+      setPreview((prev) => [
+        ...prev,
+        ...selected.map((f) => URL.createObjectURL(f)),
+      ]);
+    },
+    []
+  );
+
+  const handleUpload = useCallback(async () => {
     if (!files.length) return;
 
     setUploading(true);
+
     const formData = new FormData();
     files.forEach((f) => formData.append("images", f));
 
@@ -42,19 +53,24 @@ export default function UploadImages({
     });
 
     const data = await res.json();
-    onUploadComplete(data.urls);
 
+    // ❗ Sécurité : si le backend ne renvoie pas d’URL → ne rien appliquer
+    if (data?.urls?.length) {
+      onUploadComplete([...data.urls]);
+    }
+
+    // On garde juste la partie locale ici
     setFiles([]);
     setPreview([]);
     setUploading(false);
-  };
+  }, [files, API_BASE, onUploadComplete]);
 
   return (
     <div className="border border-cream-200 bg-cream-50 rounded-2xl p-8">
 
-      {/* ============================== */}
+      {/* ========================================================= */}
       {/* IMAGES EXISTANTES */}
-      {/* ============================== */}
+      {/* ========================================================= */}
       {existingImages.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           {existingImages.map((url) => (
@@ -76,20 +92,27 @@ export default function UploadImages({
         </div>
       )}
 
-      {/* ============================== */}
-      {/* ZONE UPLOAD */}
-      {/* ============================== */}
+      {/* ========================================================= */}
+      {/* SÉLECTEUR */}
+      {/* ========================================================= */}
       <label className="block w-full border-2 border-dashed border-cream-300 bg-cream-100 rounded-xl py-10 text-center cursor-pointer hover:bg-cream-200 transition">
-        <input type="file" multiple className="hidden" onChange={handleChange} />
-        <p className="text-sawaka-700 text-sm">Téléverser un fichier ou glisser-déposer</p>
+        <input
+          type="file"
+          multiple
+          className="hidden"
+          onChange={handleChange}
+        />
+        <p className="text-sawaka-700 text-sm">
+          Téléverser un fichier ou glisser-déposer
+        </p>
         <p className="mt-3 inline-block border px-4 py-2 rounded-lg bg-white">
           Sélectionner des images
         </p>
       </label>
 
-      {/* ============================== */}
-      {/* Prévisualisations */}
-      {/* ============================== */}
+      {/* ========================================================= */}
+      {/* PRÉVISUALISATION LOCALE */}
+      {/* ========================================================= */}
       {preview.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mt-4">
           {preview.map((src, i) => (
@@ -102,11 +125,12 @@ export default function UploadImages({
         </div>
       )}
 
-      {/* ============================== */}
-      {/* Bouton Upload */}
-      {/* ============================== */}
+      {/* ========================================================= */}
+      {/* BOUTON UPLOAD */}
+      {/* ========================================================= */}
       {preview.length > 0 && (
         <button
+          type="button"
           onClick={handleUpload}
           className="mt-4 px-5 py-2 rounded-xl bg-sawaka-700 text-white hover:bg-sawaka-800"
         >
