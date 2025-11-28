@@ -5,12 +5,13 @@ const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
 /* ===========================================================
-   🔐 AUTHENTIFICATION & RÔLES
+   🔐 AUTHENTIFICATION & ROLES
 =========================================================== */
 function requireAuth(req, res, next) {
   const bearer = req.headers.authorization;
   const headerToken =
     bearer && bearer.startsWith("Bearer ") ? bearer.split(" ")[1] : null;
+
   const cookieToken = req.cookies?.token;
   const token = headerToken || cookieToken;
 
@@ -32,8 +33,10 @@ function requireRole(...roles) {
       : req.user.role
       ? [req.user.role]
       : [];
+
     const hasRole = roles.some((r) => userRoles.includes(r));
     if (!hasRole) return res.status(403).json({ message: "Accès refusé." });
+
     next();
   };
 }
@@ -47,18 +50,15 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-console.log("🧩 Cloudinary ENV TEST:", {
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET ? "OK" : "MISSING",
-});
-
 cloudinary.api
   .ping()
   .then(() => console.log("✅ Cloudinary OK"))
   .catch((err) => console.error("❌ Cloudinary invalide :", err.message));
 
-  
+
+/* ===========================================================
+   📤 UPLOAD CLOUDINARY VIA MULTER
+=========================================================== */
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
@@ -67,6 +67,7 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
       return res.status(400).json({ message: "Aucun fichier reçu" });
 
     const urls = [];
+
     for (const file of req.files) {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -75,19 +76,19 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
         );
         stream.end(file.buffer);
       });
+
       urls.push(result.secure_url);
     }
+
     res.json({ urls });
   } catch (err) {
     console.error("❌ Erreur upload Cloudinary :", err);
-    res
-      .status(500)
-      .json({ message: "Erreur upload Cloudinary", error: err.message });
+    res.status(500).json({ message: "Erreur upload Cloudinary", error: err.message });
   }
 });
 
 /* ===========================================================
-   📰 ROUTES PUBLIQUES (produits visibles : published + auction)
+   📰 ARTICLES PUBLICS (published + auction)
 =========================================================== */
 router.get("/public", async (req, res) => {
   try {
@@ -99,9 +100,7 @@ router.get("/public", async (req, res) => {
       ? { title: { $regex: req.query.q, $options: "i" } }
       : {};
 
-    // ✅ Inclure published + auction
-    const statusFilter = { status: { $in: ["published", "auction"] } };
-    const filter = { ...statusFilter, ...search };
+    const filter = { status: { $in: ["published", "auction"] }, ...search };
 
     const total = await Article.countDocuments(filter);
     const items = await Article.find(filter)
@@ -111,13 +110,12 @@ router.get("/public", async (req, res) => {
 
     res.json({ items, total, page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    console.error("Erreur route /public :", e);
     res.status(500).json({ message: e.message });
   }
 });
 
 /* ===========================================================
-   📦 DÉTAIL PUBLIC D’UN ARTICLE (accessible à tous)
+   📄 DÉTAIL PUBLIC
 =========================================================== */
 router.get("/public/:id", async (req, res) => {
   try {
@@ -128,30 +126,46 @@ router.get("/public/:id", async (req, res) => {
     if (!article)
       return res.status(404).json({ message: "Article non trouvé." });
 
-    // ✅ Ne renvoyer que les statuts visibles publiquement
     if (!["published", "auction"].includes(article.status)) {
-      return res
-        .status(403)
-        .json({ message: "Article non accessible publiquement." });
+      return res.status(403).json({ message: "Article non accessible publiquement." });
     }
 
     res.json(article);
   } catch (e) {
-    console.error("Erreur /public/:id :", e);
     res.status(500).json({ message: e.message });
   }
 });
 
+
 /* ===========================================================
-   🔐 ROUTES PROTÉGÉES
+   🔐 ROUTES PROTÉGÉES (vendeur/admin)
 =========================================================== */
 router.use(requireAuth, requireRole("vendeur", "admin"));
 
+/* ===========================================================
+   ➕ CRÉATION D’UN ARTICLE AVEC IMAGES
+=========================================================== */
 router.post("/articles", async (req, res) => {
   try {
     const body = req.body;
 
-    // Auto-calcul de la date de fin si durée définie
+    /* 🔧 NORMALISATION DES IMAGES 
+       (car FormData envoie body.images = STRING) */
+    let images = [];
+
+    if (typeof body.images === "string") {
+      try {
+        images = JSON.parse(body.images); // cas : JSON string
+      } catch {
+        images = [body.images]; // cas : string simple
+      }
+    } else if (Array.isArray(body.images)) {
+      images = body.images;
+    }
+
+    body.images = images;
+
+    /* 🔧 PROMOTION (date de fin auto) */
     if (body.promotion?.isActive) {
       const now = new Date();
       const end = new Date(now);
@@ -161,6 +175,7 @@ router.post("/articles", async (req, res) => {
       body.promotion.endDate = end;
     }
 
+    /* 🔧 CRÉATION ARTICLE */
     const article = new Article({
       ...body,
       vendorId: req.user.id,
@@ -170,15 +185,20 @@ router.post("/articles", async (req, res) => {
     await article.save();
     res.status(201).json(article);
   } catch (e) {
+    console.error("❌ Erreur création article :", e);
     res.status(500).json({ message: e.message });
   }
 });
 
+/* ===========================================================
+   📄 OBTENIR SES ARTICLES
+=========================================================== */
 router.get("/articles", async (req, res) => {
   try {
     const query = { vendorId: req.user.id };
     if (req.query.status) query.status = req.query.status;
-    if (req.query.q) query.title = { $regex: req.query.q, $options: "i" };
+    if (req.query.q)
+      query.title = { $regex: req.query.q, $options: "i" };
 
     const page = Number(req.query.page) || 1;
     const limit = 10;
@@ -196,17 +216,20 @@ router.get("/articles", async (req, res) => {
   }
 });
 
+/* ===========================================================
+   ✏️ MODIFIER ARTICLE
+=========================================================== */
 router.patch("/articles/:id", async (req, res) => {
   try {
     const body = req.body;
 
-    if (body.promotion?.isActive) {
-      const now = new Date();
-      const end = new Date(now);
-      end.setDate(end.getDate() + (body.promotion.durationDays || 0));
-      end.setHours(end.getHours() + (body.promotion.durationHours || 0));
-      body.promotion.startDate = now;
-      body.promotion.endDate = end;
+    /* 🔧 Normalisation des images */
+    if (typeof body.images === "string") {
+      try {
+        body.images = JSON.parse(body.images);
+      } catch {
+        body.images = [body.images];
+      }
     }
 
     const article = await Article.findOneAndUpdate(
@@ -214,22 +237,29 @@ router.patch("/articles/:id", async (req, res) => {
       body,
       { new: true }
     );
+
     if (!article)
       return res.status(404).json({ message: "Article non trouvé." });
+
     res.json(article);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });
 
+/* ===========================================================
+   🗑 SUPPRESSION
+=========================================================== */
 router.delete("/articles/:id", async (req, res) => {
   try {
     const article = await Article.findOneAndDelete({
       _id: req.params.id,
       vendorId: req.user.id,
     });
+
     if (!article)
       return res.status(404).json({ message: "Article non trouvé." });
+
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ message: e.message });
@@ -237,7 +267,7 @@ router.delete("/articles/:id", async (req, res) => {
 });
 
 /* ===========================================================
-   ❤️ LIKE & COMMENTAIRES
+   ❤️ LIKE
 =========================================================== */
 router.post("/articles/:id/like", requireAuth, async (req, res) => {
   try {
@@ -258,10 +288,14 @@ router.post("/articles/:id/like", requireAuth, async (req, res) => {
   }
 });
 
+/* ===========================================================
+   💬 COMMENTAIRE
+=========================================================== */
 router.post("/articles/:id/comment", requireAuth, async (req, res) => {
   try {
     const { text, rating } = req.body;
     const article = await Article.findById(req.params.id);
+
     if (!article)
       return res.status(404).json({ message: "Article non trouvé." });
 
