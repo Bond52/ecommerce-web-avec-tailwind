@@ -1,56 +1,36 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { listMyArticles, createArticle, updateArticle, deleteArticle } from "../../lib/apiSeller";
 import type { Article } from "../../lib/apiSeller";
-import {
-  listMyArticles,
-  createArticle,
-  updateArticle,
-  deleteArticle,
-} from "../../lib/apiSeller";
 
 /* ============================================================
-   🔼 Composant Upload Cloudinary
+   📸 Upload Component (réutilisé)
 ============================================================ */
-function UploadImages({
-  onUploadComplete,
-}: {
-  onUploadComplete: (urls: string[]) => void;
-}) {
+function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[]) => void }) {
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const API_BASE =
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     "https://ecommerce-web-avec-tailwind.onrender.com";
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files ? Array.from(e.target.files) : [];
-    if (selected.length > 0) {
-      const previews = selected.map((f) => URL.createObjectURL(f));
-      setFiles((prev) => [...prev, ...selected]);
-      setPreview((prev) => [...prev, ...previews]);
+    if (selected.length) {
+      setFiles(selected);
+      setPreview(selected.map((f) => URL.createObjectURL(f)));
     }
   };
 
-  const handleRemove = (index: number) => {
-    const newFiles = [...files];
-    const newPreview = [...preview];
-    newFiles.splice(index, 1);
-    newPreview.splice(index, 1);
-    setFiles(newFiles);
-    setPreview(newPreview);
-  };
-
   const handleUpload = async () => {
-    if (files.length === 0) return alert("Choisissez au moins une image !");
-    setUploading(true);
-    setProgress(0);
+    if (!files.length) return alert("Ajoutez au moins une image");
 
     const formData = new FormData();
     files.forEach((f) => formData.append("images", f));
+
+    setUploading(true);
 
     try {
       const res = await fetch(`${API_BASE}/api/seller/upload`, {
@@ -59,129 +39,130 @@ function UploadImages({
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Erreur lors de l’upload");
       const data = await res.json();
-
       onUploadComplete(data.urls);
-      alert("✅ Upload réussi !");
-      setFiles([]);
-      setPreview([]);
-      setProgress(100);
-    } catch (err) {
-      console.error(err);
-      alert("❌ Erreur upload Cloudinary");
+      alert("Upload réussi !");
+    } catch (e) {
+      alert("Erreur upload");
     } finally {
       setUploading(false);
-      setProgress(0);
     }
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm md:col-span-2">
-      <h3 className="text-lg font-semibold mb-3">📸 Ajouter des images</h3>
-
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={handleFileChange}
-        className="block w-full border p-2 rounded mb-3"
-      />
-
-      {files.length > 0 && (
-        <p className="text-sm text-gray-600 mb-2">
-          {files.length} image{files.length > 1 ? "s" : ""} sélectionnée
-          {files.length > 1 ? "s" : ""}
+    <div className="border-2 border-dashed border-cream-300 rounded-2xl p-10 text-center bg-cream-50">
+      <div className="flex flex-col items-center gap-3">
+        <span className="text-4xl">📁</span>
+        <p className="text-sawaka-800 text-sm">
+          Téléverser un fichier ou glisser-déposer  
+          <br />
+          <span className="text-xs text-sawaka-600">PNG, JPG jusqu’à 10MB</span>
         </p>
-      )}
 
-      {preview.length > 0 && (
-        <div className="grid grid-cols-3 gap-3 mb-3">
-          {preview.map((src, i) => (
-            <div key={i} className="relative group">
-              <img
-                src={src}
-                alt={`Preview ${i}`}
-                className="w-full h-32 object-cover rounded-lg border"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemove(i)}
-                className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-80 hover:opacity-100 hidden group-hover:block"
-              >
-                🗑
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+        <input type="file" multiple onChange={handleChange} className="hidden" id="upload-input" />
 
-      {uploading && (
-        <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-          <div
-            className="bg-sawaka-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
+        <label
+          htmlFor="upload-input"
+          className="cursor-pointer mt-2 px-4 py-2 rounded-xl border border-sawaka-300 text-sawaka-700 hover:bg-cream-100"
+        >
+          Sélectionner des images
+        </label>
 
-      <button
-        onClick={handleUpload}
-        disabled={uploading}
-        className={`px-4 py-2 rounded text-white ${
-          uploading ? "bg-gray-400" : "bg-sawaka-600 hover:bg-sawaka-700"
-        }`}
-      >
-        {uploading ? "⏳ Upload en cours..." : "⬆️ Importer les images"}
-      </button>
+        {preview.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mt-4 w-full">
+            {preview.map((src) => (
+              <img key={src} src={src} className="h-28 w-full object-cover rounded-xl border" />
+            ))}
+          </div>
+        )}
+
+        {preview.length > 0 && (
+          <button
+            onClick={handleUpload}
+            className="btn btn-primary mt-4"
+            disabled={uploading}
+          >
+            {uploading ? "Envoi…" : "Importer les images"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
 /* ============================================================
-   🧺 PAGE VENDEUR : GESTION DES ARTICLES
+   🧵 PAGE RESPÉRANT EXACTEMENT TON MOCKUP
 ============================================================ */
 export default function VendorArticlesPage() {
-  const [data, setData] = useState<{
-    items: Article[];
-    total: number;
-    page: number;
-    pages: number;
-  } | null>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [q, setQ] = useState("");
   const [status, setStatus] = useState("");
 
-  const emptyForm: Article = useMemo(
-    () => ({
-      title: "",
-      description: "",
-      price: 0,
-      stock: 0,
-      status: "draft",
-      images: [],
-      categories: [],
-      sku: "",
-      promotion: {
-        isActive: false,
-        discountPercent: 0,
-        newPrice: 0,
-        durationDays: 0,
-        durationHours: 0,
-      },
-      auction: {
-        isActive: false,
-        endDate: "",
-        highestBid: 0,
-      },
-    }),
-    []
-  );
+const emptyForm: Article = {
+  title: "",
+  description: "",
+  price: 0,
+  stock: 0,
+  status: "draft",
+  images: [],
+  categories: [],
+  sku: "",
+  promotion: {
+    isActive: false,
+    discountPercent: 0,
+    newPrice: 0,
+    durationDays: 0,
+    durationHours: 0,
+    startDate: "",
+    endDate: "",
+  },
+  auction: {
+    isActive: false,
+    endDate: "",
+    highestBid: 0,
+  },
+};
+
 
   const [form, setForm] = useState<Article>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [error, setError] = useState<string>("");
+
+  async function load() {
+    setLoading(true);
+    const res = await listMyArticles({ page, q: "", status });
+    setData(res);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    load();
+  }, [page, status]);
+
+  function onEdit(a: Article) {
+    setEditingId(a._id!);
+    setForm(a);
+  }
+
+  async function onDelete(id?: string) {
+    if (!id) return;
+    if (confirm("Supprimer ?")) {
+      await deleteArticle(id);
+      load();
+    }
+  }
+
+  async function onSubmit(e: any) {
+    e.preventDefault();
+    if (editingId) {
+      await updateArticle(editingId, form);
+    } else {
+      await createArticle(form);
+    }
+    setForm(emptyForm);
+    setEditingId(null);
+    load();
+  }
 
   const categoriesList = [
     "Mode & Accessoires",
@@ -192,254 +173,127 @@ export default function VendorArticlesPage() {
     "Textile",
   ];
 
-  async function load() {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await listMyArticles({ page, q, status });
-      setData(res);
-    } catch (e: any) {
-      setError(e?.message ?? "Erreur de chargement");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-  }, [page, status]);
-
-  function resetForm() {
-    setEditingId(null);
-    setForm(emptyForm);
-  }
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    try {
-      if (editingId) {
-        await updateArticle(editingId, form);
-      } else {
-        await createArticle(form);
-      }
-      resetForm();
-      await load();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (e: any) {
-      setError(e?.message ?? "Erreur lors de l’enregistrement");
-    }
-  }
-
-  function onEdit(a: Article) {
-    setEditingId(a._id!);
-    setForm({
-      _id: a._id,
-      title: a.title,
-      description: a.description ?? "",
-      price: a.price ?? 0,
-      stock: a.stock ?? 0,
-      status: a.status,
-      images: a.images ?? [],
-      categories: a.categories ?? [],
-      sku: a.sku ?? "",
-      promotion: a.promotion ?? {
-        isActive: false,
-        discountPercent: 0,
-        newPrice: 0,
-        durationDays: 0,
-        durationHours: 0,
-      },
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  async function onDelete(id?: string) {
-    if (!id) return;
-    if (!confirm("Supprimer cet article ?")) return;
-    setError("");
-    try {
-      await deleteArticle(id);
-      await load();
-    } catch (e: any) {
-      setError(e?.message ?? "Suppression impossible");
-    }
-  }
-
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      <h1 className="text-2xl font-semibold">Mes créations</h1>
+    <div className="wrap py-10 space-y-12">
 
-      {error && (
-        <div className="p-3 rounded-xl border border-red-300 bg-red-50 text-red-700">
-          {error}
+      {/* ========================= */}
+      {/* TITRE + STATS */}
+      {/* ========================= */}
+      <div>
+        <h1 className="font-display text-3xl text-sawaka-900 mb-1">
+          Mes créations
+        </h1>
+        <p className="text-sawaka-700">
+          Gérez votre inventaire et ajoutez de nouveaux produits artisanaux.
+        </p>
+      </div>
+
+      <div className="flex gap-6">
+        <div className="bg-white border border-cream-200 shadow-card rounded-2xl p-4 w-40 text-center">
+          <p className="text-xs text-sawaka-600">TOTAL PRODUITS</p>
+          <p className="text-2xl font-semibold text-sawaka-800">{data?.total ?? 0}</p>
         </div>
-      )}
 
-      {/* 🧾 Formulaire */}
+        <div className="bg-white border border-cream-200 shadow-card rounded-2xl p-4 w-40 text-center">
+          <p className="text-xs text-sawaka-600">EN VENTE</p>
+          <p className="text-2xl font-semibold text-green-600">
+            {data?.items?.filter((a: any) => a.status === "published").length ?? 0}
+          </p>
+        </div>
+      </div>
+
+      {/* ========================= */}
+      {/* FORMULAIRE — TOUTE LA CARTE */}
+      {/* ========================= */}
       <form
         onSubmit={onSubmit}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-2xl shadow-sm"
+        className="bg-white border border-cream-200 shadow-card rounded-2xl p-8 space-y-6"
       >
-        <div>
-          <label className="block text-sm font-medium mb-1">Titre</label>
-          <input
-            className="border p-2 rounded w-full"
-            placeholder="Titre de l’article"
-            required
+        <h2 className="font-display text-2xl text-sawaka-900 mb-6">
+          Ajouter un nouveau produit
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <Input
+            label="Titre de l'article"
+            placeholder="Ex: Vase en terre cuite"
             value={form.title}
-            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+            onChange={(v) => setForm({ ...form, title: v })}
           />
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Prix (FCFA)</label>
-<input
-  className="border p-2 rounded w-full"
-  placeholder="Ex: 10000"
-  type="text"
-  inputMode="numeric"
-  pattern="[0-9]*"
-  value={form.price}
-  onChange={(e) => {
-    const value = e.target.value.replace(/\D/g, ""); // garde uniquement les chiffres
-    setForm((f) => ({ ...f, price: parseInt(value || "0") }));
-  }}
-/>
+          <Select
+            label="Catégorie"
+            value={form.categories?.[0] || ""}
+            onChange={(v) => setForm({ ...form, categories: [v] })}
+            options={categoriesList}
+          />
 
-        </div>
+          <Input
+            label="Prix (FCFA)"
+            value={form.price}
+            type="number"
+            onChange={(v) => setForm({ ...form, price: Number(v) })}
+          />
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Stock</label>
-<input
-  className="border p-2 rounded w-full"
-  type="text"
-  inputMode="numeric"
-  pattern="[0-9]*"
-  value={form.stock}
-  onChange={(e) => {
-    const value = e.target.value.replace(/\D/g, ""); 
-    setForm((f) => ({ ...f, stock: parseInt(value || "0") }));
-  }}
-/>
+          <Input
+            label="Stock"
+            type="number"
+            value={form.stock}
+            onChange={(v) => setForm({ ...form, stock: Number(v) })}
+          />
 
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">SKU (optionnel)</label>
-          <input
-            className="border p-2 rounded w-full"
+          <Input
+            label="SKU (Optionnel)"
             placeholder="Ex: CHAP-001"
             value={form.sku ?? ""}
-            onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))}
+            onChange={(v) => setForm({ ...form, sku: v })}
+          />
+
+          <Select
+            label="Statut"
+            value={form.status}
+            onChange={(v) => setForm({ ...form, status: v })}
+            options={["draft", "published"]}
+            displayMap={{ draft: "Brouillon", published: "Publié" }}
           />
         </div>
 
-
-
+        {/* Description */}
         <div>
-          <label className="block text-sm font-medium mb-1">Statut</label>
-
-<select
-  className="border p-2 rounded w-full"
-  value={form.status}
-  onChange={(e) =>
-    setForm((f) => ({
-      ...f,
-      status: e.target.value as "draft" | "published",
-      // status: e.target.value as "draft" | "published" | "auction",
-    }))
-  }
->
-  <option value="draft">Brouillon</option>
-  <option value="published">Publié</option>
-  {/* <option value="auction">Vente aux enchères</option> */}
-</select>
-
-        </div>
-
-
-
-        {/* 🕒 Vente aux enchères (option rapide) */}
-{form.status === "auction" && (
-  <div className="md:col-span-2 border-t pt-4 mt-4">
-    <label className="flex items-center gap-2 mb-3">
-      <input
-        type="checkbox"
-        checked={form.auction?.isActive || false}
-        onChange={(e) =>
-          setForm((f) => ({
-            ...f,
-            auction: { ...f.auction, isActive: e.target.checked },
-          }))
-        }
-      />
-      Activer la vente aux enchères
-    </label>
-
-    {form.auction?.isActive && (
-      <>
-        <label className="block text-sm font-medium mb-1">
-          Date et heure de fin
-        </label>
-        <input
-          type="datetime-local"
-          className="border p-2 rounded w-full"
-          value={
-            form.auction?.endDate
-              ? new Date(form.auction.endDate).toISOString().slice(0, 16)
-              : ""
-          }
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              auction: { ...f.auction, endDate: e.target.value },
-            }))
-          }
-        />
-      </>
-    )}
-  </div>
-)}
-
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Catégorie</label>
-          <select
-            className="border p-2 rounded w-full"
-            value={form.categories?.[0] || ""}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, categories: [e.target.value] }))
-            }
-          >
-            <option value="">-- Choisir une catégorie --</option>
-            {categoriesList.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="text-sm text-sawaka-800 mb-1 block">Description</label>
           <textarea
-            className="border p-2 rounded w-full"
-            placeholder="Décrivez votre création"
             value={form.description}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, description: e.target.value }))
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="border border-gray-300 rounded-xl p-4 w-full h-32"
+            placeholder="Décrivez votre création..."
+          />
+        </div>
+        {/* ====================================== */}
+        {/* 📸 UPLOAD IMAGES — Style IDENTIQUE UI */}
+        {/* ====================================== */}
+        <div>
+          <label className="text-sm text-sawaka-800 mb-2 block">
+            Galerie Photos
+          </label>
+
+          <UploadImages
+            onUploadComplete={(urls) =>
+              setForm((f) => ({ ...f, images: urls }))
             }
           />
         </div>
 
-        {/* 💸 Section Promotion */}
-        <div className="md:col-span-2 border-t pt-4 mt-4">
-          <h3 className="text-lg font-semibold mb-2">💸 Promotion</h3>
+        {/* ====================================== */}
+        {/* 💸 PROMOTION */}
+        {/* ====================================== */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
-          <label className="flex items-center gap-2 mb-2">
+          {/* Left: Checkbox */}
+          <label className="flex items-center gap-2 text-sawaka-800 mt-4">
             <input
               type="checkbox"
+              className="h-4 w-4"
               checked={form.promotion?.isActive || false}
               onChange={(e) =>
                 setForm((f) => ({
@@ -451,184 +305,264 @@ export default function VendorArticlesPage() {
             Activer une promotion
           </label>
 
-          {form.promotion?.isActive && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Nouveau prix (FCFA)
-                </label>
-                <input
-                  type="number"
-                  className="border p-2 rounded w-full"
-                  value={form.promotion?.newPrice || ""}
-                  onChange={(e) => {
-                    const newPrice = parseFloat(e.target.value || "0");
-                    const discountPercent =
-                      form.price > 0
-                        ? Math.round(
-                            ((form.price - newPrice) / form.price) * 100
-                          )
-                        : 0;
-                    setForm((f) => ({
-                      ...f,
-                      promotion: { ...f.promotion, newPrice, discountPercent },
-                    }));
-                  }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Réduction (%)
-                </label>
-                <input
-                  type="number"
-                  className="border p-2 rounded w-full"
-                  value={form.promotion?.discountPercent || ""}
-                  onChange={(e) => {
-                    const discountPercent = parseFloat(e.target.value || "0");
-                    const newPrice =
-                      form.price > 0
-                        ? Math.round(
-                            form.price * (1 - discountPercent / 100)
-                          )
-                        : 0;
-                    setForm((f) => ({
-                      ...f,
-                      promotion: { ...f.promotion, discountPercent, newPrice },
-                    }));
-                  }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Durée (jours)
-                </label>
-                <input
-                  type="number"
-                  className="border p-2 rounded w-full"
-                  value={form.promotion?.durationDays || ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      promotion: {
-                        ...f.promotion,
-                        durationDays: parseInt(e.target.value || "0"),
-                      },
-                    }))
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Durée (heures)
-                </label>
-                <input
-                  type="number"
-                  className="border p-2 rounded w-full"
-                  value={form.promotion?.durationHours || ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      promotion: {
-                        ...f.promotion,
-                        durationHours: parseInt(e.target.value || "0"),
-                      },
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          )}
+          {/* Right: explanation */}
+          <p className="text-xs text-sawaka-600 mt-4">
+            Le produit apparaîtra dans la section "Promotions".
+          </p>
         </div>
 
-        {/* 📸 Upload */}
-        <UploadImages
-          onUploadComplete={(urls) =>
-            setForm((f) => ({ ...f, images: urls }))
-          }
-        />
+        {/* ============================ */}
+        {/* Champs visibles si actif     */}
+        {/* ============================ */}
+        {form.promotion?.isActive && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div className="md:col-span-2 flex gap-3">
-          <button className="px-4 py-2 rounded-2xl bg-black text-white">
-            {editingId ? "Mettre à jour" : "Créer"}
+            {/* Nouveau prix */}
+            <div>
+              <label className="text-sm text-sawaka-800 mb-1 block">
+                Nouveau prix (FCFA)
+              </label>
+              <input
+                type="number"
+                value={form.promotion?.newPrice || ""}
+                onChange={(e) => {
+                  const newPrice = Number(e.target.value || "0");
+                  const discountPercent =
+                    form.price > 0
+                      ? Math.round(((form.price - newPrice) / form.price) * 100)
+                      : 0;
+
+                  setForm((f) => ({
+                    ...f,
+                    promotion: { ...f.promotion, newPrice, discountPercent },
+                  }));
+                }}
+                className="border border-gray-300 rounded-xl p-3 w-full"
+              />
+            </div>
+
+            {/* Pourcentage de réduction */}
+            <div>
+              <label className="text-sm text-sawaka-800 mb-1 block">
+                Réduction (%)
+              </label>
+              <input
+                type="number"
+                value={form.promotion?.discountPercent || ""}
+                onChange={(e) => {
+                  const discountPercent = Number(e.target.value || "0");
+                  const newPrice =
+                    form.price > 0
+                      ? Math.round(form.price * (1 - discountPercent / 100))
+                      : 0;
+
+                  setForm((f) => ({
+                    ...f,
+                    promotion: { ...f.promotion, discountPercent, newPrice },
+                  }));
+                }}
+                className="border border-gray-300 rounded-xl p-3 w-full"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ====================================== */}
+        {/* CTA BUTTON */}
+        {/* ====================================== */}
+        <div className="flex justify-end pt-4">
+          <button
+            type="submit"
+            className="px-6 py-3 rounded-xl font-semibold bg-sawaka-600 text-white hover:bg-sawaka-700 flex items-center gap-2"
+          >
+            + Créer le produit
           </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="px-4 py-2 rounded-2xl border"
-            >
-              Annuler
-            </button>
-          )}
         </div>
       </form>
+      {/* ======================================================= */}
+      {/* 📦 INVENTAIRE ACTUEL */}
+      {/* ======================================================= */}
 
-      {/* 🗂 Tableau */}
-      <div className="overflow-x-auto border rounded-2xl">
-        <table className="min-w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="text-left p-3">Titre</th>
-              <th className="text-left p-3">Prix</th>
-              <th className="text-left p-3">Stock</th>
-              <th className="text-left p-3">Catégorie</th>
-              <th className="text-left p-3">Statut</th>
-              <th className="text-left p-3">Promo</th>
-              <th className="text-left p-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} className="p-3">
-                  Chargement…
-                </td>
+      <h2 className="font-display text-2xl text-sawaka-900 mt-10">
+        Inventaire actuel
+      </h2>
+
+      <div className="bg-white border border-cream-200 rounded-2xl shadow-card p-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr className="text-sawaka-700 text-xs border-b bg-cream-50">
+                <th className="p-3 text-left">TITRE</th>
+                <th className="p-3 text-left">PRIX</th>
+                <th className="p-3 text-left">STOCK</th>
+                <th className="p-3 text-left">CATÉGORIE</th>
+                <th className="p-3 text-left">STATUT</th>
+                <th className="p-3 text-left">PROMO</th>
+                <th className="p-3 text-left">ACTIONS</th>
               </tr>
-            ) : (data?.items ?? []).length ? (
-              data!.items.map((a) => (
-                <tr key={a._id} className="border-t">
-                  <td className="p-3">{a.title}</td>
-                  <td className="p-3">{a.price?.toFixed(0)} FCFA</td>
-                  <td className="p-3">{a.stock}</td>
-                  <td className="p-3">
-                    {a.categories?.length ? a.categories.join(", ") : "-"}
-                  </td>
-                  <td className="p-3">{a.status}</td>
-                  <td className="p-3">
-                    {a.promotion?.isActive
-                      ? `${a.promotion.discountPercent}% (${a.promotion.newPrice} FCFA)`
-                      : "-"}
-                  </td>
-                  <td className="p-3 flex gap-2">
-                    <button
-                      onClick={() => onEdit(a)}
-                      className="px-3 py-1 border rounded"
-                    >
-                      Éditer
-                    </button>
-                    <button
-                      onClick={() => onDelete(a._id)}
-                      className="px-3 py-1 border rounded text-red-500"
-                    >
-                      Supprimer
-                    </button>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center">
+                    Chargement…
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                   <td colSpan={7} className="p-3">
-                  Aucun article.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              ) : data?.items?.length ? (
+                data.items.map((a: Article) => (
+                  <tr key={a._id} className="border-b last:border-0">
+                    {/* Titre */}
+                    <td className="p-3 font-medium text-sawaka-900">
+                      {a.title}
+                    </td>
+
+                    {/* Prix */}
+                    <td className="p-3">{a.price?.toLocaleString()} FCFA</td>
+
+                    {/* Stock */}
+                    <td className="p-3">{a.stock}</td>
+
+                    {/* Catégorie */}
+                    <td className="p-3">
+                      {a.categories?.length ? (
+                        <span className="px-3 py-1 rounded-full bg-cream-100 text-sawaka-800 text-xs">
+                          {a.categories[0]}
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+
+                    {/* Statut */}
+                    <td className="p-3">
+                      {a.status === "published" ? (
+                        <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                          ● Publié
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
+                          ● Brouillon
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Promotion */}
+                    <td className="p-3">
+                      {a.promotion?.isActive ? (
+                        <span className="text-sawaka-800 font-medium">
+                          {a.promotion.discountPercent}%{" "}
+                          <span className="text-xs text-sawaka-600">
+                            ({a.promotion.newPrice} FCFA)
+                          </span>
+                        </span>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-3 flex gap-3">
+                      <button
+                        onClick={() => onEdit(a)}
+                        className="text-sawaka-700 hover:underline"
+                      >
+                        Éditer
+                      </button>
+
+                      <button
+                        onClick={() => onDelete(a._id)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Supprimer
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center text-sawaka-700">
+                    Aucun article trouvé.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* ======================================================= */}
+        {/* PAGINATION */}
+        {/* ======================================================= */}
+        <div className="flex items-center justify-between mt-4 text-sm text-sawaka-700">
+          <p>
+            Affichage de {data?.items?.length ?? 0} sur {data?.total ?? 0} résultats
+          </p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className={`px-3 py-1 rounded-lg border ${
+                page === 1
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-cream-50"
+              }`}
+            >
+              Préc.
+            </button>
+
+            <button
+              onClick={() => setPage((p) => Math.min(data?.pages ?? 1, p + 1))}
+              disabled={page === data?.pages}
+              className={`px-3 py-1 rounded-lg border ${
+                page === data?.pages
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-cream-50"
+              }`}
+            >
+              Suiv.
+            </button>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+}
+
+/* ======================================================= */
+/* 🔧 INPUT + SELECT Components (identiques au mockup UI)  */
+/* ======================================================= */
+function Input({ label, placeholder, type = "text", value, onChange }: any) {
+  return (
+    <div>
+      <label className="text-sm text-sawaka-800 mb-1 block">{label}</label>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="border border-gray-300 rounded-xl p-3 w-full"
+      />
+    </div>
+  );
+}
+
+function Select({ label, value, onChange, options, displayMap }: any) {
+  return (
+    <div>
+      <label className="text-sm text-sawaka-800 mb-1 block">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="border border-gray-300 rounded-xl p-3 w-full"
+      >
+        <option value="">-- Choisir une option --</option>
+        {options.map((opt: string) => (
+          <option key={opt} value={opt}>
+            {displayMap?.[opt] ?? opt}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
