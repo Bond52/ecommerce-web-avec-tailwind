@@ -240,12 +240,16 @@ export default function ProduitDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white rounded-2xl shadow-lg p-6 lg:p-8">
           {/* Images */}
           <div className="space-y-4">
+
             <div className="relative aspect-square rounded-xl overflow-hidden bg-cream-100">
-              <img
-                src={article.images?.[selectedImage] || "/placeholder.png"}
-                alt={article.title}
-                className="w-full h-full object-cover"
-              />
+<img
+  src={article.images?.[selectedImage] || "/placeholder.png"}
+  alt={article.title}
+  className="w-full h-full object-contain object-center"
+/>
+
+
+
               {article.stock === 0 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                   <span className="text-white text-2xl font-bold">Rupture de stock</span>
