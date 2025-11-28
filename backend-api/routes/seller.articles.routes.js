@@ -4,7 +4,6 @@ const Article = require("../models/Article");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
-console.log("🟡 BODY REÇU (POST) :", req.body);
 
 /* ===========================================================
    AUTH
@@ -57,6 +56,8 @@ cloudinary.config({
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
+   console.log("📸 UPLOAD → Fichiers reçus :", req.files?.length);
+
   try {
     if (!req.files?.length)
       return res.status(400).json({ message: "Aucun fichier reçu" });
@@ -146,6 +147,8 @@ router.use(requireAuth, requireRole("vendeur", "admin"));
    CREATE ARTICLE
 =========================================================== */
 router.post("/articles", async (req, res) => {
+    console.log("🟡 CREATE → BODY REÇU :", req.body);
+
   try {
     const body = req.body;
 
@@ -225,6 +228,8 @@ router.get("/articles", async (req, res) => {
    UPDATE ARTICLE
 =========================================================== */
 router.patch("/articles/:id", async (req, res) => {
+console.log("🟠 UPDATE → BODY REÇU :", req.body);
+
   try {
     const body = req.body;
 
