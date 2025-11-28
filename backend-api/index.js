@@ -42,7 +42,11 @@ app.use(cookieParser());
 
 // 🧭 Routes principales
 const authRoutes = require("./routes/auth");
-app.use("/api", authRoutes); // -> POST /api/login, /api/register
+app.use("/api/auth", authRoutes); 
+// -> Routes disponibles :
+//    POST   /api/auth/login
+//    POST   /api/auth/register
+//    GET    /api/auth/me
 
 const sellerRoutes = require("./routes/seller.articles.routes");
 app.use("/api/seller", sellerRoutes); // -> /api/seller/articles
