@@ -87,6 +87,8 @@ if (res.ok) {
   fetchUser();
 }, []);
 
+console.log("USER =", user)
+
 
   async function load() {
     setLoading(true);
