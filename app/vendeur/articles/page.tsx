@@ -169,14 +169,32 @@ const emptyForm: Article = {
     setLoading(false);
   }
 
+  console.log("Données API :", data);
+
   useEffect(() => {
     load();
   }, [page, status]);
 
-  function onEdit(a: Article) {
-    setEditingId(a._id!);
-    setForm(a);
-  }
+function onEdit(a: Article) {
+  setEditingId(a._id!);
+
+  setForm({
+    ...a,
+    images: a.images ?? [],
+    promotion: {
+      isActive: a.promotion?.isActive ?? false,
+      discountPercent: a.promotion?.discountPercent ?? 0,
+      newPrice: a.promotion?.newPrice ?? 0,
+      durationDays: a.promotion?.durationDays ?? 0,
+      durationHours: a.promotion?.durationHours ?? 0,
+      startDate: a.promotion?.startDate ?? "",
+      endDate: a.promotion?.endDate ?? "",
+    },
+  });
+
+  console.log("Form après édition :", a.images);
+}
+
 
   async function onDelete(id?: string) {
     if (!id) return;
@@ -503,6 +521,8 @@ const emptyForm: Article = {
                       >
                         Éditer
                       </button>
+                      
+                      console.log("Images existantes :", a.images);
 
                       <button
                         onClick={() => onDelete(a._id)}
