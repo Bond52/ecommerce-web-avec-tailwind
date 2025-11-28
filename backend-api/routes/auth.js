@@ -106,4 +106,28 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// ================================================
+// 🔍 ME — Retourne l'utilisateur connecté
+// ================================================
+router.get("/me", (req, res) => {
+  try {
+    const bearer = req.headers.authorization;
+    const headerToken =
+      bearer && bearer.startsWith("Bearer ")
+        ? bearer.split(" ")[1]
+        : null;
+
+    const cookieToken = req.cookies?.token;
+    const token = headerToken || cookieToken;
+
+    if (!token) return res.status(401).json({ error: "Non connecté" });
+
+    const user = jwt.verify(token, process.env.JWT_SECRET);
+
+    return res.json(user);
+  } catch (err) {
+    return res.status(401).json({ error: "Token invalide" });
+  }
+});
+
 module.exports = router;
