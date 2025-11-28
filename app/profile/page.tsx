@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const provincesCM: Record<string, string[]> = {
   Centre: ["Yaoundé", "Mbalmayo", "Obala"],
@@ -41,27 +41,24 @@ export default function ProfilePage() {
       .catch((err) => setError(err.message));
   }, [API_URL]);
 
-  if (error) return <p className="text-center text-red-600">{error}</p>;
-  if (!user || !form) return <p className="text-center">Chargement...</p>;
+  if (error) return <p className="text-center text-red-600 mt-6">{error}</p>;
+  if (!form) return <p className="text-center mt-6 text-gray-600">Chargement...</p>;
 
   const isModified = JSON.stringify(user) !== JSON.stringify(form);
 
-  const updateField = (key: string, value: any) => {
-    setForm((prev: any) => ({ ...prev, [key]: value }));
+  const updateField = (k: string, v: any) => {
+    setForm((prev: any) => ({ ...prev, [k]: v }));
   };
 
   const handleSave = async () => {
     setSaving(true);
-
     const res = await fetch(`${API_URL}/api/user/profile`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
       credentials: "include",
     });
-
     setSaving(false);
-
     if (res.ok) {
       const updated = await res.json();
       setUser(updated);
@@ -74,69 +71,72 @@ export default function ProfilePage() {
 
   return (
     <div className="wrap py-12">
-      <h1 className="text-3xl font-bold text-sawaka-800 mb-6">Mon profil</h1>
+      <h1 className="text-3xl font-bold text-sawaka-800 mb-10">Mon profil</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
         {/* COLONNE GAUCHE */}
-        <div className="space-y-6">
-          {/* PHOTO */}
-          <div className="bg-white rounded-xl shadow border p-6 text-center">
-            <div className="w-40 h-40 rounded-full bg-sawaka-400 flex items-center justify-center text-4xl text-white font-bold mx-auto">
-              {form.firstName?.[0]}{form.lastName?.[0]}
+        <div className="space-y-8">
+
+          {/* Avatar Card */}
+          <div className="bg-white border border-cream-200 rounded-2xl shadow-card p-6 text-center">
+            <div className="w-32 h-32 rounded-full bg-sawaka-200 flex items-center justify-center text-4xl font-bold text-sawaka-700 mx-auto mb-4">
+              {form.firstName?.[0]}
+              {form.lastName?.[0]}
             </div>
 
-            <h2 className="text-xl font-semibold mt-4">
+            <h3 className="text-xl font-semibold text-sawaka-900">
               {form.firstName} {form.lastName}
-            </h2>
-            <p className="text-gray-600">@{form.username}</p>
+            </h3>
+            <p className="text-sawaka-700">@{form.username}</p>
 
-            <button className="mt-4 px-4 py-2 bg-sawaka-600 text-white rounded-lg">
+            <button className="mt-4 btn btn-primary w-full">
               Changer la photo
             </button>
           </div>
 
-          {/* RÔLES + ABOUT */}
-          <div className="bg-white rounded-xl shadow border p-6">
-            <h3 className="font-semibold text-sawaka-800 mb-4">Rôles</h3>
+          {/* Rôles + À propos */}
+          <div className="bg-white border border-cream-200 rounded-2xl shadow-card p-6">
+            <h3 className="text-sawaka-800 font-semibold mb-2">Rôles</h3>
             <input
-              value={form.roles}
+              value={form.roles || ""}
               onChange={(e) => updateField("roles", e.target.value)}
-              className="w-full border rounded-lg p-2 mb-4"
+              className="border rounded-lg p-2 w-full mb-4"
             />
-            <h3 className="font-semibold text-sawaka-800 mb-2">À propos de moi</h3>
+
+            <h3 className="text-sawaka-800 font-semibold mb-2">À propos de moi</h3>
             <textarea
-              value={form.about}
+              value={form.about || ""}
               onChange={(e) => updateField("about", e.target.value)}
-              className="w-full border rounded-lg p-3 h-28"
+              className="border rounded-lg p-3 w-full h-32"
             />
           </div>
 
-          {/* MOT DE PASSE */}
-          <div className="bg-white rounded-xl shadow border p-6">
-            <h3 className="font-semibold text-sawaka-800 mb-4">Sécurité</h3>
+          {/* Sécurité */}
+          <div className="bg-white border border-cream-200 rounded-2xl shadow-card p-6">
+            <h3 className="text-sawaka-800 font-semibold mb-4">Sécurité</h3>
 
             <input
               type="password"
               placeholder="Ancien mot de passe"
-              className="w-full border rounded-lg p-2 mb-3"
+              className="border rounded-lg p-3 w-full mb-3"
             />
             <input
               type="password"
               placeholder="Nouveau mot de passe"
-              className="w-full border rounded-lg p-2"
+              className="border rounded-lg p-3 w-full"
             />
 
-            <button className="mt-4 w-full px-4 py-2 bg-sawaka-600 text-white rounded-lg">
+            <button className="btn btn-primary w-full mt-4">
               Modifier le mot de passe
             </button>
           </div>
         </div>
 
         {/* COLONNE DROITE */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
 
-          {/* INFO PERSONNELLES */}
+          {/* INFOS PERSONNELLES */}
           <Card title="Informations personnelles">
             <Grid>
               <Input label="Nom d'utilisateur" value={form.username} onChange={(e) => updateField("username", e.target.value)} />
@@ -172,15 +172,14 @@ export default function ProfilePage() {
             </Card>
           )}
 
-          {/* BOUTON SAUVEGARDE */}
           <div className="text-center">
             <button
               disabled={!isModified || saving}
               onClick={handleSave}
               className={`
-                px-6 py-3 rounded-lg font-semibold
+                px-6 py-3 rounded-xl font-semibold
                 ${!isModified || saving
-                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  ? "bg-gray-300 cursor-not-allowed text-gray-600"
                   : "bg-sawaka-700 text-white hover:bg-sawaka-800"}
               `}
             >
@@ -196,8 +195,8 @@ export default function ProfilePage() {
 /* COMPONENTS */
 function Card({ title, children }: any) {
   return (
-    <div className="bg-white rounded-xl shadow border p-6">
-      <h3 className="text-xl font-semibold text-sawaka-800 mb-4">{title}</h3>
+    <div className="bg-white border border-cream-200 rounded-2xl shadow-card p-8">
+      <h3 className="text-xl font-semibold text-sawaka-800 mb-6">{title}</h3>
       {children}
     </div>
   );
@@ -211,7 +210,11 @@ function Input({ label, value, onChange }: any) {
   return (
     <div className="flex flex-col">
       <label className="text-sawaka-700 mb-1">{label}</label>
-      <input value={value} onChange={onChange} className="border rounded-lg p-2" />
+      <input
+        value={value}
+        onChange={onChange}
+        className="border border-gray-300 rounded-lg p-3"
+      />
     </div>
   );
 }
@@ -220,7 +223,11 @@ function Select({ label, value, onChange, options }: any) {
   return (
     <div className="flex flex-col">
       <label className="text-sawaka-700 mb-1">{label}</label>
-      <select value={value || ""} onChange={onChange} className="border rounded-lg p-2">
+      <select
+        value={value || ""}
+        onChange={onChange}
+        className="border border-gray-300 rounded-lg p-3"
+      >
         <option value="">Sélectionner…</option>
         {options.map((opt: string) => (
           <option key={opt}>{opt}</option>
