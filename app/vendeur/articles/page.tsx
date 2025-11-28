@@ -67,14 +67,21 @@ useEffect(() => {
         `${process.env.NEXT_PUBLIC_API_BASE || "https://ecommerce-web-avec-tailwind.onrender.com"}/api/auth/me`,
         { credentials: "include" }
       );
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-      } else {
-        setUser(null);
-      }
+
+
+if (res.ok) {
+  const data = await res.json();
+  setUser(data);    // utilisateur connecté
+} else {
+  setUser(false);   // utilisateur NON connecté
+}
+
+
+
     } catch {
-      setUser(null);
+
+      setUser(false);
+
     }
   }
   fetchUser();
@@ -90,11 +97,17 @@ useEffect(() => {
 
 // 📌 Recharger les articles quand l'utilisateur ou la page change
 useEffect(() => {
-  if (user) {
-    load();
-  } else {
-    setData(null); // éviter d'afficher l'ancien inventaire
+  // Tant que user === null → on attend la réponse du backend
+  if (user === null) return;
+
+  // Si user = false → pas connecté → on vide l’inventaire
+  if (user === false) {
+    setData({ items: [], total: 0, pages: 1 });
+    return;
   }
+
+  // Si user est un objet → charger l’inventaire
+  load();
 }, [user, page]);
 
 
