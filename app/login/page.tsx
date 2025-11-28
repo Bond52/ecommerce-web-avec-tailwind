@@ -16,43 +16,52 @@ export default function LoginPage() {
       ? 'http://localhost:5000'
       : 'https://ecommerce-web-avec-tailwind.onrender.com');
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      });
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-      const data = await res.json();
-      if (!res.ok) return alert(data.error || 'Identifiants incorrects');
 
-      // 🔑 On stocke tout dans user
-      if (data.token) {
-        localStorage.setItem(
-          'user',
-          JSON.stringify({
-            token: data.token,
-            roles: data.roles,
-            username: data.username || email.split('@')[0],
-            firstName: data.firstName || '',
-            lastName: data.lastName || '',
-          })
-        );
-      }
+  // 🧹 Supprimer ancienne session locale
+  localStorage.removeItem("user");
 
-      const redirect = searchParams.get('redirect');
-      if (redirect) {
-        router.push(redirect);
-      } else {
-        router.push('/'); // 🔥 retour accueil
-      }
-    } catch {
-      alert('Erreur de connexion au serveur');
+// 🔥 Supprime absolument toutes les versions du cookie token (Chrome, Safari, iOS, Android)
+document.cookie = "token=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure; SameSite=None";
+document.cookie = "token=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure";
+document.cookie = "token=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+document.cookie = "token=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.sawaka.org; secure; SameSite=None";
+document.cookie = "token=; Max-Age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.sawaka.org";
+
+
+  try {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) return alert(data.error || "Identifiants incorrects");
+
+    if (data.token) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          token: data.token,
+          roles: data.roles,
+          username: data.username || email.split("@")[0],
+          firstName: data.firstName || "",
+          lastName: data.lastName || ""
+        })
+      );
     }
-  };
+
+    const redirect = searchParams.get("redirect");
+    router.push(redirect || "/");
+    
+  } catch (err) {
+    alert("Erreur de connexion au serveur");
+  }
+};
 
   return (
     <main className="flex items-center justify-center min-h-[70vh] bg-cream-100">
