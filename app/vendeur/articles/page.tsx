@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState, useRef } from "react";
 import UploadImages from "../../components/UploadImages";
-import { useEffect, useMemo, useState } from "react";
 import { listMyArticles, createArticle, updateArticle, deleteArticle } from "../../lib/apiSeller";
 import type { Article } from "../../lib/apiSeller";
 
@@ -46,6 +46,14 @@ export default function VendorArticlesPage() {
 
   const [form, setForm] = useState<Article>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+    // 🔥 Empêche la perte du mode édition lorsque le composant re-render
+  const editingRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    editingRef.current = editingId;
+  }, [editingId]);
+
 
   async function load() {
     setLoading(true);
@@ -174,12 +182,13 @@ export default function VendorArticlesPage() {
         {/* ========================= */}
         {/* CTA */}
         {/* ========================= */}
-        <button
-          type="submit"
-          className="mt-6 px-6 py-3 rounded-xl bg-sawaka-700 text-white hover:bg-sawaka-800"
-        >
-          {editingId ? "Mettre à jour" : "+ Créer le produit"}
-        </button>
+<button
+  type="submit"
+  className="mt-6 px-6 py-3 rounded-xl bg-sawaka-700 text-white hover:bg-sawaka-800"
+>
+  {editingRef.current ? "Mettre à jour" : "+ Créer le produit"}
+</button>
+
       </form>
 
       {/* ======================================================= */}
