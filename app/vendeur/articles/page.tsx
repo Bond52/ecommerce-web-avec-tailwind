@@ -186,7 +186,7 @@ export default function VendorArticlesPage() {
   type="submit"
   className="mt-6 px-6 py-3 rounded-xl bg-sawaka-700 text-white hover:bg-sawaka-800"
 >
-  {editingRef.current ? "Mettre à jour" : "+ Créer le produit"}
+ {editingId ? "Mettre à jour" : "+ Créer le produit"}
 </button>
 
       </form>
