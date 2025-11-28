@@ -2,33 +2,32 @@
 
 import { useState, useEffect } from "react";
 
-// Mini base du Cameroun
 const provincesCM: Record<string, string[]> = {
-  "Centre": ["Yaoundé", "Mbalmayo", "Obala"],
-  "Littoral": ["Douala", "Nkongsamba", "Yabassi"],
-  "Ouest": ["Bafoussam", "Dschang", "Foumban"],
-  "Nord": ["Garoua", "Guider", "Pitoa"],
+  Centre: ["Yaoundé", "Mbalmayo", "Obala"],
+  Littoral: ["Douala", "Nkongsamba", "Yabassi"],
+  Ouest: ["Bafoussam", "Dschang", "Foumban"],
+  Nord: ["Garoua", "Guider", "Pitoa"],
   "Extrême-Nord": ["Maroua", "Kousséri", "Mora"],
-  "Sud": ["Ebolowa", "Kribi", "Sangmélima"],
-  "Est": ["Bertoua", "Batouri", "Abong-Mbang"],
+  Sud: ["Ebolowa", "Kribi", "Sangmélima"],
+  Est: ["Bertoua", "Batouri", "Abong-Mbang"],
   "Nord-Ouest": ["Bamenda", "Kumbo", "Ndop"],
   "Sud-Ouest": ["Buea", "Limbe", "Kumba"],
-  "Adamaoua": ["Ngaoundéré", "Meiganga", "Tibati"],
+  Adamaoua: ["Ngaoundéré", "Meiganga", "Tibati"],
 };
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [form, setForm] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const API_URL =
     process.env.NEXT_PUBLIC_API_BASE ||
-    (typeof window !== "undefined" && window.location.hostname === "localhost"
+    (typeof window !== "undefined" &&
+    window.location.hostname === "localhost"
       ? "http://localhost:5000"
       : "https://ecommerce-web-avec-tailwind.onrender.com");
 
-  // Charger profil
   useEffect(() => {
     fetch(`${API_URL}/api/user/profile`, { credentials: "include" })
       .then(async (res) => {
@@ -37,26 +36,20 @@ export default function ProfilePage() {
       })
       .then((data) => {
         setUser(data);
-        setForm(data); // copie initiale
+        setForm(data);
       })
       .catch((err) => setError(err.message));
   }, [API_URL]);
 
-  if (error)
-    return <p className="text-center text-red-600 mt-6">{error}</p>;
+  if (error) return <p className="text-center text-red-600">{error}</p>;
+  if (!user || !form) return <p className="text-center">Chargement...</p>;
 
-  if (!user || !form)
-    return <p className="text-center text-gray-500 mt-6">Chargement...</p>;
-
-  // Vérifier si formulaire modifié
   const isModified = JSON.stringify(user) !== JSON.stringify(form);
 
-  // Modifier champ
   const updateField = (key: string, value: any) => {
     setForm((prev: any) => ({ ...prev, [key]: value }));
   };
 
-  // Enregistrer
   const handleSave = async () => {
     setSaving(true);
 
@@ -81,140 +74,130 @@ export default function ProfilePage() {
 
   return (
     <div className="wrap py-12">
-      <div className="bg-white border border-cream-200 shadow-md rounded-2xl p-10 max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold text-sawaka-800 mb-6">Mon profil</h1>
 
-        <h1 className="text-3xl font-bold text-sawaka-800 mb-10">
-          Mon profil
-        </h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        {/* GRID PRINCIPALE */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
+        {/* COLONNE GAUCHE */}
+        <div className="space-y-6">
           {/* PHOTO */}
-          <div className="col-span-1">
-            <div className="bg-cream-100 border border-cream-300 rounded-xl p-6 flex flex-col items-center">
-              <img
-                src="/images/profile-placeholder.png"
-                alt="photo"
-                className="w-48 h-48 rounded-lg object-cover border border-cream-300 shadow-sm"
-              />
-              <button className="mt-4 px-4 py-2 bg-sawaka-600 text-white rounded-lg hover:bg-sawaka-700">
-                Changer la photo
-              </button>
+          <div className="bg-white rounded-xl shadow border p-6 text-center">
+            <div className="w-40 h-40 rounded-full bg-sawaka-400 flex items-center justify-center text-4xl text-white font-bold mx-auto">
+              {form.firstName?.[0]}{form.lastName?.[0]}
             </div>
+
+            <h2 className="text-xl font-semibold mt-4">
+              {form.firstName} {form.lastName}
+            </h2>
+            <p className="text-gray-600">@{form.username}</p>
+
+            <button className="mt-4 px-4 py-2 bg-sawaka-600 text-white rounded-lg">
+              Changer la photo
+            </button>
           </div>
 
-          {/* FORM */}
-          <div className="col-span-2 space-y-10">
+          {/* RÔLES + ABOUT */}
+          <div className="bg-white rounded-xl shadow border p-6">
+            <h3 className="font-semibold text-sawaka-800 mb-4">Rôles</h3>
+            <input
+              value={form.roles}
+              onChange={(e) => updateField("roles", e.target.value)}
+              className="w-full border rounded-lg p-2 mb-4"
+            />
+            <h3 className="font-semibold text-sawaka-800 mb-2">À propos de moi</h3>
+            <textarea
+              value={form.about}
+              onChange={(e) => updateField("about", e.target.value)}
+              className="w-full border rounded-lg p-3 h-28"
+            />
+          </div>
 
-            {/* --- PROFIL --- */}
-            <Section title="Informations du profil">
-              <Grid>
-                <Input label="Nom d'utilisateur" value={form.username}
-                       onChange={(e) => updateField("username", e.target.value)} />
-                <Input label="Prénom" value={form.firstName}
-                       onChange={(e) => updateField("firstName", e.target.value)} />
-                <Input label="Nom" value={form.lastName}
-                       onChange={(e) => updateField("lastName", e.target.value)} />
-                <Input label="Surnom / Nom affiché" value={form.nickname}
-                       onChange={(e) => updateField("nickname", e.target.value)} />
-                <Input label="Rôles" value={form.roles}
-                       onChange={(e) => updateField("roles", e.target.value)} />
-              </Grid>
-            </Section>
+          {/* MOT DE PASSE */}
+          <div className="bg-white rounded-xl shadow border p-6">
+            <h3 className="font-semibold text-sawaka-800 mb-4">Sécurité</h3>
 
-            {/* --- CONTACT --- */}
-            <Section title="Informations de contact">
-              <Grid>
-                <Input label="Email" value={form.email}
-                       onChange={(e) => updateField("email", e.target.value)} />
-                <Input label="Téléphone" value={form.phone}
-                       onChange={(e) => updateField("phone", e.target.value)} />
-                <Input label="Pays" value={form.country}
-                       onChange={(e) => updateField("country", e.target.value)} />
-                <Select
-                  label="Province"
-                  value={form.province}
-                  onChange={(e) => updateField("province", e.target.value)}
-                  options={Object.keys(provincesCM)}
-                />
-                <Select
-                  label="Ville"
-                  value={form.city}
-                  onChange={(e) => updateField("city", e.target.value)}
-                  options={form.province ? provincesCM[form.province] : []}
-                />
-                <Input label="Point de retrait" value={form.pickupPoint}
-                       onChange={(e) => updateField("pickupPoint", e.target.value)} />
-              </Grid>
-            </Section>
+            <input
+              type="password"
+              placeholder="Ancien mot de passe"
+              className="w-full border rounded-lg p-2 mb-3"
+            />
+            <input
+              type="password"
+              placeholder="Nouveau mot de passe"
+              className="w-full border rounded-lg p-2"
+            />
 
-            {/* --- VENDEUR --- */}
-            {form.isSeller && (
-              <Section title="Informations vendeur">
-                <Grid>
-                  <Input label="Nom du commerce" value={form.commerceName}
-                         onChange={(e) => updateField("commerceName", e.target.value)} />
-                  <Input label="Quartier" value={form.neighborhood}
-                         onChange={(e) => updateField("neighborhood", e.target.value)} />
-                  <Input label="Pièce d'identité (lien)" value={form.idCardImage}
-                         onChange={(e) => updateField("idCardImage", e.target.value)} />
-                </Grid>
-              </Section>
-            )}
-
-            {/* --- À propos --- */}
-            <Section title="À propos de moi">
-              <textarea
-                value={form.about || ""}
-                onChange={(e) => updateField("about", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 h-32"
-                placeholder="Écrivez quelque chose à propos de vous..."
-              />
-            </Section>
-
-            {/* --- PASSWORD --- */}
-            <Section title="Mot de passe">
-              <Grid>
-                <Input label="Ancien mot de passe" placeholder="Ancien mot de passe" />
-                <Input label="Nouveau mot de passe" placeholder="Nouveau mot de passe" />
-              </Grid>
-
-              <button className="mt-4 px-4 py-2 bg-sawaka-600 text-white rounded-lg hover:bg-sawaka-700">
-                Modifier le mot de passe
-              </button>
-            </Section>
-
+            <button className="mt-4 w-full px-4 py-2 bg-sawaka-600 text-white rounded-lg">
+              Modifier le mot de passe
+            </button>
           </div>
         </div>
 
-        {/* --- SAVE --- */}
-        <div className="mt-10 text-center">
-          <button
-            disabled={!isModified || saving}
-            onClick={handleSave}
-            className={`
-              px-6 py-3 rounded-lg font-semibold
-              ${!isModified || saving
-                ? "bg-gray-300 cursor-not-allowed text-gray-600"
-                : "bg-sawaka-700 text-white hover:bg-sawaka-800"}
-            `}
-          >
-            {saving ? "Enregistrement..." : "Mettre à jour"}
-          </button>
-        </div>
+        {/* COLONNE DROITE */}
+        <div className="lg:col-span-2 space-y-6">
 
+          {/* INFO PERSONNELLES */}
+          <Card title="Informations personnelles">
+            <Grid>
+              <Input label="Nom d'utilisateur" value={form.username} onChange={(e) => updateField("username", e.target.value)} />
+              <Input label="Surnom / Nom affiché" value={form.nickname} onChange={(e) => updateField("nickname", e.target.value)} />
+              <Input label="Prénom" value={form.firstName} onChange={(e) => updateField("firstName", e.target.value)} />
+              <Input label="Nom" value={form.lastName} onChange={(e) => updateField("lastName", e.target.value)} />
+            </Grid>
+          </Card>
+
+          {/* COORDONNÉES */}
+          <Card title="Coordonnées">
+            <Grid>
+              <Input label="Email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
+              <Input label="Téléphone" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
+              <Input label="Pays" value={form.country} onChange={(e) => updateField("country", e.target.value)} />
+
+              <Select label="Province" value={form.province} onChange={(e) => updateField("province", e.target.value)} options={Object.keys(provincesCM)} />
+
+              <Select label="Ville" value={form.city} onChange={(e) => updateField("city", e.target.value)} options={form.province ? provincesCM[form.province] : []} />
+
+              <Input label="Point de retrait" value={form.pickupPoint} onChange={(e) => updateField("pickupPoint", e.target.value)} />
+            </Grid>
+          </Card>
+
+          {/* VENDEUR */}
+          {form.isSeller && (
+            <Card title="Espace Vendeur">
+              <Grid>
+                <Input label="Nom du commerce" value={form.commerceName} onChange={(e) => updateField("commerceName", e.target.value)} />
+                <Input label="Quartier" value={form.neighborhood} onChange={(e) => updateField("neighborhood", e.target.value)} />
+                <Input label="Pièce d'identité (lien)" value={form.idCardImage} onChange={(e) => updateField("idCardImage", e.target.value)} />
+              </Grid>
+            </Card>
+          )}
+
+          {/* BOUTON SAUVEGARDE */}
+          <div className="text-center">
+            <button
+              disabled={!isModified || saving}
+              onClick={handleSave}
+              className={`
+                px-6 py-3 rounded-lg font-semibold
+                ${!isModified || saving
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "bg-sawaka-700 text-white hover:bg-sawaka-800"}
+              `}
+            >
+              {saving ? "Enregistrement..." : "Mettre à jour le profil"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-/* --- COMPONENTS UTILITAIRES --- */
-
-function Section({ title, children }: any) {
+/* COMPONENTS */
+function Card({ title, children }: any) {
   return (
-    <div>
-      <h2 className="text-xl font-semibold text-sawaka-800 mb-4">{title}</h2>
+    <div className="bg-white rounded-xl shadow border p-6">
+      <h3 className="text-xl font-semibold text-sawaka-800 mb-4">{title}</h3>
       {children}
     </div>
   );
@@ -224,18 +207,11 @@ function Grid({ children }: any) {
   return <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">{children}</div>;
 }
 
-function Input({ label, value, onChange, placeholder }: any) {
+function Input({ label, value, onChange }: any) {
   return (
     <div className="flex flex-col">
-      {label && (
-        <label className="text-sm text-sawaka-600 mb-1">{label}</label>
-      )}
-      <input
-        value={value}
-        placeholder={placeholder}
-        onChange={onChange}
-        className="border border-gray-300 rounded-lg p-3 bg-white"
-      />
+      <label className="text-sawaka-700 mb-1">{label}</label>
+      <input value={value} onChange={onChange} className="border rounded-lg p-2" />
     </div>
   );
 }
@@ -243,13 +219,9 @@ function Input({ label, value, onChange, placeholder }: any) {
 function Select({ label, value, onChange, options }: any) {
   return (
     <div className="flex flex-col">
-      <label className="text-sm text-sawaka-600 mb-1">{label}</label>
-      <select
-        value={value || ""}
-        onChange={onChange}
-        className="border border-gray-300 rounded-lg p-3 bg-white"
-      >
-        <option value="">Sélectionner...</option>
+      <label className="text-sawaka-700 mb-1">{label}</label>
+      <select value={value || ""} onChange={onChange} className="border rounded-lg p-2">
+        <option value="">Sélectionner…</option>
         {options.map((opt: string) => (
           <option key={opt}>{opt}</option>
         ))}
