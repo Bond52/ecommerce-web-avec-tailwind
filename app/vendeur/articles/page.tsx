@@ -7,7 +7,17 @@ import type { Article } from "../../lib/apiSeller";
 /* ============================================================
    📸 Upload Component (réutilisé)
 ============================================================ */
-function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[]) => void }) {
+
+
+function UploadImages({
+  existingImages = [],
+  onRemoveExisting,
+  onUploadComplete,
+}: {
+  existingImages?: string[];
+  onRemoveExisting?: (url: string) => void;
+  onUploadComplete: (urls: string[]) => void;
+}) {
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -19,59 +29,77 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files ? Array.from(e.target.files) : [];
     if (selected.length) {
-      setFiles(selected);
-      setPreview(selected.map((f) => URL.createObjectURL(f)));
+      setFiles((prev) => [...prev, ...selected]);
+      setPreview((prev) => [...prev, ...selected.map((f) => URL.createObjectURL(f))]);
     }
   };
 
   const handleUpload = async () => {
-    if (!files.length) return alert("Ajoutez au moins une image");
+    if (!files.length) return;
 
+    setUploading(true);
     const formData = new FormData();
     files.forEach((f) => formData.append("images", f));
 
-    setUploading(true);
+    const res = await fetch(`${API_BASE}/api/seller/upload`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
 
-    try {
-      const res = await fetch(`${API_BASE}/api/seller/upload`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+    const data = await res.json();
+    onUploadComplete(data.urls);
 
-      const data = await res.json();
-      onUploadComplete(data.urls);
-      alert("Upload réussi !");
-    } catch (e) {
-      alert("Erreur upload");
-    } finally {
-      setUploading(false);
-    }
+    setFiles([]);
+    setPreview([]);
+    setUploading(false);
   };
 
   return (
-    <div className="border-2 border-dashed border-cream-300 rounded-2xl p-10 text-center bg-cream-50">
-      <div className="flex flex-col items-center gap-3">
-        <span className="text-4xl">📁</span>
-        <p className="text-sawaka-800 text-sm">
+    <div className="border-2 border-dashed border-cream-300 rounded-2xl p-10 bg-cream-50">
+      <div className="flex flex-col items-center gap-4">
+
+        {/* ======================= */}
+        {/* IMAGES DÉJÀ EXISTANTES */}
+        {/* ======================= */}
+        {existingImages.length > 0 && (
+          <div className="grid grid-cols-3 gap-4 w-full mb-6">
+            {existingImages.map((url) => (
+              <div key={url} className="relative group">
+                <img
+                  src={url}
+                  className="rounded-xl border object-cover w-full h-28"
+                  alt="image produit"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => onRemoveExisting && onRemoveExisting(url)}
+                  className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded opacity-80 hover:opacity-100 hidden group-hover:block"
+                >
+                  ✖
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-sawaka-700 text-sm">
           Téléverser un fichier ou glisser-déposer  
-          <br />
-          <span className="text-xs text-sawaka-600">PNG, JPG jusqu’à 10MB</span>
         </p>
-
-        <input type="file" multiple onChange={handleChange} className="hidden" id="upload-input" />
-
+        <input type="file" multiple onChange={handleChange} className="hidden" id="fileInput" />
         <label
-          htmlFor="upload-input"
-          className="cursor-pointer mt-2 px-4 py-2 rounded-xl border border-sawaka-300 text-sawaka-700 hover:bg-cream-100"
+          htmlFor="fileInput"
+          className="px-4 py-2 rounded-xl border border-sawaka-300 cursor-pointer hover:bg-cream-100"
         >
           Sélectionner des images
         </label>
 
+        {/* Préviews locales */}
         {preview.length > 0 && (
           <div className="grid grid-cols-3 gap-3 mt-4 w-full">
-            {preview.map((src) => (
-              <img key={src} src={src} className="h-28 w-full object-cover rounded-xl border" />
+            {preview.map((src, i) => (
+              <img key={i} src={src} className="h-28 rounded-xl border object-cover w-full" />
             ))}
           </div>
         )}
@@ -79,16 +107,22 @@ function UploadImages({ onUploadComplete }: { onUploadComplete: (urls: string[])
         {preview.length > 0 && (
           <button
             onClick={handleUpload}
-            className="btn btn-primary mt-4"
             disabled={uploading}
+            className="btn btn-primary mt-4"
           >
-            {uploading ? "Envoi…" : "Importer les images"}
+            {uploading ? "Envoi..." : "Importer les images"}
           </button>
         )}
       </div>
     </div>
   );
 }
+
+
+
+
+
+
 
 /* ============================================================
    🧵 PAGE RESPÉRANT EXACTEMENT TON MOCKUP
