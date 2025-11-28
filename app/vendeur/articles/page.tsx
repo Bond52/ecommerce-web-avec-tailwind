@@ -47,12 +47,38 @@ export default function VendorArticlesPage() {
   const [form, setForm] = useState<Article>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  // 👤 utilisateur connecté
+const [user, setUser] = useState<any>(null);
+
+
     // 🔥 Empêche la perte du mode édition lorsque le composant re-render
   const editingRef = useRef<string | null>(null);
 
   useEffect(() => {
     editingRef.current = editingId;
   }, [editingId]);
+
+
+// 🔍 Charger l'utilisateur connecté
+useEffect(() => {
+  async function fetchUser() {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE || "https://ecommerce-web-avec-tailwind.onrender.com"}/api/auth/me`,
+        { credentials: "include" }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data);
+      } else {
+        setUser(null);
+      }
+    } catch {
+      setUser(null);
+    }
+  }
+  fetchUser();
+}, []);
 
 
   async function load() {
@@ -62,9 +88,15 @@ export default function VendorArticlesPage() {
     setLoading(false);
   }
 
-  useEffect(() => {
+// 📌 Recharger les articles quand l'utilisateur ou la page change
+useEffect(() => {
+  if (user) {
     load();
-  }, [page]);
+  } else {
+    setData(null); // éviter d'afficher l'ancien inventaire
+  }
+}, [user, page]);
+
 
   function onEdit(a: Article) {
     setEditingId(a._id!);
