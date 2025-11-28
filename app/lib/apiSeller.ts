@@ -45,12 +45,17 @@ export type Article = {
 /* ============================================
    🌍 GENERIC HTTP WRAPPER
 ============================================ */
+
+
 async function http<T = any>(path: string, init?: RequestInit) {
+const isJSON = init?.method && !["GET", "HEAD"].includes(init.method);
+
+
   const res = await fetch(`${API}${path}`, {
     ...init,
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      ...(isJSON ? { "Content-Type": "application/json" } : {}),
       ...(init?.headers || {}),
     },
   });
@@ -62,6 +67,7 @@ async function http<T = any>(path: string, init?: RequestInit) {
 
   return res.json() as Promise<T>;
 }
+
 
 /* ============================================
    📰 PUBLIC ARTICLES
