@@ -68,10 +68,15 @@ function UploadImages({
         <div className="grid grid-cols-3 gap-4 mb-6">
           {existingImages.map((url) => (
             <div key={url} className="relative group">
-              <img
-                src={url}
-                className="w-full h-28 object-cover rounded-xl border shadow-sm"
-              />
+             
+             
+<img
+  src={url}
+  className="w-full h-24 object-contain rounded-xl border bg-white shadow-sm"
+/>
+
+
+
               <button
                 type="button"
                 onClick={() => onRemoveExisting?.(url)}
@@ -99,8 +104,17 @@ function UploadImages({
       {preview.length > 0 && (
         <div className="grid grid-cols-3 gap-4 mt-4">
           {preview.map((src, i) => (
-            <img key={i} src={src} className="w-full h-28 object-cover rounded-xl border" />
-          ))}
+
+
+          <img
+  key={i}
+  src={src}
+  className="w-full h-24 object-contain rounded-xl border bg-white"
+/>
+
+         
+         
+         ))}
         </div>
       )}
 
