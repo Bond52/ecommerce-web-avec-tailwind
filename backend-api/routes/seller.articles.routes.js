@@ -55,7 +55,6 @@ cloudinary.api
   .then(() => console.log("✅ Cloudinary OK"))
   .catch((err) => console.error("❌ Cloudinary invalide :", err.message));
 
-
 /* ===========================================================
    📤 UPLOAD CLOUDINARY VIA MULTER
 =========================================================== */
@@ -88,7 +87,7 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
 });
 
 /* ===========================================================
-   📰 ARTICLES PUBLICS (published + auction)
+   📰 ARTICLES PUBLICS
 =========================================================== */
 router.get("/public", async (req, res) => {
   try {
@@ -136,28 +135,26 @@ router.get("/public/:id", async (req, res) => {
   }
 });
 
-
 /* ===========================================================
-   🔐 ROUTES PROTÉGÉES (vendeur/admin)
+   🔐 ROUTES PROTÉGÉES
 =========================================================== */
 router.use(requireAuth, requireRole("vendeur", "admin"));
 
 /* ===========================================================
-   ➕ CRÉATION D’UN ARTICLE AVEC IMAGES
+   ➕ CRÉATION D’UN ARTICLE
 =========================================================== */
 router.post("/articles", async (req, res) => {
   try {
     const body = req.body;
 
-    /* 🔧 NORMALISATION DES IMAGES 
-       (car FormData envoie body.images = STRING) */
+    /* 🔧 Normalisation des images */
     let images = [];
 
     if (typeof body.images === "string") {
       try {
-        images = JSON.parse(body.images); // cas : JSON string
+        images = JSON.parse(body.images);
       } catch {
-        images = [body.images]; // cas : string simple
+        images = [body.images];
       }
     } else if (Array.isArray(body.images)) {
       images = body.images;
@@ -165,7 +162,7 @@ router.post("/articles", async (req, res) => {
 
     body.images = images;
 
-    /* 🔧 PROMOTION (date de fin auto) */
+    /* 🔧 PROMOTION */
     if (body.promotion?.isActive) {
       const now = new Date();
       const end = new Date(now);
@@ -175,7 +172,6 @@ router.post("/articles", async (req, res) => {
       body.promotion.endDate = end;
     }
 
-    /* 🔧 CRÉATION ARTICLE */
     const article = new Article({
       ...body,
       vendorId: req.user.id,
@@ -191,50 +187,36 @@ router.post("/articles", async (req, res) => {
 });
 
 /* ===========================================================
-   📄 OBTENIR SES ARTICLES
-=========================================================== */
-router.get("/articles", async (req, res) => {
-  try {
-    const query = { vendorId: req.user.id };
-    if (req.query.status) query.status = req.query.status;
-    if (req.query.q)
-      query.title = { $regex: req.query.q, $options: "i" };
-
-    const page = Number(req.query.page) || 1;
-    const limit = 10;
-    const skip = (page - 1) * limit;
-
-    const total = await Article.countDocuments(query);
-    const items = await Article.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    res.json({ items, total, page, pages: Math.ceil(total / limit) });
-  } catch (e) {
-    res.status(500).json({ message: e.message });
-  }
-});
-
-/* ===========================================================
-   ✏️ MODIFIER ARTICLE
+   ✏️ MODIFIER ARTICLE (avec gestion images fixée)
 =========================================================== */
 router.patch("/articles/:id", async (req, res) => {
   try {
     const body = req.body;
 
-    /* 🔧 Normalisation des images */
+    /* 🔧 Normalisation intelligente des images */
+    let images;
+
     if (typeof body.images === "string") {
       try {
-        body.images = JSON.parse(body.images);
+        images = JSON.parse(body.images);
       } catch {
-        body.images = [body.images];
+        images = [body.images];
       }
+    } else if (Array.isArray(body.images)) {
+      images = body.images;
+    } else {
+      images = undefined; // Ne pas toucher si rien n'est envoyé
+    }
+
+    if (images !== undefined) {
+      body.images = images;
+    } else {
+      delete body.images; // éviter d'écraser avec []
     }
 
     const article = await Article.findOneAndUpdate(
       { _id: req.params.id, vendorId: req.user.id },
-      body,
+      { $set: body },
       { new: true }
     );
 
@@ -243,6 +225,7 @@ router.patch("/articles/:id", async (req, res) => {
 
     res.json(article);
   } catch (e) {
+    console.error("❌ Erreur modification article :", e);
     res.status(500).json({ message: e.message });
   }
 });
@@ -276,13 +259,13 @@ router.post("/articles/:id/like", requireAuth, async (req, res) => {
       return res.status(404).json({ message: "Article non trouvé." });
 
     const userId = req.user.id;
-    const alreadyLiked = article.likes?.includes(userId);
+    const liked = article.likes.includes(userId);
 
-    if (alreadyLiked) article.likes.pull(userId);
+    if (liked) article.likes.pull(userId);
     else article.likes.push(userId);
 
     await article.save();
-    res.json({ liked: !alreadyLiked, totalLikes: article.likes.length });
+    res.json({ liked: !liked, totalLikes: article.likes.length });
   } catch (e) {
     res.status(500).json({ message: e.message });
   }
