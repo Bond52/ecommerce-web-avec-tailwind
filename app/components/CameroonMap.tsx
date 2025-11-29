@@ -28,21 +28,24 @@ export default function CameroonMap() {
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
       .then((data) => {
-        const n: any = {};
+
+        // Normaliser toutes les clés reçues du backend
+        const normalizedCounts: any = {};
         Object.keys(data).forEach((k) => {
-          n[normalize(k)] = data[k];
+          normalizedCounts[normalize(k)] = data[k];
         });
-        setCounts(n);
+
+        setCounts(normalizedCounts);
       })
       .catch(console.error);
   }, []);
 
-  // Récupération du nom correct ("NAME_1")
+  // Extraction du nom correct depuis le GeoJSON
   const getRegionName = (props: any) => {
-    return props.NAME_1 || props.name || props.region || "Inconnue";
+    return props?.NAME_1 || props?.name || props?.region || "Inconnue";
   };
 
-  // Style des régions
+  // Style selon nb artisans
   const regionStyle = (feature: any) => {
     const rawName = getRegionName(feature.properties);
     const key = normalize(rawName);
@@ -63,24 +66,30 @@ export default function CameroonMap() {
     };
   };
 
-  // Tooltip
+  // Tooltip + DEBUG sécurisé
   const onEachRegion = (feature: any, layer: any) => {
     const rawName = getRegionName(feature.properties);
 
-console.log("🔍 RAW PROPS:", feature.properties);
-console.log("🔤 RAW NAME_1:", feature.properties.NAME_1);
-console.log("🧩 CODEPOINTS:", [...feature.properties.NAME_1].map(c => c.charCodeAt(0)));
-console.log("🧼 NORMALIZED:", normalize(feature.properties.NAME_1));
+    const name1 = feature.properties?.NAME_1 || "";  // string safe
 
+    console.log("🟩 RAW PROPS:", feature.properties);
+    console.log("🔤 RAW NAME_1:", name1);
+
+    if (name1) {
+      console.log("🧩 CODEPOINTS:", [...name1].map((c) => c.charCodeAt(0)));
+      console.log("🧼 NORMALIZED:", normalize(name1));
+    } else {
+      console.log("⚠️ NAME_1 ABSENT");
+    }
 
     const key = normalize(rawName);
     const value = counts[key] ?? 0;
 
-    console.log("🟡 REGION :", rawName, "| clé :", key, "| artisans :", value);
+    console.log("🟦 REGION =", rawName, "| clé =", key, "| artisans =", value);
 
     layer.bindTooltip(`${rawName} : ${value} artisan(s)`, {
       permanent: false,
-      sticky: true
+      sticky: true,
     });
   };
 
