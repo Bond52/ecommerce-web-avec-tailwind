@@ -3,8 +3,10 @@
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CameroonMap() {
+  const router = useRouter();
   const [geo, setGeo] = useState<any>(null);
   const [counts, setCounts] = useState<any>({});
 
@@ -17,14 +19,11 @@ export default function CameroonMap() {
 
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
-      .then((data) => {
-        console.log("📌 STATISTIQUES RECUES:", data);
-        setCounts(data); // on garde pour la couleur
-      })
+      .then(setCounts)
       .catch(console.error);
   }, []);
 
-  // Style selon le nombre d’artisans (on garde les couleurs)
+  // Style selon le nombre d’artisans
   const regionStyle = (feature: any) => {
     const name = feature.properties?.region || feature.properties?.name;
     const value = counts[name] ?? 0;
@@ -44,14 +43,27 @@ export default function CameroonMap() {
     };
   };
 
-  // Tooltip SIMPLE : uniquement le nom
+  // Tooltip + ONCLICK
   const onEachRegion = (feature: any, layer: any) => {
-    const name = feature.properties?.region || feature.properties?.name;
+    const rawName = feature.properties?.region || feature.properties?.name;
 
-    layer.bindTooltip(
-      `${name}`, // ⬅️ seulement le nom
-      { permanent: false, sticky: true }
-    );
+    // Tooltip simple
+    layer.bindTooltip(`${rawName}`, {
+      permanent: false,
+      sticky: true
+    });
+
+    // CLICK → redirection
+    layer.on("click", () => {
+      const normalized = rawName
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+
+      router.push(`/artisans?region=${normalized}`);
+    });
   };
 
   if (!geo)
@@ -60,7 +72,6 @@ export default function CameroonMap() {
   return (
     <div className="wrap my-12">
 
-      {/* ===== Titre ===== */}
       <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
         Artisans par région du Cameroun
       </h2>
@@ -69,7 +80,7 @@ export default function CameroonMap() {
         Découvrez la répartition géographique des artisans sur la plateforme
       </p>
 
-      {/* ===== Légende ===== */}
+      {/* Légende */}
       <div className="flex justify-center gap-6 mb-4 text-sm">
         <div className="flex items-center gap-2">
           <span style={{ width: 20, height: 20, background: "#f0e5d8", border: "1px solid #aaa" }}></span> 0 artisan
@@ -85,7 +96,6 @@ export default function CameroonMap() {
         </div>
       </div>
 
-      {/* ===== Carte ===== */}
       <MapContainer
         center={[7.3, 12.4]}
         zoom={6.3}
