@@ -55,7 +55,7 @@ export default function RegisterPage() {
   // -------------------------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("🚫 L'inscription n'est pas possible pour le moment. Veuillez réessayer plus tard.");
+    alert("🚫 L'inscription n'est pas disponible pour le moment.");
     return;
 
     /*  
