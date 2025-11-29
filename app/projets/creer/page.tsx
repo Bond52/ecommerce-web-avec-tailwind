@@ -57,10 +57,30 @@ export default function CreerProjetPage() {
       const tools = await listTools();
       const ideas = getProjectIdeas(budget);
 
+      /* 🏭 Cloud Factories (ateliers communautaires Sawaka) */
+      const cloudFactories = [
+        {
+          name: "Atelier Bois & Sculpture — Douala",
+          equipments: ["Scie électrique", "Ponçeuse", "Établi massif"],
+          available: true,
+        },
+        {
+          name: "FabLab Métal — Yaoundé",
+          equipments: ["Poste à souder", "Découpeuse métal", "Casques & gants"],
+          available: false,
+        },
+        {
+          name: "Atelier Textile — Bafoussam",
+          equipments: ["Machines à coudre", "Table de découpe"],
+          available: true,
+        },
+      ];
+
       setResult({
         fournisseurs,
         tools,
         ideas,
+        cloudFactories,
       });
     } catch (err) {
       console.error(err);
@@ -117,7 +137,7 @@ export default function CreerProjetPage() {
           </select>
         </div>
 
-        {/* Submit */}
+        {/* Bouton Explorer */}
         <div className="flex items-end">
           <button
             type="submit"
@@ -146,9 +166,7 @@ export default function CreerProjetPage() {
                 {result.fournisseurs.map((f: any) => (
                   <li key={f._id} className="p-4 border rounded-lg bg-white shadow-sm">
                     <div className="font-semibold text-sawaka-800">{f.nom}</div>
-                    <div className="text-sm text-sawaka-600">
-                      📍 {f.categorie}
-                    </div>
+                    <div className="text-sm text-sawaka-600">📍 {f.categorie}</div>
                   </li>
                 ))}
               </ul>
@@ -168,9 +186,7 @@ export default function CreerProjetPage() {
                   <div className="text-sm text-sawaka-600">
                     {t.vendor ? (
                       <>
-                        📍 {t.vendor}
-                        <br />
-                        💰 {t.price}
+                        📍 {t.vendor}<br />💰 {t.price}
                       </>
                     ) : (
                       <span className="text-red-600">
@@ -183,17 +199,57 @@ export default function CreerProjetPage() {
             </ul>
           </div>
 
-          {/* IDÉES */}
+          {/* CLOUD FACTORIES / ATELIERS */}
           <div>
             <h2 className="text-2xl font-bold text-sawaka-700 mb-3">
-              💡 Idées inspirantes basées sur votre budget
+              🏭 Ateliers collaboratifs (Cloud Factories)
             </h2>
 
+            <ul className="grid md:grid-cols-2 gap-4">
+              {result.cloudFactories.map((cf: any, i: number) => (
+                <li key={i} className="p-4 border rounded-lg bg-white shadow-sm">
+                  <div className="font-semibold text-sawaka-800">{cf.name}</div>
+                  <ul className="text-sawaka-600 text-sm mt-2 list-disc pl-5">
+                    {cf.equipments.map((eq: string, k: number) => (
+                      <li key={k}>{eq}</li>
+                    ))}
+                  </ul>
+                  <p className={`mt-2 font-semibold ${cf.available ? "text-green-600" : "text-red-600"}`}>
+                    {cf.available ? "Disponible" : "Actuellement indisponible"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* IDÉES */}
+          <div>
+            <h2 className="text-2xl font-bold text-sawaka-700 mb-3">💡 Idées inspirantes basées sur votre budget</h2>
             <ul className="list-disc pl-6 text-sawaka-700 space-y-1">
               {result.ideas.map((idea: string, i: number) => (
                 <li key={i}>{idea}</li>
               ))}
             </ul>
+          </div>
+
+          {/* MESSAGE FINAL */}
+          <div className="bg-sawaka-50 p-6 rounded-lg border border-sawaka-200">
+            <p className="text-sawaka-700 text-lg leading-relaxed">
+              🎉 <strong>Vous avez maintenant une vision claire de votre projet !</strong>
+              <br />
+              Vous pouvez maintenant créer et publier votre projet sur Sawaka afin d’être
+              contacté par d’autres artisans et recevoir des propositions.
+            </p>
+
+            {/* BOUTON CREER UN PROJET */}
+            <button
+              onClick={() =>
+                alert("🚫 La création de projet nécessite un compte. Fonctionnalité indisponible pour l'instant.")
+              }
+              className="mt-4 bg-sawaka-600 hover:bg-sawaka-700 text-white px-5 py-3 rounded-lg transition"
+            >
+              ➕ Créer mon projet
+            </button>
           </div>
 
         </div>
