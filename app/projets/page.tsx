@@ -1,9 +1,27 @@
 "use client";
 
 export default function ProjetsEnCoursPage() {
+  /* IDs réels provenant de ton SEED artisans */
+  const artisansByName: Record<string, string> = {
+    "Pascal Ebong": "pascal",     // remplacé ensuite par son vrai _id
+    "Amina Njoh": "amina",
+    "Samuel Bikoko": "samuel",
+  };
+
+  /* ⚠️ IMPORTANT :
+     Ici je mets des ID *placeholders*.
+     Remplace par les vrais _id MongoDB depuis /api/artisans.
+  */
+  const artisanIds = {
+    pascal: "6748f0a1ebong0001",   // ← METTRE LE VRAI ID ICI
+    amina: "6748efc2amina0001",    // ← METTRE LE VRAI ID ICI
+    samuel: "6748f013samuel001",   // ← METTRE LE VRAI ID ICI
+  };
+
   const projets = [
     {
       auteur: "Pascal Ebong",
+      auteurId: artisanIds.pascal,
       ville: "Ebolowa",
       titre: "Projet Arduino : faire parler les plantes 🌿🤖",
       description: `
@@ -24,6 +42,7 @@ ces données en petits messages vocaux ou lumineux.
 
     {
       auteur: "Amina Njoh",
+      auteurId: artisanIds.amina,
       ville: "Yaoundé",
       titre: "Recherche apprentie / stagiaire — Grande commande de robes 👗✨",
       description: `
@@ -43,6 +62,7 @@ et modernes pour un mariage prestigieux.
 
     {
       auteur: "Samuel Bikoko",
+      auteurId: artisanIds.samuel,
       ville: "Bafoussam",
       titre: "Création d'un outil artisanal : le « Biko-Blade » 🪵🔧",
       description: `
@@ -98,8 +118,18 @@ Un outil polyvalent pensé pour les artisans du Cameroun.
             </p>
 
             {/* STATUT */}
-            <div className="text-sm font-semibold text-sawaka-700 bg-cream-200 px-3 py-1 rounded-full inline-block">
+            <div className="text-sm font-semibold text-sawaka-700 bg-cream-200 px-3 py-1 rounded-full inline-block mb-4">
               {p.statut}
+            </div>
+
+            {/* CONTACT ARTISAN */}
+            <div className="mt-4">
+              <a
+                href={`/artisans/${p.auteurId}`}
+                className="text-sawaka-600 hover:text-sawaka-800 underline font-medium"
+              >
+                📩 Contacter l’artisan responsable
+              </a>
             </div>
           </div>
         ))}
