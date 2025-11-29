@@ -19,12 +19,12 @@ export default function CameroonMap() {
       .then((res) => res.json())
       .then((data) => {
         console.log("📌 STATISTIQUES RECUES:", data);
-        setCounts(data);
+        setCounts(data); // on garde pour la couleur
       })
       .catch(console.error);
   }, []);
 
-  // Style selon le nombre d’artisans
+  // Style selon le nombre d’artisans (on garde les couleurs)
   const regionStyle = (feature: any) => {
     const name = feature.properties?.region || feature.properties?.name;
     const value = counts[name] ?? 0;
@@ -44,13 +44,12 @@ export default function CameroonMap() {
     };
   };
 
-  // Tooltip simple
+  // Tooltip SIMPLE : uniquement le nom
   const onEachRegion = (feature: any, layer: any) => {
     const name = feature.properties?.region || feature.properties?.name;
-    const value = counts[name] ?? 0;
 
     layer.bindTooltip(
-      `${name} : ${value} artisan(s)`,
+      `${name}`, // ⬅️ seulement le nom
       { permanent: false, sticky: true }
     );
   };
