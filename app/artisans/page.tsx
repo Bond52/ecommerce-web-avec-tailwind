@@ -15,11 +15,17 @@ interface Artisan {
   lastName?: string;
   username?: string;
   email?: string;
+  phone?: string;
+  avatarUrl?: string;   // ✅ Ajout pour la photo Cloudinary
   idCardImage?: string;
   createdAt?: string;
   isSeller?: boolean;
   roles?: string[];
+  commerceName?: string;
+  city?: string;
+  province?: string;
 }
+
 
 export default function ArtisansPage() {
   const [artisans, setArtisans] = useState<Artisan[]>([]);
@@ -71,14 +77,14 @@ export default function ArtisansPage() {
               className="bg-white p-6 rounded-2xl shadow-md border border-cream-200 hover:shadow-lg transition block"
             >
               {/* IMAGE */}
-              <img
-                src={
-                  artisan.idCardImage ||
-                  "https://via.placeholder.com/300x200?text=Artisan"
-                }
-                alt={`${artisan.firstName || ""} ${artisan.lastName || ""}`}
-                className="w-full h-48 object-cover rounded-xl"
-              />
+<img
+  src={
+    artisan.avatarUrl ||
+    "https://via.placeholder.com/200x150?text=Artisan"
+  }
+  alt="artisan"
+  className="w-48 h-48 object-cover rounded-xl border border-cream-300 shadow"
+/>
 
               {/* TEXTES */}
               <h2 className="mt-4 text-xl font-semibold text-sawaka-900">

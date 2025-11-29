@@ -56,14 +56,19 @@ export default function ArtisanDetailPage() {
 
         {/* PHOTO */}
         <div className="flex flex-col items-center mb-6">
-          <img
-            src={
-              artisan.idCardImage ||
-              "https://via.placeholder.com/200x150?text=Artisan"
-            }
-            alt="artisan"
-            className="w-48 h-48 object-cover rounded-xl border border-cream-300 shadow"
-          />
+          
+<img
+  src={
+    artisan.avatarUrl ||
+    "https://via.placeholder.com/200x150?text=Artisan"
+  }
+  alt="artisan"
+  className="w-48 h-48 object-cover rounded-xl border border-cream-300 shadow"
+/>
+
+
+
+
           <h1 className="mt-4 text-3xl font-bold text-sawaka-900">
             {artisan.firstName} {artisan.lastName}
           </h1>

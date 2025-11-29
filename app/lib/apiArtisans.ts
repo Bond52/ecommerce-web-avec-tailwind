@@ -18,6 +18,7 @@ export type Artisan = {
   commerceName?: string;
   neighborhood?: string;
   idCardImage?: string;
+  avatarUrl?: string
   roles?: string[];
   isSeller?: boolean;
   createdAt?: string;
