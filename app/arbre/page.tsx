@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { listTools, getTool, Tool } from "@/app/lib/apiTools";
+import { listTools, Tool } from "@/app/lib/apiTools";
 
 /* 🔁 Expansion récursive depuis la BD */
 function expandTool(rootId: string, all: Tool[]) {
@@ -29,7 +29,7 @@ export default function ArbrePage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
-  /* 📥 Récupération des outils depuis MongoDB */
+  /* 📥 Charger les outils depuis MongoDB */
   useEffect(() => {
     async function load() {
       try {
@@ -52,6 +52,7 @@ export default function ArbrePage() {
     );
   }
 
+  /* 🔎 Filtrage */
   const filtered = tools.filter((t) =>
     t.name.toLowerCase().includes(query.toLowerCase())
   );
@@ -65,10 +66,14 @@ export default function ArbrePage() {
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl mb-8">
         Découvrez les outils nécessaires pour fabriquer d’autres outils.
         <br />
-        En recherchant un outil, vous verrez automatiquement toute sa chaîne de dépendances.
+        En sélectionnant un outil, vous verrez automatiquement toute sa chaîne
+        de dépendances.
+        <br />
+        Lorsqu’un outil n’a aucun fabricant local, cela représente une
+        opportunité d’industrialisation au Cameroun.
       </p>
 
-      {/* 🔍 Recherche */}
+      {/* 🔍 Barre de recherche */}
       <div className="max-w-lg mb-8">
         <input
           type="text"
@@ -79,7 +84,7 @@ export default function ArbrePage() {
         />
       </div>
 
-      {/* 🔧 LISTE des OUTILS */}
+      {/* 🔧 LISTE DES OUTILS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {filtered.map((tool) => (
           <div
@@ -98,17 +103,17 @@ export default function ArbrePage() {
                   <br />
                   💰 {tool.price}
                 </>
-              ) : (
+              ) : tool.id !== "main" ? (
                 <span className="text-red-600 font-semibold">
                   ❗ Aucun fabricant — Opportunité locale !
                 </span>
-              )}
+              ) : null}
             </div>
           </div>
         ))}
       </div>
 
-      {/* 🌳 CHAÎNE D’OUTILS */}
+      {/* 🌳 CHAÎNE COMPLÈTE DES OUTILS */}
       {selected.length > 0 && (
         <div className="bg-white p-6 rounded-xl shadow-md border border-cream-300">
           <h2 className="text-2xl font-bold text-sawaka-700 mb-4">
@@ -125,14 +130,14 @@ export default function ArbrePage() {
                   {tool.name}
                 </div>
 
-                {tool.id !== "main" ? (
+                {tool.id === "main" ? (
                   <div className="text-sm text-sawaka-600 mt-1">
-                    📍 Vendeur : {tool.vendor || "Non disponible"} <br />
-                    💰 Prix : {tool.price || "Non disponible"}
+                    🖐️ L’outil final est… la main de l’artisan !
                   </div>
                 ) : (
                   <div className="text-sm text-sawaka-600 mt-1">
-                    🖐️ L’outil final est… la main de l’artisan !
+                    📍 Vendeur : {tool.vendor || "Non disponible"} <br />
+                    💰 Prix : {tool.price || "Non disponible"}
                   </div>
                 )}
               </li>
