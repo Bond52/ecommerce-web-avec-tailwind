@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getFournisseurs, Fournisseur } from "@/app/lib/apiFournisseurs";
+import { listFournisseurs, Fournisseur } from "@/app/lib/apiFournisseurs";
 
 export default function FournisseursPage() {
   const [fournisseurs, setFournisseurs] = useState<Fournisseur[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getFournisseurs()
-      .then((res) => setFournisseurs(res))
+    listFournisseurs()
+      .then(setFournisseurs)
       .catch((err) => console.error("Erreur fournisseurs :", err))
       .finally(() => setLoading(false));
   }, []);
@@ -24,7 +24,9 @@ export default function FournisseursPage() {
 
   return (
     <div className="wrap py-12">
-      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">Fournisseurs</h1>
+      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">
+        Fournisseurs
+      </h1>
 
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl">
         Voici une liste de fournisseurs de matières premières, bois,
@@ -38,17 +40,15 @@ export default function FournisseursPage() {
             className="bg-white border border-cream-300 rounded-lg p-4 shadow-sm"
           >
             <div className="flex items-center mb-3">
-              {f.logo ? (
-                <img
-                  src={f.logo}
-                  alt={f.nom}
-                  className="w-12 h-12 object-contain mr-3"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-gray-200 rounded mr-3" />
-              )}
+              <img
+                src={f.logo || "https://via.placeholder.com/100?text=logo"}
+                alt={f.nom}
+                className="w-12 h-12 object-contain mr-3"
+              />
               <div>
-                <h2 className="text-xl font-semibold text-sawaka-700">{f.nom}</h2>
+                <h2 className="text-xl font-semibold text-sawaka-700">
+                  {f.nom}
+                </h2>
                 <p className="text-sawaka-500 text-sm">{f.categorie}</p>
               </div>
             </div>

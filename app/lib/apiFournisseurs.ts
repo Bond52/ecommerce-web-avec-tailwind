@@ -1,5 +1,10 @@
 // src/app/lib/apiFournisseurs.ts
 
+const API =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BACKEND_URL) ||
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_API_BASE) ||
+  "https://ecommerce-web-avec-tailwind.onrender.com";
+
 export interface Fournisseur {
   _id: string;
   nom: string;
@@ -14,15 +19,24 @@ export interface Fournisseur {
   delaiLivraison: string;
 }
 
-// Récupère tous les fournisseurs depuis ton backend Node.js
-export async function getFournisseurs(): Promise<Fournisseur[]> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/fournisseurs`, {
-    cache: "no-store", // pour toujours récupérer la version la plus à jour
+async function http<T = any>(path: string, init?: RequestInit) {
+  const res = await fetch(`${API}${path}`, {
+    ...init,
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers || {}),
+    },
   });
 
   if (!res.ok) {
-    throw new Error("Erreur lors du chargement des fournisseurs");
+    const text = await res.text();
+    throw new Error(text || `Erreur HTTP ${res.status} sur ${path}`);
   }
 
-  return res.json();
+  return res.json() as Promise<T>;
+}
+
+export async function listFournisseurs() {
+  return http<Fournisseur[]>("/api/fournisseurs");
 }
