@@ -1,30 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { listArtisansByCity } from "@/app/lib/apiArtisans";
 import { listFournisseurs } from "@/app/lib/apiFournisseurs";
 import { listTools } from "@/app/lib/apiTools";
 
+/* ------------------------------------------------------------------
+   📌 Liste des villes disponibles 
+------------------------------------------------------------------- */
 const CITIES = [
   "Douala", "Yaoundé", "Bafoussam", "Ebolowa", "Kribi",
   "Garoua", "Maroua", "Buea", "Bamenda", "Bertoua",
   "Ngaoundéré", "Limbe", "Dschang"
 ];
 
-// Idées de projets selon budget (mock inspirant)
+/* ------------------------------------------------------------------
+   💡 Idées de projets selon budget (mock)
+------------------------------------------------------------------- */
 function getProjectIdeas(budget: number) {
   if (budget <= 5000) {
-    return [
-      "Petite décoration en bois",
-      "Boîte personnalisée",
-      "Porte-clef artisanal"
-    ];
+    return ["Petite décoration en bois", "Boîte personnalisée", "Porte-clef artisanal"];
   } else if (budget <= 15000) {
-    return [
-      "Tabouret simple",
-      "Cadre photo solide",
-      "Mini-étagère murale"
-    ];
+    return ["Tabouret simple", "Cadre photo solide", "Mini-étagère murale"];
   } else if (budget <= 30000) {
     return [
       "Table basse minimaliste",
@@ -42,11 +38,14 @@ function getProjectIdeas(budget: number) {
 }
 
 export default function CreerProjetPage() {
-  const [budget, setBudget] = useState<number | null>(null);
+  const [budget, setBudget] = useState<number>(0);
   const [city, setCity] = useState("");
   const [result, setResult] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /* -------------------------------------------------------------
+     🔍 Soumission
+  -------------------------------------------------------------- */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!budget || !city) return;
@@ -54,22 +53,12 @@ export default function CreerProjetPage() {
     setLoading(true);
 
     try {
-      const artisans = await listArtisansByCity(city);
       const fournisseurs = await listFournisseurs();
       const tools = await listTools();
-
-      // Filtrer matériaux abordables (mock simple basé sur prix textuels)
-      const affordableMaterials = fournisseurs.filter((f) => {
-        const price = parseInt(f.produits?.join(", ") || "0");
-        return price <= budget;
-      });
-
-      // Idées de projets selon budget
       const ideas = getProjectIdeas(budget);
 
       setResult({
-        artisans,
-        fournisseurs: affordableMaterials,
+        fournisseurs,
         tools,
         ideas,
       });
@@ -80,18 +69,18 @@ export default function CreerProjetPage() {
     setLoading(false);
   }
 
+  /* -------------------------------------------------------------
+     🖼️ Rendu
+  -------------------------------------------------------------- */
   return (
     <div className="wrap py-12">
-      {/* TITLE */}
-      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">
-        Créer un projet
-      </h1>
+      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">Créer un projet</h1>
 
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl mb-8">
-        Indiquez votre budget et votre ville, et Sawaka vous proposera
-        des matériaux, des artisans et des idées de projets adaptés.
+        Indiquez votre budget et votre ville, et Sawaka vous proposera des matériaux,
+        des outils et des idées pour inspirer votre prochain projet.
         <br />
-        🧠 Objectif : stimuler la créativité, pas imposer un projet.
+        🧠 <strong>Objectif :</strong> stimuler la créativité, pas imposer un projet.
       </p>
 
       {/* FORMULAIRE */}
@@ -99,20 +88,18 @@ export default function CreerProjetPage() {
         {/* Budget */}
         <div>
           <label className="block mb-2 font-semibold">Votre budget (FCFA)</label>
-<input
-  type="text"
-  inputMode="numeric"
-  pattern="[0-9]*"
-  placeholder="Ex : 30000"
-  value={budget}
-  onChange={(e) => {
-    const cleaned = e.target.value.replace(/\D/g, ""); // garde uniquement les chiffres
-    setBudget(cleaned === "" ? 0 : Number(cleaned));   // ← conversion en number
-  }}
-  className="w-full h-12 px-4 rounded-lg border-2 border-cream-300 focus:border-sawaka-500 focus:ring-0"
-/>
-
-
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="Ex : 30000"
+            value={budget}
+            onChange={(e) => {
+              const cleaned = e.target.value.replace(/\D/g, "");
+              setBudget(cleaned === "" ? 0 : Number(cleaned));
+            }}
+            className="w-full h-12 px-4 rounded-lg border-2 border-cream-300 focus:border-sawaka-500"
+          />
         </div>
 
         {/* Ville */}
@@ -141,32 +128,13 @@ export default function CreerProjetPage() {
         </div>
       </form>
 
-      {loading && (
-        <p className="text-center text-sawaka-600 text-lg">Analyse du projet…</p>
-      )}
+      {loading && <p className="text-center text-sawaka-600">Analyse du projet…</p>}
 
       {/* RESULT */}
       {result && (
         <div className="space-y-12">
-          {/* --- ARTISANS --- */}
-          <div>
-            <h2 className="text-2xl font-bold text-sawaka-700 mb-3">
-              👨‍🏭 Artisans disponibles à {city}
-            </h2>
-            {result.artisans.length === 0 ? (
-              <p className="text-sawaka-600">Aucun artisan disponible dans cette ville.</p>
-            ) : (
-              <ul className="space-y-2">
-                {result.artisans.map((a: any) => (
-                  <li key={a._id} className="p-3 bg-white border rounded-lg shadow-sm">
-                    {a.firstName} {a.lastName} — {a.city}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
 
-          {/* --- MATÉRIAUX --- */}
+          {/* MATÉRIAUX */}
           <div>
             <h2 className="text-2xl font-bold text-sawaka-700 mb-3">
               🪵 Matériaux accessibles avec {budget} FCFA
@@ -176,12 +144,10 @@ export default function CreerProjetPage() {
             ) : (
               <ul className="grid md:grid-cols-2 gap-4">
                 {result.fournisseurs.map((f: any) => (
-                  <li key={f.id} className="p-4 border rounded-lg bg-white shadow-sm">
+                  <li key={f._id} className="p-4 border rounded-lg bg-white shadow-sm">
                     <div className="font-semibold text-sawaka-800">{f.nom}</div>
                     <div className="text-sm text-sawaka-600">
                       📍 {f.categorie}
-                      <br />
-                      💰 {f.prix || "Prix non spécifié"}
                     </div>
                   </li>
                 ))}
@@ -189,7 +155,7 @@ export default function CreerProjetPage() {
             )}
           </div>
 
-          {/* --- OUTILS --- */}
+          {/* OUTILS */}
           <div>
             <h2 className="text-2xl font-bold text-sawaka-700 mb-3">
               🔧 Outils accessibles dans votre réseau Sawaka
@@ -207,7 +173,9 @@ export default function CreerProjetPage() {
                         💰 {t.price}
                       </>
                     ) : (
-                      <span className="text-red-600">Aucun fabricant — opportunité artisanale</span>
+                      <span className="text-red-600">
+                        Aucun fabricant — opportunité artisanale
+                      </span>
                     )}
                   </div>
                 </li>
@@ -215,7 +183,7 @@ export default function CreerProjetPage() {
             </ul>
           </div>
 
-          {/* --- IDÉES DE PROJETS --- */}
+          {/* IDÉES */}
           <div>
             <h2 className="text-2xl font-bold text-sawaka-700 mb-3">
               💡 Idées inspirantes basées sur votre budget
@@ -227,6 +195,7 @@ export default function CreerProjetPage() {
               ))}
             </ul>
           </div>
+
         </div>
       )}
     </div>
