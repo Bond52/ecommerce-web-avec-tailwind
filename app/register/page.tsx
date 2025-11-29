@@ -20,7 +20,7 @@ const provincesCM = {
 export default function RegisterPage() {
   const router = useRouter();
 
-  // ✔ plus de "isSeller" dynamique → tout le monde est vendeur !
+  // ✔ tout le monde est vendeur
   const isSeller = true;
 
   const [form, setForm] = useState({
@@ -39,12 +39,6 @@ export default function RegisterPage() {
     idCardImage: '',
   });
 
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_BASE ||
-    (typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      ? 'http://localhost:5000'
-      : 'https://ecommerce-web-avec-tailwind.onrender.com');
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -52,14 +46,29 @@ export default function RegisterPage() {
     setForm((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "province" ? { city: "" } : {}) // reset city si province change
+      ...(name === "province" ? { city: "" } : {})
     }));
   };
 
+  // -------------------------------------------------------------
+  // 🚫 Nouveau comportement : inscription désactivée temporairement
+  // -------------------------------------------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    alert("🚫 L'inscription n'est pas possible pour le moment. Veuillez réessayer plus tard.");
+    return;
 
-    // ✔ transmettre toujours les deux rôles
+    /*  
+    ------------------------------------------------------------------
+    🔒 CODE ORIGINAL D’INSCRIPTION — LAISSÉ EN PLACE MAIS EN COMMENTAIRE
+    ------------------------------------------------------------------
+
+    const API_URL =
+      process.env.NEXT_PUBLIC_API_BASE ||
+      (typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:5000'
+        : 'https://ecommerce-web-avec-tailwind.onrender.com');
+
     const roles = "acheteur,vendeur";
 
     try {
@@ -73,7 +82,6 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) return alert(data.error || 'Erreur à l’inscription');
 
-      // 🔑 Sauvegarde local
       if (data.token) {
         localStorage.setItem(
           'user',
@@ -92,6 +100,8 @@ export default function RegisterPage() {
       console.error(err);
       alert('Erreur de connexion au serveur');
     }
+
+    */
   };
 
   return (
@@ -146,7 +156,7 @@ export default function RegisterPage() {
 
             <input type="password" name="password" placeholder="Mot de passe" value={form.password} onChange={handleChange} required className="input w-full" />
 
-            {/* ✔ CHAMPS VENDEUR TOUJOURS VISIBLES, OPTIONNELS */}
+            {/* Champs optionnels vendeur */}
             <div className="space-y-3 border-t pt-4">
               <input name="commerceName" placeholder="Nom du commerce (optionnel)" value={form.commerceName} onChange={handleChange} className="input w-full" />
               <textarea name="neighborhood" placeholder="Quartier / Description (optionnel)" value={form.neighborhood} onChange={handleChange} className="input w-full" />
