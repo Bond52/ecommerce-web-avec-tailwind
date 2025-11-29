@@ -28,12 +28,15 @@ export default function CameroonMap() {
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
       .then((data) => {
-
-        // Normaliser toutes les clés reçues du backend
         const normalizedCounts: any = {};
+
+        // Normalisation forcée des clés du backend
         Object.keys(data).forEach((k) => {
           normalizedCounts[normalize(k)] = data[k];
         });
+
+        // 💥 LOG IMPORTANT → ENVIE-MOI CETTE LIGNE
+        console.log("🗝️ COUNTS KEYS =", Object.keys(normalizedCounts));
 
         setCounts(normalizedCounts);
       })
@@ -69,8 +72,7 @@ export default function CameroonMap() {
   // Tooltip + DEBUG sécurisé
   const onEachRegion = (feature: any, layer: any) => {
     const rawName = getRegionName(feature.properties);
-
-    const name1 = feature.properties?.NAME_1 || "";  // string safe
+    const name1 = feature.properties?.NAME_1 || "";
 
     console.log("🟩 RAW PROPS:", feature.properties);
     console.log("🔤 RAW NAME_1:", name1);
