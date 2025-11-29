@@ -52,7 +52,7 @@ export default function FournisseursPage() {
       </h1>
 
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl mb-8">
-        Trovuez des fournisseurs de matières premières et accessoires du réseau Sawaka
+        Trovuez des fournisseurs de matières premières et accessoires dans le réseau Sawaka
       </p>
 
       {/* 🔎 Barre de recherche + filtre */}

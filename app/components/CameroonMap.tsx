@@ -4,29 +4,57 @@ import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
+/* ============================================================
+   🧹 Normalisation des noms de région (anti-espace / anti-accent)
+=============================================================== */
+function normalizeRegion(str: string = "") {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // retire accents
+    .replace(/\s+/g, " ")            // espaces multiples
+    .trim()                           // retire espaces début/fin
+    .toLowerCase();                   // casse uniforme
+}
+
 export default function CameroonMap() {
   const [geo, setGeo] = useState<any>(null);
   const [counts, setCounts] = useState<any>({});
 
-  // Charger le GeoJSON + les stats
+  // Charger GeoJSON + stats
   useEffect(() => {
+    // ▼ Charger le fichier GeoJSON local
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
 
+    // ▼ Récupérer les stats backend
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
       .then((data) => {
         console.log("📌 STATISTIQUES RECUES:", data);
-        setCounts(data);
+
+        // Normalisation des clés (ex : "Sud" → "sud")
+        const normalized: any = {};
+        Object.keys(data).forEach((key) => {
+          normalized[normalizeRegion(key)] = data[key];
+        });
+
+        console.log("📌 NORMALISE:", normalized);
+        setCounts(normalized);
       })
       .catch(console.error);
   }, []);
 
-  // Style selon le nombre d’artisans
+  /* ============================================================
+     🎨 Style selon le nombre d’artisans
+  =============================================================== */
   const regionStyle = (feature: any) => {
-    const name = feature.properties?.region || feature.properties?.name;
+    const rawName =
+      feature.properties?.region || feature.properties?.name;
+
+    const name = normalizeRegion(rawName);
+
     const value = counts[name] ?? 0;
 
     const color =
@@ -44,13 +72,19 @@ export default function CameroonMap() {
     };
   };
 
-  // Tooltip simple
+  /* ============================================================
+     🏷️ Tooltip
+  =============================================================== */
   const onEachRegion = (feature: any, layer: any) => {
-    const name = feature.properties?.region || feature.properties?.name;
+    const rawName =
+      feature.properties?.region || feature.properties?.name;
+
+    const name = normalizeRegion(rawName);
+
     const value = counts[name] ?? 0;
 
     layer.bindTooltip(
-      `${name} : ${value} artisan(s)`,
+      `${rawName} : ${value} artisan(s)`,
       { permanent: false, sticky: true }
     );
   };
