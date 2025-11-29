@@ -58,3 +58,10 @@ export async function listArtisans() {
 export async function getArtisan(id: string) {
   return http<Artisan>(`/api/artisans/${id}`);
 }
+
+/* ===========================================================
+   📍 LISTE DES ARTISANS PAR VILLE
+=========================================================== */
+export async function listArtisansByCity(city: string) {
+  return http<Artisan[]>(`/api/artisans?city=${encodeURIComponent(city)}`);
+}
