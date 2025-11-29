@@ -99,12 +99,20 @@ export default function CreerProjetPage() {
         {/* Budget */}
         <div>
           <label className="block mb-2 font-semibold">Votre budget (FCFA)</label>
-          <input
-            type="number"
-            min="100"
-            className="w-full p-3 border-2 border-cream-300 rounded-lg focus:border-sawaka-500"
-            onChange={(e) => setBudget(parseInt(e.target.value))}
-          />
+<input
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  placeholder="Ex : 30000"
+  value={budget}
+  onChange={(e) => {
+    const cleaned = e.target.value.replace(/\D/g, ""); // garde uniquement les chiffres
+    setBudget(cleaned === "" ? 0 : Number(cleaned));   // ← conversion en number
+  }}
+  className="w-full h-12 px-4 rounded-lg border-2 border-cream-300 focus:border-sawaka-500 focus:ring-0"
+/>
+
+
         </div>
 
         {/* Ville */}
