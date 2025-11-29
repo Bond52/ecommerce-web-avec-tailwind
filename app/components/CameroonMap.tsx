@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 
-// Normalisation robuste
+// Normalisation
 function normalize(str = "") {
   return str
     .normalize("NFD")
@@ -18,37 +18,31 @@ export default function CameroonMap() {
   const [counts, setCounts] = useState<any>({});
 
   useEffect(() => {
-    // Charger le GeoJSON local
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
       .then(setGeo)
       .catch(console.error);
 
-    // Charger les stats
     fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
       .then((res) => res.json())
       .then((data) => {
         const normalizedCounts: any = {};
-
-        // Normalisation forcée des clés du backend
         Object.keys(data).forEach((k) => {
           normalizedCounts[normalize(k)] = data[k];
         });
 
-        // 💥 LOG IMPORTANT → ENVIE-MOI CETTE LIGNE
-        console.log("🗝️ COUNTS KEYS =", Object.keys(normalizedCounts));
+        console.log("🗝️ Final COUNT KEYS =", Object.keys(normalizedCounts));
 
         setCounts(normalizedCounts);
       })
       .catch(console.error);
   }, []);
 
-  // Extraction du nom correct depuis le GeoJSON
+  // 🚀 FIX : on utilise UNIQUEMENT props.name
   const getRegionName = (props: any) => {
-    return props?.NAME_1 || props?.name || props?.region || "Inconnue";
+    return props?.name || "Inconnue";
   };
 
-  // Style selon nb artisans
   const regionStyle = (feature: any) => {
     const rawName = getRegionName(feature.properties);
     const key = normalize(rawName);
@@ -69,30 +63,14 @@ export default function CameroonMap() {
     };
   };
 
-  // Tooltip + DEBUG sécurisé
   const onEachRegion = (feature: any, layer: any) => {
     const rawName = getRegionName(feature.properties);
-    const name1 = feature.properties?.NAME_1 || "";
-
-    console.log("🟩 RAW PROPS:", feature.properties);
-    console.log("🔤 RAW NAME_1:", name1);
-
-    if (name1) {
-      console.log("🧩 CODEPOINTS:", [...name1].map((c) => c.charCodeAt(0)));
-      console.log("🧼 NORMALIZED:", normalize(name1));
-    } else {
-      console.log("⚠️ NAME_1 ABSENT");
-    }
-
     const key = normalize(rawName);
     const value = counts[key] ?? 0;
 
     console.log("🟦 REGION =", rawName, "| clé =", key, "| artisans =", value);
 
-    layer.bindTooltip(`${rawName} : ${value} artisan(s)`, {
-      permanent: false,
-      sticky: true,
-    });
+    layer.bindTooltip(`${rawName} : ${value} artisan(s)`);
   };
 
   if (!geo)
