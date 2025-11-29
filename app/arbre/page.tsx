@@ -56,7 +56,7 @@ export default function ArbrePage() {
     <div className="wrap py-12">
       <h1 className="text-3xl font-bold text-sawaka-700 mb-4">
         {selectedRoot
-          ? `L’Arbre à Outils de ${selectedRoot.name}`
+          ? `L’Arbre à Outils`
           : "L’Arbre à Outils"}
       </h1>
 
