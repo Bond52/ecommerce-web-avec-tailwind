@@ -20,14 +20,17 @@ export default function ProfilePage() {
   const [form, setForm] = useState<any>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const API_URL =
     process.env.NEXT_PUBLIC_API_BASE ||
-    (typeof window !== "undefined" &&
-    window.location.hostname === "localhost"
+    (typeof window !== "undefined" && window.location.hostname === "localhost"
       ? "http://localhost:5000"
       : "https://ecommerce-web-avec-tailwind.onrender.com");
 
+  /* =====================================================
+      CHARGEMENT DU PROFIL
+  ===================================================== */
   useEffect(() => {
     fetch(`${API_URL}/api/user/profile`, { credentials: "include" })
       .then(async (res) => {
@@ -50,6 +53,37 @@ export default function ProfilePage() {
     setForm((prev: any) => ({ ...prev, [k]: v }));
   };
 
+  /* =====================================================
+      UPLOAD AVATAR CLOUDINARY
+  ===================================================== */
+  const handleAvatarUpload = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const res = await fetch(`${API_URL}/api/user/upload-avatar`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    setUploadingAvatar(false);
+
+    if (!res.ok) return alert("Erreur lors du chargement de la photo");
+
+    const data = await res.json();
+    updateField("avatar", data.url); // ajout URL Cloudinary dans form
+
+    alert("Photo mise à jour !");
+  };
+
+  /* =====================================================
+      SAUVEGARDE DU PROFIL
+  ===================================================== */
   const handleSave = async () => {
     setSaving(true);
     const res = await fetch(`${API_URL}/api/user/profile`, {
@@ -59,6 +93,7 @@ export default function ProfilePage() {
       credentials: "include",
     });
     setSaving(false);
+
     if (res.ok) {
       const updated = await res.json();
       setUser(updated);
@@ -74,15 +109,26 @@ export default function ProfilePage() {
       <h1 className="text-3xl font-bold text-sawaka-800 mb-10">Mon profil</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
+        
         {/* COLONNE GAUCHE */}
         <div className="space-y-8">
 
-          {/* Avatar Card */}
+          {/* AVATAR */}
           <div className="bg-white border border-cream-200 rounded-2xl shadow-card p-6 text-center">
-            <div className="w-32 h-32 rounded-full bg-sawaka-200 flex items-center justify-center text-4xl font-bold text-sawaka-700 mx-auto mb-4">
-              {form.firstName?.[0]}
-              {form.lastName?.[0]}
+            
+            {/* IMAGE OU INITIALS */}
+            <div className="w-32 h-32 rounded-full mx-auto overflow-hidden mb-4">
+              {form.avatar ? (
+                <img
+                  src={form.avatar}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-sawaka-200 flex items-center justify-center text-4xl font-bold text-sawaka-700">
+                  {form.firstName?.[0]}
+                  {form.lastName?.[0]}
+                </div>
+              )}
             </div>
 
             <h3 className="text-xl font-semibold text-sawaka-900">
@@ -90,9 +136,15 @@ export default function ProfilePage() {
             </h3>
             <p className="text-sawaka-700">@{form.username}</p>
 
-            <button className="mt-4 btn btn-primary w-full">
-              Changer la photo
-            </button>
+            <label className="mt-4 btn btn-primary w-full cursor-pointer">
+              {uploadingAvatar ? "Téléchargement..." : "Changer la photo"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+            </label>
           </div>
 
           {/* Rôles + À propos */}
@@ -136,7 +188,7 @@ export default function ProfilePage() {
         {/* COLONNE DROITE */}
         <div className="lg:col-span-2 space-y-8">
 
-          {/* INFOS PERSONNELLES */}
+          {/* Informations personnelles */}
           <Card title="Informations personnelles">
             <Grid>
               <Input label="Nom d'utilisateur" value={form.username} onChange={(e) => updateField("username", e.target.value)} />
@@ -146,22 +198,19 @@ export default function ProfilePage() {
             </Grid>
           </Card>
 
-          {/* COORDONNÉES */}
+          {/* Coordonnées */}
           <Card title="Coordonnées">
             <Grid>
               <Input label="Email" value={form.email} onChange={(e) => updateField("email", e.target.value)} />
               <Input label="Téléphone" value={form.phone} onChange={(e) => updateField("phone", e.target.value)} />
               <Input label="Pays" value={form.country} onChange={(e) => updateField("country", e.target.value)} />
-
               <Select label="Province" value={form.province} onChange={(e) => updateField("province", e.target.value)} options={Object.keys(provincesCM)} />
-
               <Select label="Ville" value={form.city} onChange={(e) => updateField("city", e.target.value)} options={form.province ? provincesCM[form.province] : []} />
-
               <Input label="Point de retrait" value={form.pickupPoint} onChange={(e) => updateField("pickupPoint", e.target.value)} />
             </Grid>
           </Card>
 
-          {/* VENDEUR */}
+          {/* Vendeur */}
           {form.isSeller && (
             <Card title="Espace Vendeur">
               <Grid>
@@ -180,8 +229,8 @@ export default function ProfilePage() {
                 px-6 py-3 rounded-xl font-semibold
                 ${!isModified || saving
                   ? "bg-gray-300 cursor-not-allowed text-gray-600"
-                  : "bg-sawaka-700 text-white hover:bg-sawaka-800"}
-              `}
+                  : "bg-sawaka-700 text-white hover:bg-sawaka-800"
+                }`}
             >
               {saving ? "Enregistrement..." : "Mettre à jour le profil"}
             </button>
@@ -210,11 +259,7 @@ function Input({ label, value, onChange }: any) {
   return (
     <div className="flex flex-col">
       <label className="text-sawaka-700 mb-1">{label}</label>
-      <input
-        value={value}
-        onChange={onChange}
-        className="border border-gray-300 rounded-lg p-3"
-      />
+      <input value={value} onChange={onChange} className="border border-gray-300 rounded-lg p-3" />
     </div>
   );
 }
@@ -223,11 +268,7 @@ function Select({ label, value, onChange, options }: any) {
   return (
     <div className="flex flex-col">
       <label className="text-sawaka-700 mb-1">{label}</label>
-      <select
-        value={value || ""}
-        onChange={onChange}
-        className="border border-gray-300 rounded-lg p-3"
-      >
+      <select value={value || ""} onChange={onChange} className="border border-gray-300 rounded-lg p-3">
         <option value="">Sélectionner…</option>
         {options.map((opt: string) => (
           <option key={opt}>{opt}</option>
