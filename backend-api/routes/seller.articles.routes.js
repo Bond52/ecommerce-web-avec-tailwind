@@ -4,22 +4,18 @@ const Article = require("../models/Article");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 
-
 /* ===========================================================
-   AUTH
+   AUTH MIDDLEWARES
 =========================================================== */
 function requireAuth(req, res, next) {
   const bearer = req.headers.authorization;
   const headerToken =
-    bearer && bearer.startsWith("Bearer ")
-      ? bearer.split(" ")[1]
-      : null;
+    bearer && bearer.startsWith("Bearer ") ? bearer.split(" ")[1] : null;
 
   const cookieToken = req.cookies?.token;
   const token = headerToken || cookieToken;
 
-  if (!token)
-    return res.status(401).json({ message: "Non autorisé." });
+  if (!token) return res.status(401).json({ message: "Non autorisé." });
 
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
@@ -45,7 +41,7 @@ function requireRole(...roles) {
 }
 
 /* ===========================================================
-   CLOUDINARY
+   CLOUDINARY UPLOAD
 =========================================================== */
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -56,7 +52,7 @@ cloudinary.config({
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/upload", upload.array("images", 5), async (req, res) => {
-   console.log("📸 UPLOAD → Fichiers reçus :", req.files?.length);
+  console.log("📸 UPLOAD → Fichiers reçus :", req.files?.length);
 
   try {
     if (!req.files?.length)
@@ -72,6 +68,7 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
         );
         stream.end(file.buffer);
       });
+
       urls.push(result.secure_url);
     }
 
@@ -83,36 +80,26 @@ router.post("/upload", upload.array("images", 5), async (req, res) => {
 });
 
 /* ===========================================================
-   PUBLIC LIST
+   🔥 PUBLIC LIST — FIXÉ (LE FRONT FAIT LA PAGINATION)
 =========================================================== */
 router.get("/public", async (req, res) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 12;
-    const skip = (page - 1) * limit;
-
     const search = req.query.q
       ? { title: { $regex: req.query.q, $options: "i" } }
       : {};
 
     const filter = {
-      status: { $in: ["published", "auction"] },
+      status: "published",
       ...search,
     };
 
-    const total = await Article.countDocuments(filter);
     const items = await Article.find(filter)
       .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .lean();
 
-    res.json({
-      items,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-    });
+    res.json({ items });
   } catch (e) {
+    console.error("❌ PUBLIC LIST ERROR:", e);
     res.status(500).json({ message: e.message });
   }
 });
@@ -147,7 +134,7 @@ router.use(requireAuth, requireRole("vendeur", "admin"));
    CREATE ARTICLE
 =========================================================== */
 router.post("/articles", async (req, res) => {
-    console.log("🟡 CREATE → BODY REÇU :", req.body);
+  console.log("🟡 CREATE → BODY REÇU :", req.body);
 
   try {
     const body = req.body;
@@ -192,7 +179,7 @@ router.post("/articles", async (req, res) => {
 });
 
 /* ===========================================================
-   GET VENDOR ARTICLES
+   GET VENDOR ARTICLES (vendeur connecté)
 =========================================================== */
 router.get("/articles", async (req, res) => {
   try {
@@ -228,11 +215,12 @@ router.get("/articles", async (req, res) => {
    UPDATE ARTICLE
 =========================================================== */
 router.patch("/articles/:id", async (req, res) => {
-console.log("🟠 UPDATE → BODY REÇU :", req.body);
+  console.log("🟠 UPDATE → BODY REÇU :", req.body);
 
   try {
     const body = req.body;
 
+    // Convertir images JSON → array
     if (typeof body.images === "string") {
       try {
         body.images = JSON.parse(body.images);
