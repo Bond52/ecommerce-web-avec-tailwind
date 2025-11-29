@@ -97,6 +97,8 @@ app.use("/stats", statsRoutes);
 const fournisseursRoute = require("./routes/fournisseurs.js");
 app.use("/api/fournisseurs", fournisseursRoute);
 
+const toolsRoutes = require("./routes/tools.js");
+app.use("/api/tools", toolsRoutes);
 
 // CRON (fermeture enchères)
 const cron = require("node-cron");
