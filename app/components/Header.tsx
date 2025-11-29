@@ -74,12 +74,13 @@ export default function Header() {
 
       {/* MAIN HEADER */}
       <div className="wrap py-3 flex items-center justify-between gap-4">
+
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
           <span className="font-display text-2xl font-bold text-sawaka-700">Sawaka</span>
         </Link>
 
-        {/* SEARCH */}
+        {/* SEARCH BAR */}
         <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4">
           <div className="relative">
             <input
@@ -155,7 +156,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* NEW NAV MENU (corrigé hover) */}
+      {/* NAV BAR (CORRIGÉ - PAS DE GAP) */}
       <div className="border-t bg-cream-50">
         <div className="wrap py-3 flex gap-8 text-sm items-center whitespace-nowrap">
 
@@ -165,7 +166,14 @@ export default function Header() {
           {/* PRODUITS */}
           <div className="relative group">
             <button className="hover:text-sawaka-900">Produits ▾</button>
-            <div className="absolute left-0 w-48 bg-white border rounded-lg shadow-md hidden group-hover:block pt-4 mt-1 z-50">
+
+            <div
+              className="
+                absolute left-0 top-full translate-y-[2px]
+                w-48 bg-white border rounded-lg shadow-md
+                hidden group-hover:block z-50
+              "
+            >
               <Link href="/produits" className="block px-4 py-2 hover:bg-cream-50">Tous les produits</Link>
               <Link href="/nouveautes" className="block px-4 py-2 hover:bg-cream-50">Nouveautés</Link>
               <Link href="/promotions" className="block px-4 py-2 hover:bg-cream-50">Promotions</Link>
@@ -175,7 +183,14 @@ export default function Header() {
           {/* PROJETS */}
           <div className="relative group">
             <button className="hover:text-sawaka-900">Projets ▾</button>
-            <div className="absolute left-0 w-48 bg-white border rounded-lg shadow-md hidden group-hover:block pt-4 mt-1 z-50">
+
+            <div
+              className="
+                absolute left-0 top-full translate-y-[2px]
+                w-48 bg-white border rounded-lg shadow-md
+                hidden group-hover:block z-50
+              "
+            >
               <Link href="/projets/creer" className="block px-4 py-2 hover:bg-cream-50">Créer un projet</Link>
               <Link href="/projets" className="block px-4 py-2 hover:bg-cream-50">Projets en cours</Link>
             </div>
@@ -184,7 +199,14 @@ export default function Header() {
           {/* CONTRIBUTEURS */}
           <div className="relative group">
             <button className="hover:text-sawaka-900">Contributeurs ▾</button>
-            <div className="absolute left-0 w-48 bg-white border rounded-lg shadow-md hidden group-hover:block pt-4 mt-1 z-50">
+
+            <div
+              className="
+                absolute left-0 top-full translate-y-[2px]
+                w-48 bg-white border rounded-lg shadow-md
+                hidden group-hover:block z-50
+              "
+            >
               <Link href="/artisans" className="block px-4 py-2 hover:bg-cream-50">Artisans</Link>
               <Link href="/fournisseurs" className="block px-4 py-2 hover:bg-cream-50">Fournisseurs</Link>
             </div>
@@ -193,7 +215,14 @@ export default function Header() {
           {/* COMMUNAUTÉ */}
           <div className="relative group">
             <button className="hover:text-sawaka-900">Communauté ▾</button>
-            <div className="absolute left-0 w-56 bg-white border rounded-lg shadow-md hidden group-hover:block pt-4 mt-1 z-50">
+
+            <div
+              className="
+                absolute left-0 top-full translate-y-[2px]
+                w-56 bg-white border rounded-lg shadow-md
+                hidden group-hover:block z-50
+              "
+            >
               <Link href="/arbre" className="block px-4 py-2 hover:bg-cream-50">L’Arbre à outils</Link>
               <Link href="/amelioration" className="block px-4 py-2 hover:bg-cream-50">Améliorer Sawaka</Link>
             </div>
