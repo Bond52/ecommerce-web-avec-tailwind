@@ -66,6 +66,13 @@ export default function CameroonMap() {
   // Tooltip
   const onEachRegion = (feature: any, layer: any) => {
     const rawName = getRegionName(feature.properties);
+
+console.log("🔍 RAW PROPS:", feature.properties);
+console.log("🔤 RAW NAME_1:", feature.properties.NAME_1);
+console.log("🧩 CODEPOINTS:", [...feature.properties.NAME_1].map(c => c.charCodeAt(0)));
+console.log("🧼 NORMALIZED:", normalize(feature.properties.NAME_1));
+
+
     const key = normalize(rawName);
     const value = counts[key] ?? 0;
 
