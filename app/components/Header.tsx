@@ -56,7 +56,9 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm border-b border-cream-200 sticky top-0 z-40">
-      {/* Top Bar */}
+      {/* ───────────────────────────── */}
+      {/* TOP BAR */}
+      {/* ───────────────────────────── */}
       <div className="bg-sawaka-700 text-white">
         <div className="wrap py-2">
           <div className="flex items-center justify-between text-sm">
@@ -72,14 +74,17 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main */}
+      {/* ───────────────────────────── */}
+      {/* MAIN HEADER */}
+      {/* ───────────────────────────── */}
       <div className="wrap py-3 flex items-center justify-between gap-4">
-        {/* Logo */}
+
+        {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
           <span className="font-display text-2xl font-bold text-sawaka-700">Sawaka</span>
         </Link>
 
-        {/* Search */}
+        {/* SEARCH BAR */}
         <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4">
           <div className="relative">
             <input
@@ -95,7 +100,7 @@ export default function Header() {
           </div>
         </form>
 
-        {/* User */}
+        {/* USER */}
         <div className="flex items-center gap-3">
           {user ? (
             <div className="relative">
@@ -149,32 +154,55 @@ export default function Header() {
         </div>
       </div>
 
-      {/* NAV BAR — NO CATEGORIES */}
+      {/* ───────────────────────────── */}
+      {/* NEW NAVIGATION MENU */}
+      {/* ───────────────────────────── */}
       <div className="border-t bg-cream-50">
         <div className="wrap py-3 flex gap-8 text-sm items-center whitespace-nowrap">
 
-          {/* Catégories désactivé */}
-          {/* 
-          <button className="px-4 py-2 bg-sawaka-500 text-white rounded-lg">
-            ☰ Catégories
-          </button>
-          */}
-
+          {/* ACCUEIL */}
           <Link href="/">Accueil</Link>
-          <Link href="/artisans">Artisans</Link>
-          <Link href="/produits">Produits</Link>
-          <Link href="/nouveautes">Nouveautés</Link>
-          <Link href="/promotions">Promotions</Link>
 
-          <Link href="/encheres" className="text-sawaka-700 hover:text-sawaka-900">
-            Ventes aux enchères
-          </Link>
+          {/* PRODUITS */}
+          <div className="group relative">
+            <button className="hover:text-sawaka-900">Produits ▾</button>
+            <div className="absolute hidden group-hover:block bg-white border rounded-lg shadow-md py-2 mt-1 w-48 z-50">
+              <Link href="/produits" className="block px-4 py-2 hover:bg-cream-50">Tous les produits</Link>
+              <Link href="/nouveautes" className="block px-4 py-2 hover:bg-cream-50">Nouveautés</Link>
+              <Link href="/promotions" className="block px-4 py-2 hover:bg-cream-50">Promotions</Link>
+            </div>
+          </div>
 
-          <Link href="/fournisseurs">Fournisseurs</Link>
-          <Link href="/projets">Projets en cours</Link>
-          <Link href="/arbre">L’Arbre à outils</Link>
+          {/* PROJETS */}
+          <div className="group relative">
+            <button className="hover:text-sawaka-900">Projets ▾</button>
+            <div className="absolute hidden group-hover:block bg-white border rounded-lg shadow-md py-2 mt-1 w-48 z-50">
+              <Link href="/projets/creer" className="block px-4 py-2 hover:bg-cream-50">Créer un projet</Link>
+              <Link href="/projets" className="block px-4 py-2 hover:bg-cream-50">Projets en cours</Link>
+            </div>
+          </div>
 
-          <Link href="/amelioration">Améliorer Sawaka</Link>
+          {/* CONTRIBUTEURS */}
+          <div className="group relative">
+            <button className="hover:text-sawaka-900">Contributeurs ▾</button>
+            <div className="absolute hidden group-hover:block bg-white border rounded-lg shadow-md py-2 mt-1 w-48 z-50">
+              <Link href="/artisans" className="block px-4 py-2 hover:bg-cream-50">Artisans</Link>
+              <Link href="/fournisseurs" className="block px-4 py-2 hover:bg-cream-50">Fournisseurs</Link>
+            </div>
+          </div>
+
+          {/* COMMUNAUTÉ */}
+          <div className="group relative">
+            <button className="hover:text-sawaka-900">Communauté ▾</button>
+            <div className="absolute hidden group-hover:block bg-white border rounded-lg shadow-md py-2 mt-1 w-56 z-50">
+              <Link href="/arbre" className="block px-4 py-2 hover:bg-cream-50">L’Arbre à outils</Link>
+              <Link href="/amelioration" className="block px-4 py-2 hover:bg-cream-50">Améliorer Sawaka</Link>
+            </div>
+          </div>
+
+          {/* ENCHÈRES */}
+          <Link href="/encheres" className="hover:text-sawaka-900">Ventes aux enchères</Link>
+
         </div>
       </div>
     </header>
