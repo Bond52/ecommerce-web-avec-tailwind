@@ -59,8 +59,8 @@ export default function HomePage() {
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-sawaka-800 leading-tight mb-6">
-                Partagez vos
-                <span className="block text-gradient">créations</span>
+                Bienvenue sur Sawaka
+                <span className="block text-gradient">la Communauté des artisans</span>
               </h1>
 
               <p className="text-lg text-sawaka-600 mb-8 max-w-xl">
