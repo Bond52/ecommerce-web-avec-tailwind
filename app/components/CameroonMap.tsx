@@ -2,106 +2,72 @@
 
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Normalisation
-function normalize(str = "") {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
-}
-
 export default function CameroonMap() {
-  const [geo, setGeo] = useState<any>(null);
-  const [counts, setCounts] = useState<any>({});
+  const router = useRouter();
+  const [regions, setRegions] = useState<any>(null);
 
+  // Charger le GeoJSON depuis /public/maps
   useEffect(() => {
     fetch("/maps/cameroon-regions.json")
       .then((res) => res.json())
-      .then(setGeo)
-      .catch(console.error);
-
-    fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
-      .then((res) => res.json())
-      .then((data) => {
-        const normalizedCounts: any = {};
-        Object.keys(data).forEach((k) => {
-          normalizedCounts[normalize(k)] = data[k];
-        });
-
-        console.log("🗝️ Final COUNT KEYS =", Object.keys(normalizedCounts));
-
-        setCounts(normalizedCounts);
-      })
-      .catch(console.error);
+      .then((data) => setRegions(data))
+      .catch((err) => console.error("Erreur chargement GeoJSON :", err));
   }, []);
 
-  // 🚀 FIX : on utilise UNIQUEMENT props.name
-  const getRegionName = (props: any) => {
-    return props?.name || "Inconnue";
+  // Style de base
+  const regionStyle = {
+    fillColor: "#c57b32",
+    weight: 1,
+    color: "black",
+    fillOpacity: 0.4,
   };
 
-  const regionStyle = (feature: any) => {
-    const rawName = getRegionName(feature.properties);
-    const key = normalize(rawName);
-    const value = counts[key] ?? 0;
-
-    const color =
-      value === 0 ? "#f0e5d8" :
-      value === 1 ? "#f7c58d" :
-      value === 2 ? "#ee9f49" :
-      "#d97904";
-
-    return {
-      fillColor: color,
-      weight: 1,
-      opacity: 1,
-      color: "#8a5500",
-      fillOpacity: 0.7,
-    };
+  // Style survol
+  const highlightStyle = {
+    weight: 2,
+    color: "#333",
+    fillOpacity: 0.6,
   };
 
-  const onEachRegion = (feature: any, layer: any) => {
-    const rawName = getRegionName(feature.properties);
-    const key = normalize(rawName);
-    const value = counts[key] ?? 0;
+  function onEachRegion(feature: any, layer: any) {
+    const regionName = feature.properties.NAME_1;
 
-    console.log("🟦 REGION =", rawName, "| clé =", key, "| artisans =", value);
+    // Tooltip simplifié
+    layer.bindTooltip(regionName, { sticky: true });
 
-    layer.bindTooltip(`${rawName} : ${value} artisan(s)`);
-  };
+    // Hover
+    layer.on("mouseover", () => layer.setStyle(highlightStyle));
+    layer.on("mouseout", () => layer.setStyle(regionStyle));
 
-  if (!geo)
-    return <p className="text-center py-6">Chargement de la carte…</p>;
+    // Clic → Filtrer artisans
+    layer.on("click", () => {
+      router.push(`/artisans?region=${encodeURIComponent(regionName)}`);
+    });
+  }
 
   return (
-    <div className="wrap my-12">
-      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
-        Artisans par région du Cameroun
-      </h2>
-
-      <p className="text-lg text-sawaka-600 text-center mb-6">
-        Découvrez la répartition géographique des artisans sur la plateforme
-      </p>
-
+    <div className="flex justify-center my-8">
       <MapContainer
-        center={[7.3, 12.4]}
-        zoom={6.3}
+        center={[7.5, 12.5]}
+        zoom={7}
         scrollWheelZoom={false}
-        style={{ height: "550px", width: "100%" }}
+        style={{ height: "600px", width: "900px" }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="© OpenStreetMap contributors"
+          attribution='&copy; OpenStreetMap contributors'
         />
 
-        <GeoJSON
-          data={geo}
-          style={regionStyle}
-          onEachFeature={onEachRegion}
-        />
+        {regions && (
+          <GeoJSON
+            data={regions}
+            style={() => regionStyle}
+            onEachFeature={onEachRegion}
+          />
+        )}
       </MapContainer>
     </div>
   );
