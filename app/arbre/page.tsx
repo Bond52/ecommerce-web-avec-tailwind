@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { listTools, Tool } from "@/app/lib/apiTools";
 
-/* 🔁 Expansion récursive depuis la BD */
+/* 🔁 Expansion récursive depuis la BD (sans l’outil racine) */
 function expandTool(rootId: string, all: Tool[]) {
   const visited = new Set<string>();
   const result: Tool[] = [];
@@ -20,12 +20,15 @@ function expandTool(rootId: string, all: Tool[]) {
   }
 
   explore(rootId);
-  return result;
+
+  // ❌ Supprimer la première entrée = l’outil sélectionné lui-même
+  return result.slice(1);
 }
 
 export default function ArbrePage() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [selected, setSelected] = useState<Tool[]>([]);
+  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -34,7 +37,8 @@ export default function ArbrePage() {
     async function load() {
       try {
         const data = await listTools();
-        setTools(data);
+        // ❌ Babyfoot doit être un projet → pas un outil
+        setTools(data.filter((t) => t.id !== "babyfoot"));
       } catch (e) {
         console.error("Erreur chargement tools:", e);
       } finally {
@@ -52,7 +56,7 @@ export default function ArbrePage() {
     );
   }
 
-  /* 🔎 Filtrage */
+  /* 🔎 Filtre */
   const filtered = tools.filter((t) =>
     t.name.toLowerCase().includes(query.toLowerCase())
   );
@@ -60,20 +64,19 @@ export default function ArbrePage() {
   return (
     <div className="wrap py-12">
       <h1 className="text-3xl font-bold text-sawaka-700 mb-4">
-        L’Arbre à Outils
+        {selectedTool
+          ? `L’Arbre à Outils de ${selectedTool.name}`
+          : "L’Arbre à Outils"}
       </h1>
 
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl mb-8">
         Découvrez les outils nécessaires pour fabriquer d’autres outils.
         <br />
         En sélectionnant un outil, vous verrez automatiquement toute sa chaîne
-        de dépendances.
-        <br />
-        Lorsqu’un outil n’a aucun fabricant local, cela représente une
-        opportunité d’industrialisation au Cameroun.
+        de dépendances (sauf l’outil lui-même).
       </p>
 
-      {/* 🔍 Barre de recherche */}
+      {/* 🔍 Recherche */}
       <div className="max-w-lg mb-8">
         <input
           type="text"
@@ -89,7 +92,10 @@ export default function ArbrePage() {
         {filtered.map((tool) => (
           <div
             key={tool.id}
-            onClick={() => setSelected(expandTool(tool.id, tools))}
+            onClick={() => {
+              setSelectedTool(tool);
+              setSelected(expandTool(tool.id, tools));
+            }}
             className="cursor-pointer bg-white p-5 border border-cream-300 rounded-xl shadow-sm hover:shadow-lg transition"
           >
             <div className="text-lg font-semibold text-sawaka-700">
@@ -113,36 +119,42 @@ export default function ArbrePage() {
         ))}
       </div>
 
-      {/* 🌳 CHAÎNE COMPLÈTE DES OUTILS */}
-      {selected.length > 0 && (
+      {/* 🌳 CHAÎNE D’OUTILS */}
+      {selectedTool && (
         <div className="bg-white p-6 rounded-xl shadow-md border border-cream-300">
           <h2 className="text-2xl font-bold text-sawaka-700 mb-4">
-            Chaîne complète des outils nécessaires
+            Outils nécessaires pour fabriquer : {selectedTool.name}
           </h2>
 
-          <ul className="space-y-4">
-            {selected.map((tool) => (
-              <li
-                key={tool.id}
-                className="p-4 border rounded-lg bg-cream-50 border-cream-300"
-              >
-                <div className="font-semibold text-sawaka-800">
-                  {tool.name}
-                </div>
+          {selected.length === 0 ? (
+            <p className="text-sawaka-600">
+              Aucun outil n’est nécessaire — ou cet outil est un outil final.
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {selected.map((tool) => (
+                <li
+                  key={tool.id}
+                  className="p-4 border rounded-lg bg-cream-50 border-cream-300"
+                >
+                  <div className="font-semibold text-sawaka-800">
+                    {tool.name}
+                  </div>
 
-                {tool.id === "main" ? (
-                  <div className="text-sm text-sawaka-600 mt-1">
-                    🖐️ L’outil final est… la main de l’artisan !
-                  </div>
-                ) : (
-                  <div className="text-sm text-sawaka-600 mt-1">
-                    📍 Vendeur : {tool.vendor || "Non disponible"} <br />
-                    💰 Prix : {tool.price || "Non disponible"}
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                  {tool.id === "main" ? (
+                    <div className="text-sm text-sawaka-600 mt-1">
+                      🖐️ L’outil final est… la main de l’artisan !
+                    </div>
+                  ) : (
+                    <div className="text-sm text-sawaka-600 mt-1">
+                      📍 Vendeur : {tool.vendor || "Non disponible"} <br />
+                      💰 Prix : {tool.price || "Non disponible"}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
