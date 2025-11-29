@@ -1,112 +1,85 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-
-// API
-const API =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_BASE ||
-  "https://ecommerce-web-avec-tailwind.onrender.com";
-
-interface Artisan {
-  _id: string;
-  firstName?: string;
-  lastName?: string;
-  username?: string;
-  email?: string;
-  phone?: string;
-  avatarUrl?: string;   // ✅ Ajout pour la photo Cloudinary
-  idCardImage?: string;
-  createdAt?: string;
-  isSeller?: boolean;
-  roles?: string[];
-  commerceName?: string;
-  city?: string;
-  province?: string;
-}
-
+import { useSearchParams } from "next/navigation";
+import { listArtisans } from "@/app/lib/apiArtisans";
 
 export default function ArtisansPage() {
-  const [artisans, setArtisans] = useState<Artisan[]>([]);
+  const params = useSearchParams();
+  const regionParam = params.get("region"); // ← récupère ?region=
+
+  const [artisans, setArtisans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchArtisans = async () => {
-      try {
-        const res = await fetch(`${API}/api/artisans`, { cache: "no-store" });
-        const data = await res.json();
-
-        const filtered = data.filter(
-          (a: Artisan) => a.isSeller === true || a.roles?.includes("vendeur")
-        );
-
-        setArtisans(filtered);
-      } catch (error) {
-        console.error("Erreur lors du chargement :", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArtisans();
+    listArtisans()
+      .then((res) => setArtisans(res))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen text-lg text-gray-600">
-        Chargement des artisans...
-      </div>
-    );
-  }
+  // Fonction de normalisation (comme dans la carte)
+  const normalize = (str: string) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+
+  // Si filtre par région
+  const filtered = regionParam
+    ? artisans.filter((a) => normalize(a.province || "") === regionParam)
+    : artisans;
 
   return (
-    <main className="min-h-screen bg-cream-100 p-8">
-      <h1 className="text-3xl font-bold text-center text-sawaka-900 mb-10">
+    <div className="wrap py-10">
+      <h1 className="text-4xl font-bold text-center text-sawaka-700 mb-8">
         Les Artisans
       </h1>
 
-      {artisans.length === 0 ? (
-        <p className="text-center text-gray-600">Aucun artisan trouvé.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          {artisans.map((artisan) => (
-            <Link
-              key={artisan._id}
-              href={`/artisans/${artisan._id}`}
-              className="bg-white p-6 rounded-2xl shadow-md border border-cream-200 hover:shadow-lg transition block"
-            >
-              {/* IMAGE */}
-<img
-  src={
-    artisan.avatarUrl ||
-    "https://via.placeholder.com/200x150?text=Artisan"
-  }
-  alt="artisan"
-  className="w-48 h-48 object-cover rounded-xl border border-cream-300 shadow"
-/>
-
-              {/* TEXTES */}
-              <h2 className="mt-4 text-xl font-semibold text-sawaka-900">
-                {artisan.firstName || artisan.lastName
-                  ? `${artisan.firstName || ""} ${artisan.lastName || ""}`
-                  : artisan.username}
-              </h2>
-
-              <p className="text-sm text-gray-700 mt-1">
-                {artisan.email || "Email indisponible"}
-              </p>
-
-              <p className="text-sm mt-3 italic text-gray-500">
-                Inscrit depuis le{" "}
-                {artisan.createdAt
-                  ? new Date(artisan.createdAt).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            </Link>
-          ))}
-        </div>
+      {regionParam && (
+        <p className="text-center text-sawaka-600 text-lg mb-6">
+          Région sélectionnée :{" "}
+          <span className="font-semibold capitalize">
+            {regionParam.replace("-", " ")}
+          </span>
+        </p>
       )}
-    </main>
+
+      {loading && (
+        <p className="text-center text-sawaka-600">Chargement…</p>
+      )}
+
+      {!loading && filtered.length === 0 && (
+        <p className="text-center text-sawaka-600 text-lg">
+          Aucun artisan trouvé pour cette région.
+        </p>
+      )}
+
+      {/* LISTE */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filtered.map((a) => (
+          <div
+            key={a._id}
+            className="p-5 bg-white rounded-xl border shadow-sm"
+          >
+            <img
+              src={a.avatarUrl || "/placeholder.jpg"}
+              alt={a.firstName}
+              className="w-full h-56 object-cover rounded-lg mb-3"
+            />
+
+            <h3 className="text-xl font-bold text-sawaka-800">
+              {a.firstName} {a.lastName}
+            </h3>
+
+            <p className="text-sm text-sawaka-600">{a.email}</p>
+            <p className="text-sm text-sawaka-500">
+              Province : {a.province || "Non spécifié"}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
