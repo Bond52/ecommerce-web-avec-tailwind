@@ -7,7 +7,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-// ✅ Nécessaire derrière un proxy HTTPS (Render, Vercel...) pour cookies Secure
+// 🔐 Obligatoire pour Render/Vercel (proxy HTTPS)
 app.set("trust proxy", 1);
 
 // 🌍 Origines autorisées
@@ -19,37 +19,54 @@ const allowedOrigins = [
   "http://localhost:3000",
 ].filter(Boolean);
 
+// 🌐 Ajoute Access-Control-Allow-Credentials AVANT CORS
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
 
-// 🧩 Middleware CORS (version stable et compatible Render/Vercel)
+// 🛡️ CORS dynamique (INDISPENSABLE pour Render)
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true, // ✅ permet d'envoyer les cookies JWT entre domaines
+    origin: function (origin, callback) {
+      // Autorise aussi Postman, mobile, requêtes internes
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, origin);
+      } else {
+        callback(new Error("Origine non autorisée par CORS : " + origin));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Réponse automatique aux requêtes OPTIONS (préflight)
+// 📨 Préflight OPTIONS automatique
 app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error("CORS non autorisé"));
+    }
+  },
+  credentials: true
 }));
 
 // 📦 Parsers
 app.use(express.json());
 app.use(cookieParser());
 
-// 🧭 Routes principales
+// =======================
+// ROUTES PRINCIPALES
+// =======================
+
 const authRoutes = require("./routes/auth");
-app.use("/api/auth", authRoutes); 
-// -> Routes disponibles :
-//    POST   /api/auth/login
-//    POST   /api/auth/register
-//    GET    /api/auth/me
+app.use("/api/auth", authRoutes);
 
 const sellerRoutes = require("./routes/seller.articles.routes");
-app.use("/api/seller", sellerRoutes); // -> /api/seller/articles
+app.use("/api/seller", sellerRoutes);
 
 const orderRoutes = require("./routes/order.routes");
 app.use("/api/orders", orderRoutes);
@@ -57,15 +74,12 @@ app.use("/api/orders", orderRoutes);
 const budgetRoutes = require("./routes/budget.routes");
 app.use("/api/budget", budgetRoutes);
 
-// 👑 Routes Admin
 const adminRoutes = require("./routes/admin.routes");
 app.use("/api/admin", adminRoutes);
 
-// 👤 Routes Utilisateur
 const userRoutes = require("./routes/user");
 app.use("/api/user", userRoutes);
 
-// Routes produits
 const productRoutes = require("./routes/products");
 app.use("/api/products", productRoutes);
 
@@ -77,32 +91,29 @@ app.use("/api/auction", auctionRoutes);
 
 app.use("/api/feedback", require("./routes/feedback"));
 
-const cron = require("node-cron");
-const closeExpiredAuctions = require("./cronJobs/endAuction");
-
 const statsRoutes = require("./routes/stats");
 app.use("/stats", statsRoutes);
 
-
-// Vérifie toutes les 5 minutes
+// CRON (fermeture enchères)
+const cron = require("node-cron");
+const closeExpiredAuctions = require("./cronJobs/endAuction");
 cron.schedule("*/5 * * * *", closeExpiredAuctions);
 
-// 🔎 Route de test rapide
+// 🔎 Route simple
 app.get("/", (_, res) => res.send("🎉 API e-commerce Sawaka opérationnelle !"));
 
-// 🔗 Connexion MongoDB (sans options deprecated)
+// =======================
+// 🔌 MongoDB
+// =======================
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connecté à MongoDB"))
   .catch((err) => {
     console.error("❌ Erreur MongoDB :", err.message);
-    console.error("\n⚠️  SOLUTIONS POSSIBLES:");
-    console.error("1. MongoDB local: Installez et démarrez MongoDB avec 'mongod'");
-    console.error("2. MongoDB Atlas (gratuit): Créez un compte sur https://cloud.mongodb.com");
-    console.error("3. Vérifiez votre MONGO_URI dans le fichier .env\n");
+    console.error("\n⚠️ Vérifiez votre MONGO_URI dans le .env\n");
   });
 
-// 🚀 Lancement du serveur
+// 🚀 Lancement serveur
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () =>
   console.log(`🚀 Serveur lancé sur http://localhost:${PORT}`)
