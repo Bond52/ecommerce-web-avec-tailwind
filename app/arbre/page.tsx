@@ -2,104 +2,172 @@
 
 import { useState } from "react";
 
+/* 🌳 ARBRE D’OUTILS (parent → enfants) */
+const toolTree = [
+  {
+    id: "babyfoot",
+    name: "Babyfoot (projet complet)",
+    vendor: null,
+    price: null,
+    children: ["planche-bois", "visserie", "peinture"],
+  },
+
+  {
+    id: "planche-bois",
+    name: "Découper une planche de bois",
+    vendor: "Menuiserie BoisPlus",
+    price: "5 000 FCFA",
+    children: ["scie", "metre", "main"],
+  },
+
+  {
+    id: "visserie",
+    name: "Visserie / Assemblage",
+    vendor: "Quincaillerie Express",
+    price: "2 000 FCFA",
+    children: ["tournevis", "main"],
+  },
+
+  {
+    id: "peinture",
+    name: "Peinture / Finition",
+    vendor: "MasterPaint Douala",
+    price: "3 000 FCFA",
+    children: ["pinceau", "main"],
+  },
+
+  // 🔧 OUTILS SIMPLES
+  { id: "scie", name: "Scie manuelle", vendor: "Bois & Bambou", price: "4 500 FCFA", children: ["main"] },
+  { id: "metre", name: "Mètre ruban", vendor: "DécoBois", price: "1 000 FCFA", children: ["main"] },
+  { id: "tournevis", name: "Tournevis", vendor: "Quincaillerie Express", price: "800 FCFA", children: ["main"] },
+  { id: "pinceau", name: "Pinceau", vendor: "MasterPaint", price: "500 FCFA", children: ["main"] },
+
+  // 🖐️ FIN DE CHAÎNE
+  { id: "main", name: "La main de l’artisan 🖐️", vendor: null, price: null, children: [] },
+];
+
+/* 🔍 Trouver un outil par ID */
+function getTool(id: string) {
+  return toolTree.find((t) => t.id === id) || null;
+}
+
+/* 🔁 Expansion récursive : trouve toutes les dépendances d’un outil */
+function expandTool(id: string) {
+  const root = getTool(id);
+  if (!root) return [];
+
+  const result: any[] = [];
+  const visited = new Set<string>();
+
+  function explore(nodeId: string) {
+    if (visited.has(nodeId)) return;
+    visited.add(nodeId);
+
+    const node = getTool(nodeId);
+    if (!node) return;
+
+    result.push(node);
+
+    // explore enfants
+    node.children.forEach((childId) => explore(childId));
+  }
+
+  explore(id);
+  return result;
+}
+
 export default function ArbrePage() {
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<any[]>([]);
 
-  // 🔧 Catalogue fictif des outils
-  const tools = [
-    {
-      name: "Petite scie artisanale",
-      vendor: "Boutique Bois&Bambou",
-      price: "4 500 FCFA",
-    },
-    {
-      name: "Mini-perceuse manuelle",
-      vendor: "Atelier TechnoCraft",
-      price: "12 000 FCFA",
-    },
-    {
-      name: "Cutter de précision",
-      vendor: "Art & Design Shop",
-      price: "2 000 FCFA",
-    },
-    {
-      name: "Tige en bois pour axe",
-      vendor: "ÉcoRécup Village",
-      price: "500 FCFA",
-    },
-    {
-      name: "Roue en bois pré-taillée",
-      vendor: "DécoBois Douala",
-      price: "2 800 FCFA",
-    },
-    {
-      name: "Machine CNC artisanale",
-      vendor: null, // ❗ Aucun fabricant !
-      price: null,
-    },
-  ];
-
-  const filtered = tools.filter((t) =>
+  // outils filtrés
+  const filtered = toolTree.filter((t) =>
     t.name.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
     <div className="wrap py-12">
-      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">
-        L’Arbre à Outils
-      </h1>
+      <h1 className="text-3xl font-bold text-sawaka-700 mb-4">L’Arbre à Outils</h1>
 
       <p className="text-sawaka-700 text-lg leading-relaxed max-w-2xl mb-8">
-        Cette section vous donnera accès aux outils nécessaires ainsi qu’aux vendeurs
-        locaux qui les proposent pour soutenir vos projets — artisanaux ou industriels.
+        Découvrez les outils nécessaires pour créer d’autres outils.
+        <br />
+        En recherchant un outil, vous verrez automatiquement tous les éléments nécessaires pour le fabriquer.
         <br /><br />
-      Lorsqu’il n’existe aucun fabricant national pour un outil, c’est une excellente opportunité de lancer un projet pour le produire localement !
-      De plus, n’hésitez pas à rechercher aussi les outils… qui servent à fabriquer d’autres outils et contactez l'association des forgerons du Cameroun !
+        Lorsqu’il n’existe aucun fabricant national pour un outil, c’est une opportunité pour l’industrialisation locale.
       </p>
 
       {/* 🔍 Barre de recherche */}
       <div className="max-w-lg mb-8">
         <input
           type="text"
-          placeholder="Rechercher un outil, une machine, un fournisseur..."
+          placeholder="Rechercher un outil…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full p-3 border-2 border-cream-300 rounded-lg focus:border-sawaka-500 focus:ring-0"
         />
       </div>
 
-      {/* 🔧 Liste d’outils */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((tool, i) => (
+      {/* 🔧 LISTE DES OUTILS DISPONIBLES */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {filtered.map((tool) => (
           <div
-            key={i}
-            className="relative bg-white p-5 border border-cream-300 rounded-xl shadow-sm hover:shadow-lg transition group cursor-pointer"
+            key={tool.id}
+            onClick={() => setSelected(expandTool(tool.id))}
+            className="cursor-pointer bg-white p-5 border border-cream-300 rounded-xl shadow-sm hover:shadow-lg transition relative"
           >
-            <div className="text-lg font-semibold text-sawaka-700">
-              {tool.name}
-            </div>
+            <div className="text-lg font-semibold text-sawaka-700">{tool.name}</div>
 
-            {/* 🟦 Info-bulle au survol */}
-            <div className="absolute left-0 top-full mt-2 w-full p-3 rounded-lg shadow-md border bg-white opacity-0 group-hover:opacity-100 transition pointer-events-none">
+            <div className="text-sm text-sawaka-600 mt-2">
               {tool.vendor ? (
                 <>
-                  <div className="text-sm text-sawaka-700">
-                    📍 Vendeur : <span className="font-medium">{tool.vendor}</span>
-                  </div>
-                  <div className="text-sm text-sawaka-700 mt-1">
-                    💰 Prix : <span className="font-medium">{tool.price}</span>
-                  </div>
+                  📍 {tool.vendor}
+                  <br />
+                  💰 {tool.price}
                 </>
               ) : (
-                <div className="text-sm text-red-600 font-semibold">
-                  ❗ Aucun fabricant pour cet outil !  
-                  <br />Voilà une opportunité !
-                </div>
+                <span className="text-red-600 font-semibold">
+                  ❗ Aucun fabricant — Opportunité locale !
+                </span>
               )}
             </div>
           </div>
         ))}
       </div>
+
+      {/* 🌳 AFFICHAGE DE L’ARBRE EXPANSÉ */}
+      {selected.length > 0 && (
+        <div className="bg-white p-6 rounded-xl shadow-md border border-cream-300">
+          <h2 className="text-2xl font-bold text-sawaka-700 mb-4">
+            Chaîne complète des outils nécessaires
+          </h2>
+
+          <ul className="space-y-4">
+            {selected.map((tool) => (
+              <li
+                key={tool.id}
+                className="p-4 border rounded-lg bg-cream-50 border-cream-300"
+              >
+                <div className="font-semibold text-sawaka-800">{tool.name}</div>
+
+                {tool.id !== "main" && (
+                  <div className="text-sm text-sawaka-600 mt-1">
+                    📍 Vendeur : {tool.vendor || "Non disponible"}
+                    <br />
+                    💰 Prix : {tool.price || "Non disponible"}
+                  </div>
+                )}
+
+                {tool.id === "main" && (
+                  <div className="text-sm text-sawaka-600 mt-1">
+                    🖐️ L’outil final est… la main de l’artisan !
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {filtered.length === 0 && (
         <p className="mt-6 text-sawaka-600">Aucun outil trouvé.</p>
