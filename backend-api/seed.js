@@ -1,9 +1,12 @@
 /**
- * SEED COMPLET — Réinitialisation et création d’artisans + articles
- * ✔ Mots de passe hashés
- * ✔ Suppression des utilisateurs sauf admin
- * ✔ Suppression des articles
- * ✔ Pas d’image par défaut
+ * SEED COMPLET — 5 ARTISANS + PRODUITS UNIQUES
+ * --------------------------------------------
+ * ✔ Supprime tous les articles
+ * ✔ Supprime tous les utilisateurs sauf admin
+ * ✔ Crée 5 vendeurs différents
+ * ✔ Donne 5 produits uniques à chaque vendeur
+ * ✔ 1 produit "draft" par vendeur
+ * ✔ Prix, stocks, catégories, descriptions tous différents
  */
 
 require("dotenv").config();
@@ -15,23 +18,10 @@ const Article = require("./models/Article");
 
 const MONGO_URI = process.env.MONGO_URI;
 
-// ===============================
-//  ARTISANS : 5 vendeurs
-// ===============================
-
+// ===========================================================
+//  👤 Artisans
+// ===========================================================
 const artisans = [
-  {
-    firstName: "Jean",
-    lastName: "Kouemé",
-    username: "jean",
-    email: "jean@example.com",
-    password: "jean123",
-    isSeller: true,
-    roles: ["vendeur"],
-    commerceName: "Atelier Kouemé",
-    city: "Douala",
-    country: "Cameroun",
-  },
   {
     firstName: "Amina",
     lastName: "Njoh",
@@ -54,6 +44,18 @@ const artisans = [
     roles: ["vendeur"],
     commerceName: "Bikoko Design",
     city: "Bafoussam",
+    country: "Cameroun",
+  },
+  {
+    firstName: "Jean",
+    lastName: "Kouemé",
+    username: "jean",
+    email: "jean@example.com",
+    password: "jean123",
+    isSeller: true,
+    roles: ["vendeur"],
+    commerceName: "Atelier Kouemé",
+    city: "Douala",
     country: "Cameroun",
   },
   {
@@ -82,21 +84,55 @@ const artisans = [
   },
 ];
 
-// ===============================
-//  ARTICLES PAR CATÉGORIE
-// ===============================
+// ===========================================================
+//  🎁 PRODUITS UNIQUE PAR ARTISAN
+// ===========================================================
 
-const categoryArticles = [
-  { title: "Chaise en bois massif", cat: "Maison & Décoration" },
-  { title: "Sac en raphia tressé", cat: "Mode & Accessoires" },
-  { title: "Masque traditionnel sculpté", cat: "Art & Artisanat" },
-  { title: "Bracelet perles multicolores", cat: "Bijoux" },
-  { title: "Huile de coco artisanale", cat: "Beauté & Bien-être" },
-];
+const productsByVendor = {
+  amina: [
+    { title: "Sac en raphia brodé main", cat: "Mode & Accessoires" },
+    { title: "Boucles d’oreilles en bronze", cat: "Bijoux" },
+    { title: "Panier tressé multicolore", cat: "Art & Artisanat" },
+    { title: "Tapis décoratif camerounais", cat: "Maison & Décoration" },
+    { title: "Huile de karité bio non raffinée", cat: "Beauté & Bien-être", draft: true },
+  ],
 
-// ===============================
-//       SEED PRINCIPAL
-// ===============================
+  samuel: [
+    { title: "Tabouret africain sculpté", cat: "Art & Artisanat" },
+    { title: "Lampe en bambou naturel", cat: "Maison & Décoration" },
+    { title: "Chemise pagne premium", cat: "Mode & Accessoires" },
+    { title: "Bracelet perles noires ébène", cat: "Bijoux" },
+    { title: "Savon noir traditionnel", cat: "Beauté & Bien-être", draft: true },
+  ],
+
+  jean: [
+    { title: "Chaise en bois iroko", cat: "Maison & Décoration" },
+    { title: "Mortier de cuisine artisanal", cat: "Cuisine & Utilitaires" },
+    { title: "Masque bamiléké précieux", cat: "Art & Artisanat" },
+    { title: "Porte-clés cuir embossé", cat: "Mode & Accessoires" },
+    { title: "Huile essentielle de clou de girofle", cat: "Beauté & Bien-être", draft: true },
+  ],
+
+  clara: [
+    { title: "Coquillage décoratif monté", cat: "Maison & Décoration" },
+    { title: "Collier perles marines", cat: "Bijoux" },
+    { title: "Robe en tissu traditionnel", cat: "Mode & Accessoires" },
+    { title: "Petit panier de plage", cat: "Art & Artisanat" },
+    { title: "Beurre cacao artisanal", cat: "Beauté & Bien-être", draft: true },
+  ],
+
+  pascal: [
+    { title: "Masque fang ancestral", cat: "Art & Artisanat" },
+    { title: "Bol en bois exotique", cat: "Maison & Décoration" },
+    { title: "Chapeau tissé camerounais", cat: "Mode & Accessoires" },
+    { title: "Pendentif en pierre sculptée", cat: "Bijoux" },
+    { title: "Lotion réparatrice naturelle", cat: "Beauté & Bien-être", draft: true },
+  ],
+};
+
+// ===========================================================
+//  🚀 SEED PRINCIPAL
+// ===========================================================
 
 async function seed() {
   try {
@@ -109,9 +145,7 @@ async function seed() {
     console.log("🗑 Suppression des UTILISATEURS sauf admin...");
     await User.deleteMany({ roles: { $nin: ["admin"] } });
 
-    // ==============================
-    // HASH MOTS DE PASSE (important!)
-    // ==============================
+    // Hash mots de passe
     const hashedArtisans = await Promise.all(
       artisans.map(async (a) => ({
         ...a,
@@ -119,24 +153,27 @@ async function seed() {
       }))
     );
 
-    console.log("👤 Création des 5 artisans...");
+    console.log("👤 Création des artisans...");
     const createdUsers = await User.insertMany(hashedArtisans);
 
-    console.log("📦 Génération des articles...");
+    console.log("📦 Génération des articles uniques...");
     let allArticles = [];
 
     for (const artisan of createdUsers) {
       const vendorId = artisan._id;
+      const vendorKey = artisan.username;
 
-      const articlesForVendor = categoryArticles.map((item, index) => ({
+      const productList = productsByVendor[vendorKey];
+
+      const vendorArticles = productList.map((item, index) => ({
         vendorId,
         title: item.title,
-        description: `Produit artisanal fait main : ${item.title}`,
-        price: 5000 + index * 3000,
+        description: `Produit artisanal unique : ${item.title}. Fait main avec soin.`,
+        price: 4000 + index * 3000,
         stock: 5 + index * 2,
-        images: [], // ❌ aucune image par défaut
-        status: index === 4 ? "draft" : "published", // 4 publiés, 1 brouillon
         categories: [item.cat],
+        status: item.draft ? "draft" : "published",
+        images: [],
         sku: `SKU-${vendorId}-${index}`,
         promotion: {
           isActive: false,
@@ -152,12 +189,12 @@ async function seed() {
         },
       }));
 
-      allArticles.push(...articlesForVendor);
+      allArticles.push(...vendorArticles);
     }
 
     await Article.insertMany(allArticles);
 
-    console.log("🎉 SEED TERMINÉ AVEC SUCCÈS !");
+    console.log("🎉 SEED TERMINÉ — 5 vendeurs × 5 produits uniques !");
     process.exit();
   } catch (err) {
     console.error("❌ Erreur SEED:", err);
