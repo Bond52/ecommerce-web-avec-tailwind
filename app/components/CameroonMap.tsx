@@ -2,78 +2,108 @@
 
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import cameroonRegions from "@/public/maps/cameroon-regions.json"; 
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function CameroonMap() {
-  const router = useRouter();
+  const [geo, setGeo] = useState<any>(null);
+  const [counts, setCounts] = useState<any>({});
 
-  /** 🎨 STYLE NORMAL */
-  const regionStyle = {
-    fillColor: "#d6a05e", // couleur d’origine
-    color: "#000",
-    weight: 1,
-    fillOpacity: 0.45,
+  // Charger le GeoJSON + les stats
+  useEffect(() => {
+    fetch("/maps/cameroon-regions.json")
+      .then((res) => res.json())
+      .then(setGeo)
+      .catch(console.error);
+
+    fetch("https://ecommerce-web-avec-tailwind.onrender.com/stats/artisans-par-region")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("📌 STATISTIQUES RECUES:", data);
+        setCounts(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  // Style selon le nombre d’artisans
+  const regionStyle = (feature: any) => {
+    const name = feature.properties?.region || feature.properties?.name;
+    const value = counts[name] ?? 0;
+
+    const color =
+      value === 0 ? "#f0e5d8" :
+      value === 1 ? "#f7c58d" :
+      value === 2 ? "#ee9f49" :
+      "#d97904";
+
+    return {
+      fillColor: color,
+      weight: 1,
+      opacity: 1,
+      color: "#8a5500",
+      fillOpacity: 0.7,
+    };
   };
 
-  /** 🎨 STYLE SURVOL */
-  const highlightStyle = {
-    weight: 2,
-    color: "#333",
-    fillOpacity: 0.65,
+  // Tooltip simple
+  const onEachRegion = (feature: any, layer: any) => {
+    const name = feature.properties?.region || feature.properties?.name;
+    const value = counts[name] ?? 0;
+
+    layer.bindTooltip(
+      `${name} : ${value} artisan(s)`,
+      { permanent: false, sticky: true }
+    );
   };
 
-  /** 🧠 Gestion des interactions par région */
-  function onEachRegion(feature: any, layer: any) {
-    const regionName = feature.properties.NAME_1;
-
-    /** 🔍 Tooltip : nom uniquement */
-    layer.bindTooltip(regionName, {
-      sticky: true,
-      className: "region-tooltip",
-    });
-
-    /** ✨ Survol */
-    layer.on("mouseover", function () {
-      layer.setStyle(highlightStyle);
-    });
-
-    layer.on("mouseout", function () {
-      layer.setStyle(regionStyle);
-    });
-
-    /** 👆 Click vers artisans filtrés */
-    layer.on("click", function () {
-      router.push(`/artisans?region=${encodeURIComponent(regionName)}`);
-    });
-  }
+  if (!geo)
+    return <p className="text-center py-6">Chargement de la carte…</p>;
 
   return (
-    <div className="w-full flex justify-center my-10">
-      <div className="w-full max-w-6xl">
-        <MapContainer
-          center={[7.4, 12.5]}       // ← ton ancien centrage
-          zoom={7}                   // ← ton ancien zoom
-          scrollWheelZoom={true}
-          style={{
-            height: "650px",         // ← hauteur restaurée
-            width: "100%",
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; OpenStreetMap contributors'
-          />
+    <div className="wrap my-12">
 
-          <GeoJSON
-            data={cameroonRegions as any}
-            style={() => regionStyle}
-            onEachFeature={onEachRegion}
-          />
-        </MapContainer>
+      {/* ===== Titre ===== */}
+      <h2 className="text-3xl md:text-4xl font-bold text-sawaka-800 mb-4 text-center">
+        Artisans par région du Cameroun
+      </h2>
+
+      <p className="text-lg text-sawaka-600 text-center mb-6">
+        Découvrez la répartition géographique des artisans sur la plateforme
+      </p>
+
+      {/* ===== Légende ===== */}
+      <div className="flex justify-center gap-6 mb-4 text-sm">
+        <div className="flex items-center gap-2">
+          <span style={{ width: 20, height: 20, background: "#f0e5d8", border: "1px solid #aaa" }}></span> 0 artisan
+        </div>
+        <div className="flex items-center gap-2">
+          <span style={{ width: 20, height: 20, background: "#f7c58d", border: "1px solid #aaa" }}></span> 1 artisan
+        </div>
+        <div className="flex items-center gap-2">
+          <span style={{ width: 20, height: 20, background: "#ee9f49", border: "1px solid #aaa" }}></span> 2 artisans
+        </div>
+        <div className="flex items-center gap-2">
+          <span style={{ width: 20, height: 20, background: "#d97904", border: "1px solid #aaa" }}></span> 3+ artisans
+        </div>
       </div>
+
+      {/* ===== Carte ===== */}
+      <MapContainer
+        center={[7.3, 12.4]}
+        zoom={6.3}
+        scrollWheelZoom={false}
+        style={{ height: "550px", width: "100%" }}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="© OpenStreetMap contributors"
+        />
+
+        <GeoJSON
+          data={geo}
+          style={regionStyle}
+          onEachFeature={onEachRegion}
+        />
+      </MapContainer>
     </div>
   );
 }
